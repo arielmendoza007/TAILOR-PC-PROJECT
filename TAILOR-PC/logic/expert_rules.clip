@@ -1,0 +1,67 @@
+;; 1. Definición de moldes (Templates)
+(deftemplate procesador
+   (slot modelo (type STRING))
+   (slot socket (type SYMBOL))
+   (slot tdp (type INTEGER))
+   (slot precio (type FLOAT)))
+
+(deftemplate placa_madre
+   (slot modelo (type STRING))
+   (slot socket (type SYMBOL))
+   (slot precio (type FLOAT)))
+
+;; 2. Catálogo de componentes (Facts)
+(deffacts catalogo
+   (procesador (modelo "Core i5-13600K") (socket LGA1700) (tdp 125) (precio 5500.0))
+   (procesador (modelo "Ryzen 5 7600X") (socket AM5) (tdp 105) (precio 4800.0))
+   (placa_madre (modelo "ASUS B760") (socket LGA1700) (precio 3200.0))
+   (placa_madre (modelo "Gigabyte X670") (socket AM5) (precio 4500.0)))
+
+;; 3. Regla de Oro: Compatibilidad de Socket
+(defrule verificar-compatibilidad
+   (procesador (modelo ?m-cpu) (socket ?s))
+   (placa_madre (modelo ?m-placa) (socket ?s))
+   =>
+   (assert (compatible ?m-cpu ?m-placa)))
+
+;; Prioridad Alta (10): Validaciones físicas críticas
+(defrule validar-espacio-gpu
+   (declare (salience 10))
+   ?u <- (usuario (espacio-gabinete ?max))
+   ?g <- (gpu (modelo ?mod) (longitud ?len))
+   (test (> ?len ?max))
+=>
+   (assert (error-compatibilidad (msg (str-cat "La tarjeta " ?mod " es demasiado larga (" ?len "mm) para tu gabinete."))))
+)
+
+;; Prioridad Media (5): Emparejamiento técnico
+(defrule compatibilidad-socket
+   (declare (salience 5))
+   ?c <- (cpu (modelo ?m-cpu) (socket ?s))
+   ?p <- (placa (modelo ?m-placa) (socket ?s-p))
+   (test (eq ?s ?s-p))
+   (not (par-compatible ?m-cpu ?m-placa))
+=>
+   (assert (par-compatible ?m-cpu ?m-placa))
+   (printout t "Sistema: Socket " ?s " verificado para " ?m-cpu "." crlf)
+)
+
+;; Prioridad Baja (0): Optimización de presupuesto
+(defrule optimizar-gaming-presupuesto
+   (declare (salience 0))
+   ?u <- (usuario (uso "gaming") (presupuesto ?p))
+   (test (>= ?p 20000))
+=>
+   (assert (recomendacion (prioridad "GPU") (razon "Para gaming de alto nivel, destinamos el 60% del presupuesto a la tarjeta de video.")))
+)
+
+;; Regla para detectar desequilibrio entre CPU y GPU
+(defrule detectar-cuello-botella
+   (declare (salience 7))
+   ?c <- (cpu (modelo ?m-cpu) (nucleos ?n))
+   ?g <- (gpu (modelo ?m-gpu) (precio ?p-g))
+   ;; Heurística: Si la GPU es cara (>10k) pero el CPU tiene pocos núcleos (<6)
+   (test (and (> ?p-g 10000) (< ?n 6)))
+=>
+   (assert (recomendacion (razon (str-cat "Advertencia: El " ?m-cpu " podria limitar el potencial de la " ?m-gpu ". Sugerimos un CPU de al menos 8 nucleos."))))
+)
