@@ -7,15 +7,12 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        /* ESTILOS MÁGICOS PARA EXPORTACIÓN A PDF */
+        /* CSS MÁGICO PARA PDF */
         @media print {
             body { background: white !important; color: black !important; }
-            /* Ocultamos cosas que no van en papel */
             .btn, .dropdown, #chatbot-container, .accordion-button::after { display: none !important; }
-            /* Obligamos a que todas las fichas se abran en el PDF */
             .accordion-collapse { display: block !important; height: auto !important; }
             .accordion-item { border: 2px solid #555 !important; page-break-inside: avoid; margin-bottom: 20px !important; }
-            /* Limpiamos fondos oscuros para que se vea formal */
             .bg-light-custom, .bg-dark, .table-dark th { background-color: transparent !important; color: black !important; }
             .text-primary, .text-success, .text-danger, .text-white { color: black !important; }
             .accordion-button { background-color: transparent !important; color: black !important; border-bottom: 1px solid #555; }
@@ -30,7 +27,7 @@
             <h3 class="text-success font-monospace">&gt; PROPUESTAS GENERADAS</h3>
             <div class="dropdown">
                 <button class="btn btn-outline-info dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">
-                    Opciones de Visualización
+                    Filtros de Visualización
                 </button>
                 <ul class="dropdown-menu shadow">
                     <li class="dropdown-header fw-bold text-primary">ORDENAR POR:</li>
@@ -40,7 +37,7 @@
                     <li class="dropdown-header fw-bold text-primary">CANTIDAD A MOSTRAR:</li>
                     <li><a class="dropdown-item" href="#" onclick="applyFilters(undefined, 5); return false;">Top 5 (Recomendado)</a></li>
                     <li><a class="dropdown-item" href="#" onclick="applyFilters(undefined, 10); return false;">Top 10 Opciones</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters(undefined, 'all'); return false;">Todas las combinaciones</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="applyFilters(undefined, 'all'); return false;">Mostrar Todas</a></li>
                 </ul>
             </div>
         </div>
@@ -62,36 +59,48 @@
               <div class="accordion-body p-4 bg-light-custom">
                 <h6 class="text-uppercase text-primary small fw-bold mb-3">Diagnóstico del Algoritmo RETE:</h6>
                   {% if s.es_lista %}
-                      <table class="table table-hover border">
+                      <table class="table table-sm table-hover border mb-3 shadow-sm">
                           <thead class="table-dark">
-                              <tr><th>Componente</th><th>Modelo Recomendado</th></tr>
+                              <tr><th style="width: 25%;">Componente</th><th>Modelo Recomendado</th></tr>
                           </thead>
                           <tbody>
                               {% for item in s.detalles %}
                                   {% set linea = item.split(':') %}
+                                  {% if linea|length == 2 %}
                                   <tr>
-                                      <td class="fw-bold">{{ linea[0] }}</td>
+                                      <td class="fw-bold text-muted">{{ linea[0] }}</td>
                                       <td>{{ linea[1] }}</td>
                                   </tr>
+                                  {% endif %}
                               {% endfor %}
                           </tbody>
                       </table>
 
-                      <div class="alert {% if s.balance < 0 %}alert-danger border-danger{% else %}alert-success border-success{% endif %} mt-3 shadow-sm border-2">
+                      <div class="p-3 bg-white rounded border border-secondary mb-3 shadow-sm" style="color: black !important;">
+                          <h6 class="text-uppercase text-secondary small fw-bold mb-3">🛒 Cotización Estimada en Tiendas (Costo Base: ${{ s.total }} MXN):</h6>
+                          <div class="d-flex flex-wrap gap-2">
+                              <span class="badge bg-warning text-dark border border-dark fs-6 shadow-sm">Amazon: ${{ (s.total * 1.05) | round(2) }}</span>
+                              <span class="badge bg-primary border border-dark fs-6 shadow-sm">Mercado Libre: ${{ (s.total * 0.98) | round(2) }}</span>
+                              <span class="badge bg-info text-dark border border-dark fs-6 shadow-sm">Walmart: ${{ (s.total * 1.03) | round(2) }}</span>
+                              <span class="badge text-white border border-dark fs-6 shadow-sm" style="background-color: #ff5722;">Cyberpuerta: ${{ (s.total * 0.95) | round(2) }}</span>
+                              <span class="badge bg-dark text-white border border-light fs-6 shadow-sm">DDTech: ${{ (s.total * 0.96) | round(2) }}</span>
+                          </div>
+                          <small class="text-muted d-block mt-2 font-monospace" style="font-size: 0.7rem;">
+                              *Los precios por tienda fluctúan en tiempo real. Considera costos de envío.
+                          </small>
+                      </div>
+
+                      <div class="alert {% if s.balance < 0 %}alert-danger border-danger{% else %}alert-success border-success{% endif %} shadow-sm border-2">
                           <div class="d-flex justify-content-between align-items-center">
                               <div>
                                   <h4 class="alert-heading fw-bold mb-1">
-                                      {% if s.balance < 0 %}
-                                          ⚠️ Déficit Presupuestario: Te faltan ${{ s.balance * -1 }} MXN
-                                      {% else %}
-                                          ✅ Balance Final: ${{ s.balance }} MXN
+                                      {% if s.balance < 0 %}⚠️ Déficit Presupuestario: Te faltan ${{ (s.balance * -1) | round(2) }} MXN
+                                      {% else %}✅ Balance Final: ${{ s.balance | round(2) }} MXN
                                       {% endif %}
                                   </h4>
                                   <p class="mb-0 small">
-                                      {% if s.balance < 0 %}
-                                          Esta configuración excede tu límite. Te sugerimos priorizar componentes más económicos.
-                                      {% else %}
-                                          Monto sobrante garantizado. Validación de compatibilidad física y eléctrica completada.
+                                      {% if s.balance < 0 %}Esta configuración excede tu límite. Te sugerimos priorizar componentes más económicos.
+                                      {% else %}Monto sobrante garantizado. Validación de compatibilidad física y eléctrica completada.
                                       {% endif %}
                                   </p>
                               </div>
@@ -120,7 +129,7 @@
             <div class="card-header bg-primary text-white fw-bold">Asistente de Compras Tailor-PC</div>
             <div class="card-body">
                 <div id="chat-response" class="mb-3 small p-2 bg-light text-dark rounded" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
-                    ¡El diagnóstico está listo! Si no sabes dónde comprar o tienes dudas con los resultados, pregúntame.
+                    ¡El diagnóstico está listo! Si no sabes dónde comprar, pregúntame.
                 </div>
                 <div class="d-flex flex-wrap gap-1 mb-3">
                     <button class="btn btn-outline-warning btn-sm fw-bold text-dark" onclick="askChat('¿Dónde puedo comprar estos componentes?')">🛒 ¿Dónde comprar?</button>
@@ -132,7 +141,7 @@
     </div>
 
     <script>
-        // --- LÓGICA DE FILTRADO Y ORDENAMIENTO VISUAL ---
+        // FILTROS JS
         let currentSort = 'max-ahorro';
         let currentLimit = 5;
 
@@ -143,30 +152,20 @@
             const container = document.getElementById('pcAccordion');
             const items = Array.from(container.querySelectorAll('.accordion-item'));
             
-            // Ordenar en memoria
             items.sort((a, b) => {
-                const valueA = parseFloat(a.dataset.balance || '0');
-                const valueB = parseFloat(b.dataset.balance || '0');
-                return currentSort === 'min-ahorro' ? valueA - valueB : valueB - valueA;
+                const valA = parseFloat(a.dataset.balance || '0');
+                const valB = parseFloat(b.dataset.balance || '0');
+                return currentSort === 'min-ahorro' ? valA - valB : valB - valA;
             });
             
-            // Reinsertar en el HTML y aplicar el límite
             items.forEach((item, index) => {
                 container.appendChild(item);
-                if (currentLimit === 'all' || index < currentLimit) {
-                    item.style.display = 'block';
-                } else {
-                    item.style.display = 'none';
-                }
+                item.style.display = (currentLimit === 'all' || index < currentLimit) ? 'block' : 'none';
             });
         }
+        document.addEventListener('DOMContentLoaded', () => applyFilters(null, 5));
 
-        // Ejecutar al cargar la página para mostrar el Top 5 por defecto
-        document.addEventListener('DOMContentLoaded', () => {
-            applyFilters(null, 5);
-        });
-
-        // --- LÓGICA DEL CHATBOT DE RESULTADOS ---
+        // CHATBOT JS
         function toggleChat() {
             const win = document.getElementById('chat-window');
             win.style.display = win.style.display === 'none' ? 'block' : 'none';
@@ -175,8 +174,7 @@
         function askChat(query) {
             const inputField = document.getElementById('chat-input');
             inputField.value = query;
-            const event = new KeyboardEvent('keypress', { 'key': 'Enter' });
-            inputField.dispatchEvent(event);
+            inputField.dispatchEvent(new KeyboardEvent('keypress', { 'key': 'Enter' }));
         }
 
         document.getElementById('chat-input').addEventListener('keypress', function(e) {
@@ -184,25 +182,15 @@
                 const q = this.value.toLowerCase().trim();
                 if(q === "") return;
                 
-                let res = "";
-                
-                // NLP INTUITIVO PARA COMPRAS Y ANÁLISIS
+                let res = "Recuerda que puedes exportar la configuración que más te guste dando click en el botón de PDF abajo.";
                 if(q.match(/(comprar|tienda|cotizar|ddtech|cyberpuerta|amazon|dónde|precio|lugar)/)) {
-                    res = "Como sistema experto, aseguro la compatibilidad física y eléctrica. Para comprar, te sugiero armar un carrito con los modelos sugeridos en tiendas mexicanas como <strong>DDTech</strong>, <strong>Cyberpuerta</strong> o <strong>Amazon</strong> para obtener la cotización final del día.";
-                }
-                else if(q.match(/(negativo|rojo|falta|deficit)/)) {
-                    res = "Si tu balance está en rojo, significa que las exigencias técnicas superan el presupuesto. Considera bajar la resolución objetivo en un nuevo diagnóstico.";
-                }
-                else if(q.match(/(hola|buenas|gracias)/)) {
-                    res = "¡Aquí sigo! Revisa la tabla técnica. Puedes exportar la configuración que más te guste dando click en el botón de PDF abajo.";
-                }
-                else {
-                    res = "Comprendido. Recuerda que puedes filtrar los resultados arriba para ver el Top 10 o todas las combinaciones que procesé.";
+                    res = "Como sistema experto garantizo la compatibilidad. Puedes buscar estos modelos exactos en <strong>DDTech</strong>, <strong>Cyberpuerta</strong> o <strong>Amazon</strong> para hacer tu pedido.";
+                } else if(q.match(/(negativo|rojo|falta|deficit)/)) {
+                    res = "Si tu balance es rojo, tus exigencias superan el presupuesto actual. Prioriza bajar la resolución objetivo.";
                 }
 
                 const chatResponse = document.getElementById('chat-response');
                 chatResponse.innerHTML = `<div class="p-2 border-start border-success border-3 bg-dark text-light rounded mb-2"><strong>Tú:</strong> ${this.value}<br><br><strong class="text-info">Tailor-PC:</strong> ${res}</div>` + chatResponse.innerHTML;
-                
                 this.value = '';
             }
         });

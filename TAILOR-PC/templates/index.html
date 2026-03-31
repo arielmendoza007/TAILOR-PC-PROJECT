@@ -5,57 +5,13 @@
     <title>Tailor-PC | Consultoría Experta</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* VARIABLES PARA MODO CLARO/OSCURO */
-        :root {
-            --bg-color: #f8f9fa;
-            --text-color: #212529;
-            --card-bg: #ffffff;
-            --input-bg: #ffffff;
-            --input-text: #212529;
-            --border-color: #dee2e6;
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #1a1d20;
-            --text-color: #e9ecef;
-            --card-bg: #2b3035;
-            --input-bg: #343a40;
-            --input-text: #ffffff;
-            --border-color: #495057;
-        }
-
-        body { 
-            background-color: var(--bg-color); 
-            color: var(--text-color); 
-            font-family: 'Segoe UI', sans-serif; 
-            transition: 0.3s; 
-        }
-
-        .card { 
-            background-color: var(--card-bg); 
-            border: none; 
-            border-radius: 15px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-        }
-
-        .form-control, .form-select { 
-            background-color: var(--input-bg); 
-            border: 1px solid var(--border-color); 
-            color: var(--input-text); 
-        }
-
-        .form-control:focus, .form-select:focus { 
-            background-color: var(--input-bg); 
-            color: var(--input-text); 
-        }
-
-        .btn-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
+        :root { --bg-color: #f8f9fa; --text-color: #212529; --card-bg: #ffffff; --input-bg: #ffffff; --input-text: #212529; --border-color: #dee2e6; }
+        [data-theme="dark"] { --bg-color: #1a1d20; --text-color: #e9ecef; --card-bg: #2b3035; --input-bg: #343a40; --input-text: #ffffff; --border-color: #495057; }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', sans-serif; transition: 0.3s; }
+        .card { background-color: var(--card-bg); border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .form-control, .form-select { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--input-text); }
+        .form-control:focus, .form-select:focus { background-color: var(--input-bg); color: var(--input-text); }
+        .btn-toggle { position: fixed; top: 20px; right: 20px; z-index: 1000; }
         label { font-weight: 500; margin-bottom: 8px; opacity: 0.8; }
     </style>
 </head>
@@ -65,7 +21,7 @@
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card p-5">
+                <div class="card p-5 position-relative">
                     <h1 class="text-center mb-2">Bienvenido a Tailor-PC</h1>
                     <p class="text-center text-muted mb-4">Configura tu equipo ideal con inteligencia experta</p>
                     <hr class="mb-4" style="opacity: 0.1;">
@@ -155,12 +111,18 @@
         </div>
     </div>
 
+    <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10, 10, 11, 0.98); z-index:9999; flex-direction:column; justify-content:center; align-items:center; color:#00ff41; font-family: 'Courier New', monospace;">
+        <div class="spinner-border text-success mb-4" style="width: 4rem; height: 4rem; border-width: 0.3em;" role="status"></div>
+        <h2 id="loading-text" class="fw-bold mb-3">INICIANDO MOTOR DE INFERENCIA RETE...</h2>
+        <ul id="loading-logs" class="list-unstyled text-start fs-5" style="width: 600px; opacity: 0.9;"></ul>
+    </div>
+
     <div id="chatbot-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 2000;">
-        <button class="btn btn-dark rounded-circle p-3 shadow" onclick="toggleChat()">🤖</button>
+        <button class="btn btn-dark rounded-circle p-3 shadow border border-success" onclick="toggleChat()">🤖</button>
         <div id="chat-window" class="card shadow" style="display:none; width: 340px; position: absolute; bottom: 70px; left: 0;">
             <div class="card-header bg-primary text-white fw-bold">Asistente Experto Tailor-PC</div>
             <div class="card-body">
-                <div id="chat-response" class="mb-3 small p-2 bg-light rounded" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
+                <div id="chat-response" class="mb-3 small p-2 bg-light text-dark rounded" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
                     ¡Hola! Soy tu asistente de hardware. Pregúntame la hora, o elige una opción técnica:
                 </div>
                 <div class="d-flex flex-wrap gap-1 mb-3">
@@ -175,12 +137,10 @@
     </div>
 
     <script>
-        // --- LÓGICA DE INTERFAZ ---
         function toggleTheme() {
             const body = document.body;
             const current = body.getAttribute('data-theme');
-            const target = current === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', target);
+            body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
         }
 
         function nextStep(step) {
@@ -193,56 +153,62 @@
             win.style.display = win.style.display === 'none' ? 'block' : 'none';
         }
 
-        // --- LÓGICA DEL CHATBOT EXPERTO ---
         function askChat(query) {
             const inputField = document.getElementById('chat-input');
             inputField.value = query;
-            
-            // Simulamos presionar "Enter" para reusar el motor NLP
-            const event = new KeyboardEvent('keypress', { 'key': 'Enter' });
-            inputField.dispatchEvent(event);
+            inputField.dispatchEvent(new KeyboardEvent('keypress', { 'key': 'Enter' }));
         }
 
+        // Lógica NLP Chatbot
         document.getElementById('chat-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const q = this.value.toLowerCase().trim();
-                if(q === "") return; // Evitar mensajes vacíos
+                if(q === "") return;
                 
-                let res = "";
-                
-                // MOTOR NLP BASADO EN EXPRESIONES REGULARES
-                if(q.match(/(hola|buenas|qué tal|saludos|hi)/)) {
-                    res = "¡Hola! Soy el cerebro detrás de Tailor-PC. Puedo ayudarte a entender términos como TDP, VRAM, o cuellos de botella mientras llenas el formulario. ¿Qué necesitas saber?";
-                }
-                else if(q.match(/(hora|reloj|qué tiempo|time|hour)/)) {
-                    const now = new Date();
-                    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    res = `Son las ${timeString}. Por cierto, ¿tienes alguna duda técnica sobre el hardware para tu futura PC?`;
-                }
-                else if(q.match(/(gracias|ty|thx)/)) {
-                    res = "¡De nada! Aquí sigo por si te trabas con alguna parte técnica.";
-                }
-                else if(q.match(/(cuello.*botella|bottleneck|limita|frena|lento)/)) {
-                    res = "El cuello de botella ocurre cuando un componente (como un CPU básico) frena el rendimiento de otro más potente (como una GPU de gama alta). Yo equilibrio esto automáticamente usando el Motor RETE.";
-                } 
-                else if(q.match(/(tdp|calor|watts|energia|fuente|poder)/)) {
-                    res = "El TDP (Thermal Design Power) indica el calor que genera tu hardware. Yo sumo el consumo de la CPU y GPU para asegurarme de que tu fuente de poder tenga los Watts necesarios.";
-                }
-                else if(q.match(/(vram|video|graficos|4k|texturas)/)) {
-                    res = "La VRAM es la memoria de tu tarjeta gráfica. Si vas a jugar en 4K o hacer render 3D, valido que tengas la memoria suficiente para que el sistema no colapse.";
-                }
-                else if(q.match(/(rete|motor|algoritmo)/)) {
-                    res = "El Algoritmo RETE es el motor de inferencia de CLIPS que uso. Me permite evaluar miles de combinaciones de componentes en milisegundos sin saturar la memoria RAM.";
-                }
-                else {
-                    res = "Entendido. Como sistema experto, mi enfoque es validar la lógica de tu hardware. ¿Tienes dudas específicas sobre memoria, energía o compatibilidad física?";
-                }
+                let res = "Como sistema experto, analizo la lógica de hardware. ¿Tienes dudas sobre memoria, energía o compatibilidad física?";
+                if(q.match(/(hola|buenas|qué tal|saludos|hi)/)) res = "¡Hola! Soy el cerebro detrás de Tailor-PC. Puedo explicar términos como TDP, VRAM, o cuellos de botella. ¿Qué necesitas saber?";
+                else if(q.match(/(hora|reloj|qué tiempo|time|hour)/)) res = `Son las ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Por cierto, ¿tienes dudas del formulario?`;
+                else if(q.match(/(cuello.*botella|bottleneck|limita|frena|lento)/)) res = "El cuello de botella ocurre cuando un componente frena a otro. Yo lo prevengo usando el Motor RETE.";
+                else if(q.match(/(tdp|calor|watts|energia|fuente|poder)/)) res = "El TDP es el calor generado. Yo sumo el consumo total para que tu fuente de poder no explote.";
+                else if(q.match(/(vram|video|graficos|4k|texturas)/)) res = "La VRAM es la memoria gráfica. Vital para jugar en 4K o diseño 3D sin congelamientos.";
+                else if(q.match(/(rete|motor|algoritmo)/)) res = "El Algoritmo RETE evalúa miles de combinaciones de componentes en milisegundos sin saturar la RAM.";
 
                 const chatResponse = document.getElementById('chat-response');
                 chatResponse.innerHTML = `<div class="p-2 border-start border-success border-3 bg-dark text-light rounded mb-2"><strong>Tú:</strong> ${this.value}<br><br><strong class="text-info">Tailor-PC:</strong> ${res}</div>` + chatResponse.innerHTML;
-                
-                this.value = ''; // Limpiar input
+                this.value = '';
             }
+        });
+
+        // MAGIA VISUAL: Simulación de procesamiento RETE
+        document.getElementById('msform').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            const overlay = document.getElementById('loading-overlay');
+            const text = document.getElementById('loading-text');
+            const logs = document.getElementById('loading-logs');
+            
+            overlay.style.display = 'flex';
+            
+            const steps = [
+                "Cargando Base de Conocimientos de Componentes...",
+                "Evaluando reglas de compatibilidad física (Sockets/ATX)...",
+                "Calculando umbrales de Cuello de Botella térmico...",
+                "Ajustando restricciones financieras...",
+                "Purgando 648 combinaciones inválidas en memoria...",
+                "Generando Top de Configuraciones Óptimas..."
+            ];
+            
+            let i = 0;
+            const interval = setInterval(() => {
+                if(i < steps.length) {
+                    logs.innerHTML += `<li><span class="text-white">></span> ${steps[i]} <span class="text-info">[OK]</span></li>`;
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    text.innerText = "¡DIAGNÓSTICO COMPLETADO!";
+                    text.classList.replace('text-success', 'text-white');
+                    setTimeout(() => { document.getElementById('msform').submit(); }, 600);
+                }
+            }, 550); 
         });
     </script>
 </body>
