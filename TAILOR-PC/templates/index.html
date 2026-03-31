@@ -59,7 +59,8 @@
         label { font-weight: 500; margin-bottom: 8px; opacity: 0.8; }
     </style>
 </head>
-<body data-theme="dark"> <button class="btn btn-outline-info btn-toggle" onclick="toggleTheme()">🌓 Cambiar Tema</button>
+<body data-theme="dark"> 
+    <button class="btn btn-outline-info btn-toggle" onclick="toggleTheme()">🌓 Cambiar Tema</button>
 
     <div class="container py-5">
         <div class="row justify-content-center">
@@ -69,100 +70,84 @@
                     <p class="text-center text-muted mb-4">Configura tu equipo ideal con inteligencia experta</p>
                     <hr class="mb-4" style="opacity: 0.1;">
                     
-                    <form action="/diagnostico" method="POST">
-                        <div id="step-1" class="form-step">
-                            <h3>Paso 1: ¿Cuál es tu presupuesto?</h3>
-                            <input type="number" id="p_input" name="presupuesto" class="form-control" placeholder="Ej. 15000" required>
-                            <button type="button" onclick="nextStep(2)" class="btn btn-primary mt-3">Siguiente</button>
+                    <form action="/diagnostico" method="POST" id="msform">
+                        
+                        <div class="step-container" id="step1">
+                            <h4 class="font-monospace text-primary">&gt; Fase 1: Capacidad Financiera</h4>
+                            <label>¿Cuál es tu presupuesto máximo (MXN)?</label>
+                            <input type="number" name="presupuesto" class="form-control mb-3" placeholder="Ej. 25000" required>
+                            <button type="button" class="btn btn-outline-success" onclick="nextStep(2)">Siguiente Proceso</button>
                         </div>
 
-                        <div id="step-2" class="form-step" style="display:none;">
-                            <h3>Paso 2: Uso principal del equipo</h3>
+                        <div class="step-container" id="step2" style="display:none;">
+                            <h4 class="font-monospace text-primary">&gt; Fase 2: Perfil de Usuario</h4>
                             <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <label>¿Necesitas Wi-Fi o Bluetooth?</label>
+                                <div class="col-md-6 mb-3">
+                                    <label>Uso Principal:</label>
+                                    <select name="uso" class="form-select" id="usoSelect">
+                                        <option value="gaming">Gaming / Streaming</option>
+                                        <option value="render">Renderizado / 3D</option>
+                                        <option value="ofimatica">Ofimática / Estudio</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label>Prioridad:</label>
+                                    <select name="prioridad" class="form-select">
+                                        <option value="rendimiento">Rendimiento Máximo</option>
+                                        <option value="estetica">Estética / RGB</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary me-2" onclick="nextStep(1)">Anterior</button>
+                            <button type="button" class="btn btn-outline-success" onclick="nextStep(3)">Siguiente Proceso</button>
+                        </div>
+
+                        <div class="step-container" id="step3" style="display:none;">
+                            <h4 class="font-monospace text-primary">&gt; Fase 3: Especificaciones de Entorno</h4>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label>¿Necesitas Wi-Fi?</label>
                                     <select name="wifi" class="form-select">
-                                        <option value="SI">Sí, los necesito integrados</option>
-                                        <option value="NO">No, uso cable de red</option>
+                                        <option value="SI">Sí, integrado</option>
+                                        <option value="NO">No, uso cable</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6 mb-4">
-                                    <label>Tipo de Uso Detallado:</label>
-                                    <select name="uso" class="form-select">
-                                        <option value="gaming">Gaming Competitivo</option>
-                                        <option value="diseno">Diseño Gráfico (Adobe/Corel)</option>
-                                        <option value="render">Edición de Video / Render 3D</option>
-                                        <option value="ofimatica">Ofimática y Navegación</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row mt-4">
-                                <div class="col-md-6 mb-4">
-                                    <label>Tamaño de gabinete preferido:</label>
+                                <div class="col-md-6 mb-3">
+                                    <label>Tamaño de Gabinete:</label>
                                     <select name="size" class="form-select">
-                                        <option value="ATX">Torre Grande (ATX)</option>
-                                        <option value="Micro-ATX">Compacta (Micro-ATX)</option>
+                                        <option value="ATX">Torre Estándar (ATX)</option>
+                                        <option value="Micro-ATX">Compacto (Micro-ATX)</option>
                                     </select>
                                 </div>
                             </div>
-
-                            <button type="button" onclick="nextStep(3)" class="btn btn-primary mt-3">Siguiente</button>
+                            <div class="form-check form-switch mb-4">
+                                <input class="form-check-input" type="checkbox" name="streaming" id="streaming">
+                                <label class="form-check-label" for="streaming">¿Harás Streaming pesado?</label>
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary me-2" onclick="nextStep(2)">Anterior</button>
+                            <button type="button" class="btn btn-outline-success" onclick="nextStep(4)">Siguiente Proceso</button>
                         </div>
 
-                        <div id="step-3" class="form-step" style="display:none;">
+                        <div class="step-container" id="step4" style="display:none;">
+                            <h4 class="font-monospace text-primary mb-3">&gt; Fase 4: Optimización Técnica</h4>
                             <div class="row">
                                 <div class="col-md-6 mb-4">
-                                    <label>Resolución Objetivo:</label>
-                                    <select name="resolucion" class="form-select">
-                                        <option value="1080p">1080p (Estándar)</option>
-                                        <option value="1440p">1440p (2K)</option>
-                                        <option value="4K">4K (Ultra HD)</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-4">
-                                    <label>¿Zona de clima cálido?</label>
-                                    <select name="clima" class="form-select">
-                                        <option value="templado">No, clima templado/frío</option>
-                                        <option value="calido">Sí, zona calurosa</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <label>¿Planeas actualizar en 2 años?</label>
+                                    <label>¿Planeas actualizar componentes en 2 años?</label>
                                     <select name="longevidad" class="form-select">
                                         <option value="SI">Sí, quiero que dure (AM5/DDR5)</option>
                                         <option value="NO">No, busco lo mejor por mi dinero hoy</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-4">
-                                    <label>Prioridad de Almacenamiento:</label>
-                                    <select name="almacenamiento" class="form-select">
-                                        <option value="velocidad">Velocidad (NVMe Gen4)</option>
-                                        <option value="capacidad">Capacidad (2TB+)</option>
+                                    <label>Prioridad de Audio:</label>
+                                    <select name="audio" class="form-select">
+                                        <option value="estandar">Estandar (Jack 3.5mm)</option>
+                                        <option value="pro">Pro/Audiófilo (Mejor DAC)</option>
                                     </select>
                                 </div>
                             </div>
-
-                            <div class="mb-4">
-                                <label class="d-block mb-3">Prioridad de Diseño:</label>
-                                <div class="btn-group w-100" role="group">
-                                    <input type="radio" class="btn-check" name="prioridad" id="rend" value="rendimiento" checked>
-                                    <label class="btn btn-outline-primary" for="rend">Rendimiento Puro</label>
-                                    
-                                    <input type="radio" class="btn-check" name="prioridad" id="est" value="estetica">
-                                    <label class="btn btn-outline-primary" for="est">Estética / RGB</label>
-                                </div>
-                            </div>
-
-                            <div class="form-check form-switch mb-4">
-                                <input class="form-check-input" type="checkbox" name="streaming" id="stream">
-                                <label class="form-check-label" for="stream">¿Harás Streaming o Creación de Contenido?</label>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">Comenzar Diagnóstico</button>
+                            <button type="button" class="btn btn-outline-secondary me-2" onclick="nextStep(3)">Anterior</button>
+                            <button type="submit" class="btn btn-success fw-bold">GENERAR RECOMENDACIÓN FINAL</button>
                         </div>
                     </form>
                 </div>
@@ -170,7 +155,27 @@
         </div>
     </div>
 
+    <div id="chatbot-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 2000;">
+        <button class="btn btn-dark rounded-circle p-3 shadow" onclick="toggleChat()">🤖</button>
+        <div id="chat-window" class="card shadow" style="display:none; width: 340px; position: absolute; bottom: 70px; left: 0;">
+            <div class="card-header bg-primary text-white fw-bold">Asistente Experto Tailor-PC</div>
+            <div class="card-body">
+                <div id="chat-response" class="mb-3 small p-2 bg-light rounded" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
+                    ¡Hola! Soy tu asistente de hardware. Pregúntame la hora, o elige una opción técnica:
+                </div>
+                <div class="d-flex flex-wrap gap-1 mb-3">
+                    <button class="btn btn-outline-info btn-sm" onclick="askChat('RETE')">Motor RETE</button>
+                    <button class="btn btn-outline-info btn-sm" onclick="askChat('TDP')">¿TDP?</button>
+                    <button class="btn btn-outline-info btn-sm" onclick="askChat('VRAM')">¿VRAM?</button>
+                    <button class="btn btn-outline-primary btn-sm" onclick="askChat('¿qué es el cuello de botella?')">Cuello de Botella</button>
+                </div>
+                <input type="text" id="chat-input" class="form-control" placeholder="Escribe tu duda o saluda...">
+            </div>
+        </div>
+    </div>
+
     <script>
+        // --- LÓGICA DE INTERFAZ ---
         function toggleTheme() {
             const body = document.body;
             const current = body.getAttribute('data-theme');
@@ -179,61 +184,66 @@
         }
 
         function nextStep(step) {
-            document.querySelectorAll('.form-step').forEach(div => div.style.display = 'none');
-            document.getElementById('step-' + step).style.display = 'block';
+            document.querySelectorAll('.step-container').forEach(div => div.style.display = 'none');
+            document.getElementById('step' + step).style.display = 'block';
         }
+
+        function toggleChat() {
+            const win = document.getElementById('chat-window');
+            win.style.display = win.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // --- LÓGICA DEL CHATBOT EXPERTO ---
+        function askChat(query) {
+            const inputField = document.getElementById('chat-input');
+            inputField.value = query;
+            
+            // Simulamos presionar "Enter" para reusar el motor NLP
+            const event = new KeyboardEvent('keypress', { 'key': 'Enter' });
+            inputField.dispatchEvent(event);
+        }
+
+        document.getElementById('chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const q = this.value.toLowerCase().trim();
+                if(q === "") return; // Evitar mensajes vacíos
+                
+                let res = "";
+                
+                // MOTOR NLP BASADO EN EXPRESIONES REGULARES
+                if(q.match(/(hola|buenas|qué tal|saludos|hi)/)) {
+                    res = "¡Hola! Soy el cerebro detrás de Tailor-PC. Puedo ayudarte a entender términos como TDP, VRAM, o cuellos de botella mientras llenas el formulario. ¿Qué necesitas saber?";
+                }
+                else if(q.match(/(hora|reloj|qué tiempo|time|hour)/)) {
+                    const now = new Date();
+                    const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    res = `Son las ${timeString}. Por cierto, ¿tienes alguna duda técnica sobre el hardware para tu futura PC?`;
+                }
+                else if(q.match(/(gracias|ty|thx)/)) {
+                    res = "¡De nada! Aquí sigo por si te trabas con alguna parte técnica.";
+                }
+                else if(q.match(/(cuello.*botella|bottleneck|limita|frena|lento)/)) {
+                    res = "El cuello de botella ocurre cuando un componente (como un CPU básico) frena el rendimiento de otro más potente (como una GPU de gama alta). Yo equilibrio esto automáticamente usando el Motor RETE.";
+                } 
+                else if(q.match(/(tdp|calor|watts|energia|fuente|poder)/)) {
+                    res = "El TDP (Thermal Design Power) indica el calor que genera tu hardware. Yo sumo el consumo de la CPU y GPU para asegurarme de que tu fuente de poder tenga los Watts necesarios.";
+                }
+                else if(q.match(/(vram|video|graficos|4k|texturas)/)) {
+                    res = "La VRAM es la memoria de tu tarjeta gráfica. Si vas a jugar en 4K o hacer render 3D, valido que tengas la memoria suficiente para que el sistema no colapse.";
+                }
+                else if(q.match(/(rete|motor|algoritmo)/)) {
+                    res = "El Algoritmo RETE es el motor de inferencia de CLIPS que uso. Me permite evaluar miles de combinaciones de componentes en milisegundos sin saturar la memoria RAM.";
+                }
+                else {
+                    res = "Entendido. Como sistema experto, mi enfoque es validar la lógica de tu hardware. ¿Tienes dudas específicas sobre memoria, energía o compatibilidad física?";
+                }
+
+                const chatResponse = document.getElementById('chat-response');
+                chatResponse.innerHTML = `<div class="p-2 border-start border-success border-3 bg-dark text-light rounded mb-2"><strong>Tú:</strong> ${this.value}<br><br><strong class="text-info">Tailor-PC:</strong> ${res}</div>` + chatResponse.innerHTML;
+                
+                this.value = ''; // Limpiar input
+            }
+        });
     </script>
-
-    <div id="chatbot-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 2000;">
-    <button class="btn btn-dark rounded-circle p-3 shadow" onclick="toggleChat()">🤖</button>
-    <div id="chat-window" class="card shadow" style="display:none; width: 320px; position: absolute; bottom: 70px; left: 0;">
-        <div class="card-header bg-primary text-white">Asistente Experto Tailor-PC</div>
-        <div class="card-body">
-            <div id="chat-response" class="mb-3 small p-2 bg-light rounded" style="min-height: 50px;">
-                ¡Hola! Soy tu asistente de hardware. Hazme una pregunta o elige una opción:
-            </div>
-            <div class="d-grid gap-2 mb-3">
-                <button class="btn btn-outline-primary btn-sm" onclick="askChat('¿Qué es el cuello de botella?')">¿Qué es el cuello de botella?</button>
-                <button class="btn btn-outline-primary btn-sm" onclick="askChat('¿Qué es el TDP?')">¿Qué es el TDP?</button>
-                <button class="btn btn-outline-primary btn-sm" onclick="askChat('¿Por qué importa la VRAM?')">¿Por qué importa la VRAM?</button>
-            </div>
-            <input type="text" id="chat-input" class="form-control" placeholder="Escribe tu duda aquí...">
-        </div>
-    </div>
-</div>
-
-<script>
-function toggleChat() {
-    const win = document.getElementById('chat-window');
-    win.style.display = win.style.display === 'none' ? 'block' : 'none';
-}
-
-function askChat(query) {
-    const responses = {
-        "¿qué es el cuello de botella?": "Es cuando un componente (generalmente el CPU) limita el rendimiento real de otro (la GPU)[cite: 35].",
-        "¿qué es el tdp?": "Es la potencia de diseño térmico. Indica cuánto calor genera un componente y cuánta energía consume[cite: 255].",
-        "¿por qué importa la vram?": "Es la memoria de video. Es vital para cargar texturas en altas resoluciones como 4K[cite: 6]."
-    };
-    const q = query.toLowerCase();
-    document.getElementById('chat-response').innerText = responses[q] || "Interesante pregunta. Como sistema experto, te sugiero revisar las compatibilidades técnicas[cite: 28].";
-}
-
-document.getElementById('chat-input').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-        const q = this.value.toLowerCase();
-        let res = "No entiendo esa parte técnica, ¿puedes repetirlo?";
-        if(q.includes("tdp")) res = "El TDP es la potencia de diseño térmico de la CPU/GPU.";
-        if(q.includes("vram")) res = "La VRAM es memoria de video; importa para texturas y resoluciones altas.";
-        if(q.includes("botella")) res = "El cuello de botella ocurre cuando un componente limita el rendimiento de otro.";
-        document.getElementById('chat-response').innerText = res;
-    }
-});
-
-document.querySelector('select[name="uso"]').addEventListener('change', function() {
-    if (this.value === 'render') {
-        alert("Sugerencia de Experto: El Render 3D requiere un presupuesto mayor a $25,000 MXN para resultados óptimos.");
-    }
-});
-</script>
 </body>
 </html>

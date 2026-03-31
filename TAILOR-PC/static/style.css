@@ -131,7 +131,7 @@ body {
 body { background-color: var(--bg-main); color: var(--text-sub); transition: 0.4s; }
 .hero-title { color: var(--text-title); text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
 
-/* Estilo para las fichas en Modo Claro (Default) [cite: 105] */
+/* Estilo para las fichas en Modo Claro (Default) */
 .accordion-item {
     background-color: #ffffff;
     transition: transform 0.2s ease;
@@ -139,7 +139,7 @@ body { background-color: var(--bg-main); color: var(--text-sub); transition: 0.4
 
 .bg-light-custom { background-color: #f8f9fa; }
 
-/* Ajustes para Modo Oscuro [cite: 207] */
+/* Ajustes para Modo Oscuro */
 [data-theme="dark"] .accordion-item {
     background-color: #2b3035;
     color: #ffffff;
@@ -151,5 +151,5 @@ body { background-color: var(--bg-main); color: var(--text-sub); transition: 0.4
 
 [data-theme="dark"] .accordion-button {
     background-color: #2b3035;
-    color: #00ff41; /* Verde neón para visibilidad [cite: 46] */
+    color: #00ff41; /* Verde neón para visibilidad  */
 }

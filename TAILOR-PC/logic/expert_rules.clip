@@ -18,6 +18,15 @@
 =>
    (assert (recomendacion (prioridad "DESEMPENO") (razon (str-cat "La GPU " ?mod " tiene poca VRAM para texturas 4K.")))))
 
+;; Regla de seguridad física para GPUs pesadas
+(defrule sugerir-soporte-gpu
+   (gpu (modelo ?mod) (longitud ?len))
+   (test (> ?len 300)) ; Si mide más de 300mm, es pesada
+=>
+   (assert (recomendacion (prioridad "TECNICA") 
+           (razon (str-cat "Seguridad: La GPU " ?mod " es muy grande; se incluyó un soporte para evitar daños a la placa madre."))))
+   (assert (requerimiento-tecnico (tipo "accesorio") (nivel "soporte"))))
+
    ;; Regla para Longevidad (Árbol de Decisión)
 (defrule validar-longevidad-plataforma
    (usuario (longevidad SI) (presupuesto ?p))
@@ -113,3 +122,23 @@
 =>
    (assert (recomendacion (prioridad "CRITICA") 
            (razon (str-cat "Incompatibilidad: El gabinete " ?mod " es demasiado grande/incompatible para una build compacta Micro-ATX.")))))
+
+;; Regla de Longevidad (Árbol de Decisión Profundo)
+(defrule validar-longevidad-plataforma
+   (usuario (longevidad SI) (presupuesto ?p))
+   (test (> ?p 15000))
+=>
+   ;; Fuerza la selección de placas AM5 y memorias DDR5
+   (assert (requerimiento-tecnico (tipo "plataforma") (nivel "AM5")))
+   (assert (recomendacion (prioridad "ALTA") 
+           (razon "Decisión Experta: Se priorizó plataforma AM5 para longevidad, asegurando compatibilidad con futuras CPUs de AMD."))))
+
+;; Regla de Audio (Fase 4 - Optimización)
+(defrule sugerir-placa-audio-premium
+   (usuario (audio "pro"))
+   ?p <- (placa (modelo ?mod) (precio ?pr))
+   (test (str-index "ROG" ?mod)) ; Busca placas de gama alta (ASUS ROG)
+=>
+   (assert (recomendacion (prioridad "TECNICA") 
+           (razon (str-cat "Audio: Se seleccionó la placa " ?mod " por su mejor códec de audio y soporte para audífonos de alta impedancia."))))
+)

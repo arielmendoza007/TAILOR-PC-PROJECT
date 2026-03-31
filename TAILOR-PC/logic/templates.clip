@@ -27,6 +27,18 @@
    (slot flujo-aire (type STRING))
    (slot precio (type FLOAT)))
 
+;; Nueva plantilla para Memoria RAM
+(deftemplate ram
+   (slot modelo (type STRING))
+   (slot capacidad (type INTEGER)) ; GB
+   (slot velocidad (type INTEGER)) ; MHz
+   (slot precio (type FLOAT)))
+
+;; Nueva plantilla para Soporte de GPU
+(deftemplate soporte-gpu
+   (slot modelo (type STRING))
+   (slot precio (type FLOAT)))
+
 ;; ESTE ES EL QUE CAUSABA EL ERROR (Debe estar aquí definido)
 (deftemplate requerimiento-tecnico
    (slot tipo (type STRING))
@@ -83,6 +95,7 @@
    (slot streaming (type SYMBOL))
    (slot longevidad (type SYMBOL))
    (slot almacenamiento (type STRING))
-   (slot wifi (type SYMBOL))        ;; <--- ESTO ES LO QUE FALTABA
-   (slot size (type SYMBOL))        ;; <--- PARA EL TAMAÑO ATX/MICRO
+   (slot wifi (type SYMBOL))        
+   (slot size (type SYMBOL))        
+   (slot audio (type STRING))       ;; <--- ESTO ES LO QUE FALTA PARA LA FASE 4
    (slot espacio-gabinete (type INTEGER) (default 400)))

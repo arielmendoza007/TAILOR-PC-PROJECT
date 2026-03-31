@@ -22,23 +22,22 @@
 )
 
 (deffacts catalogo-extra
-   ;; Fuentes de Poder (Crucial para la regla de "no tronar" [cite: 34, 350])
+   ;; Fuentes de Poder (Crucial para la regla de "no tronar")
    (fuente (modelo "EVGA 500W 80+ White") (watts 500) (precio 1100.0))
    (fuente (modelo "Corsair RM750e 80+ Gold") (watts 750) (precio 2400.0))
    (fuente (modelo "ASUS ROG Thor 1000W Platinum") (watts 1000) (precio 5800.0))
 
-   ;; Almacenamiento (Para completar la PC [cite: 183])
+   ;; Almacenamiento (Para completar la PC)
    (disco (modelo "Kingston NV2 1TB NVMe") (tipo "SSD") (precio 1250.0))
    (disco (modelo "Samsung 980 Pro 2TB") (tipo "SSD") (precio 3100.0))
 )
 
-(deffacts catalogo-extra
-   ;; Fuentes de Poder
-   (fuente (modelo "EVGA 500W 80+ White") (watts 500) (precio 1100.0))
-   (fuente (modelo "Corsair RM750e 80+ Gold") (watts 750) (precio 2400.0))
-   (fuente (modelo "ASUS ROG Thor 1000W Platinum") (watts 1000) (precio 5800.0))
-
-   ;; Almacenamiento
-   (disco (modelo "Kingston NV2 1TB NVMe") (tipo "SSD") (precio 1250.0))
-   (disco (modelo "Samsung 980 Pro 2TB") (tipo "SSD") (precio 3100.0))
+(deffacts componentes-adicionales
+   ;; Memoria RAM
+   (ram (modelo "Corsair Vengeance 16GB") (capacidad 16) (velocidad 3200) (precio 1200.0))
+   (ram (modelo "Kingston Fury 32GB") (capacidad 32) (velocidad 5200) (precio 2800.0))
+   
+   ;; Soportes para GPUs pesadas
+   (soporte-gpu (modelo "Cooler Master GPU Bracket") (precio 450.0))
 )
+

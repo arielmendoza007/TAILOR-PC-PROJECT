@@ -19,8 +19,12 @@
    (gpu (modelo ?mg) (precio ?pg))
    (placa (modelo ?mp) (precio ?pp))
    (gabinete (modelo ?mgb) (precio ?pgb))
+   (ram (modelo ?mram) (capacidad ?cr) (velocidad ?vr) (precio ?pram))
+   (test (eq ?mram "Corsair Vengeance 16GB"))
+   (soporte-gpu (modelo ?ms) (precio ?psoporte))
+   (test (eq ?ms "Cooler Master GPU Bracket"))
 =>
-   (bind ?total (+ ?pc ?pg ?pp ?pgb))
+   (bind ?total (+ ?pc ?pg ?pp ?pgb ?pram ?psoporte))
    (if (> ?total ?p-max)
       then
       (assert (recomendacion (prioridad "ECONOMICA") (razon (str-cat "Presupuesto excedido: El costo total es $" ?total " pero tu limite es $" ?p-max ". Sugerimos bajar la gama de la GPU o CPU."))))
@@ -30,31 +34,32 @@
 )
 
 
-(defrule validar-fuente-poder
-   (cpu (modelo ?mc) (tdp ?tc))
-   (gpu (modelo ?mg) (consumo ?tg))
-   (fuente (modelo ?mf) (watts ?wf))
-=>
-   (bind ?consumo-total (+ ?tc ?tg 100)) ; 100W extra para el resto del sistema 
-   (if (< ?wf ?consumo-total)
-      then
-      (assert (recomendacion (prioridad "CRITICA") (razon (str-cat "La fuente de " ?wf "W es insuficiente para un consumo de " ?consumo-total "W."))))))
-
-(defrule seleccion-final-detallada
-   (declare (salience -20))
-   (usuario (presupuesto ?p-max) (uso ?uso-u))
-   (cpu (modelo ?mc) (precio ?pc))
-   (gpu (modelo ?mg) (precio ?pg))
+(defrule validar-fuente-poder-integral
+   (declare (salience -15)) ; Se ejecuta justo antes de la decisión final
+   (usuario (presupuesto ?p-max))
+   (cpu (modelo ?mc) (tdp ?tc) (precio ?pc))
+   (gpu (modelo ?mg) (consumo ?tg) (precio ?pg))
+   (fuente (modelo ?mf) (watts ?wf) (precio ?pf))
    (placa (modelo ?mp) (precio ?pp))
    (gabinete (modelo ?mgb) (precio ?pgb))
-   (fuente (modelo ?mf) (precio ?pf))
+   (ram (modelo ?mram) (capacidad ?cr) (velocidad ?vr) (precio ?pram))
+   (test (eq ?mram "Corsair Vengeance 16GB"))
+   (soporte-gpu (modelo ?ms) (precio ?psoporte))
+   (test (eq ?ms "Cooler Master GPU Bracket"))
    (disco (modelo ?md) (precio ?pd))
 =>
-   (bind ?total (+ ?pc ?pg ?pp ?pgb ?pf ?pd))
+   (bind ?consumo-total (+ ?tc ?tg 100))
+   (bind ?total (+ ?pc ?pg ?pp ?pgb ?pf ?pd ?pram ?psoporte))
    (bind ?balance (- ?p-max ?total))
-   ;; Creamos una cadena única con separadores "|" para que Python la rompa fácilmente
-   (assert (recomendacion (prioridad "EXITO") 
-           (razon (str-cat "ANALISIS: Configuración optimizada para " ?uso-u " | CPU: " ?mc " | GPU: " ?mg " | PLACA: " ?mp " | FUENTE: " ?mf " | DISCO: " ?md " | COSTO: $" ?total " | BALANCE: $" ?balance))))
+   
+   (if (< ?wf ?consumo-total)
+      then
+      (assert (recomendacion (prioridad "CRITICA") 
+              (razon (str-cat "CONFIGURACION_COMPLETA | ERROR: Fuente insuficiente (" ?wf "W para " ?consumo-total "W) | CPU: " ?mc " | GPU: " ?mg " | RAM: " ?mram " | SOPORTE: " ?ms " | TOTAL: $" ?total " | BALANCE: $" ?balance))))
+      else
+      (assert (recomendacion (prioridad "EXITO") 
+              (razon (str-cat "CONFIGURACION_COMPLETA | Todo compatible y optimizado | CPU: " ?mc " | GPU: " ?mg " | PLACA: " ?mp " | FUENTE: " ?mf " | RAM: " ?mram " | SOPORTE: " ?ms " | DISCO: " ?md " | TOTAL: $" ?total " | BALANCE: $" ?balance))))
+   )
 )
 
 (defrule advertencia-presupuesto-insuficiente
@@ -64,4 +69,12 @@
 =>
    (assert (recomendacion (prioridad "CRITICA") 
            (razon "Tu presupuesto es muy bajo para los requerimientos actuales. Intenta reducir la resolución o quitar el streaming."))))
+
+(defrule error-critico-presupuesto-nulo
+   (declare (salience -50)) ; Se dispara solo si NADA más funcionó
+   (usuario (presupuesto ?p))
+   (not (recomendacion))
+=>
+   (assert (recomendacion (prioridad "CRITICA") 
+           (razon "SISTEMA ABORTADO | No existen componentes en el mercado actual que cumplan con tu presupuesto. Aumenta tu presupuesto para continuar."))))
 
