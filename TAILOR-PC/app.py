@@ -101,8 +101,18 @@ def ejecutar_diagnostico():
                         'es_lista': True
                     })
 
-        # ORDENAMIENTO POR DEFECTO (Mayor ahorro primero)
+        # 5. ORDENAMIENTO Y CÁLCULO DE FACTOR DE CERTEZA
         sugerencias_ordenadas = sorted(sugerencias, key=lambda x: x['balance'], reverse=True)
+        
+        for i, s in enumerate(sugerencias_ordenadas):
+            if s['balance'] >= 0:
+                certeza = 99.5 - (i * 0.5)
+                s['sinergia'] = max(80.5, round(certeza, 1))
+            else:
+                penalizacion = abs(s['balance']) / 150
+                certeza = 75.0 - penalizacion
+                s['sinergia'] = max(30.0, round(certeza, 1))
+
         return render_template('resultado.html', sugerencias=sugerencias_ordenadas)
         
     except Exception as e:

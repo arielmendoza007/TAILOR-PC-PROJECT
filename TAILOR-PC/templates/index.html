@@ -31,8 +31,7 @@
                         <div class="step-container" id="step1">
                             <h4 class="font-monospace text-primary">&gt; Fase 1: Capacidad Financiera</h4>
                             <label>¿Cuál es tu presupuesto máximo (MXN)?</label>
-                            <input type="number" name="presupuesto" class="form-control mb-3" placeholder="Ej. 25000" required>
-                            <button type="button" class="btn btn-outline-success" onclick="nextStep(2)">Siguiente Proceso</button>
+<input type="number" name="presupuesto" class="form-control mb-3" placeholder="Ej. 25000" min="3000" oninput="this.value = Math.abs(this.value)" required>                            <button type="button" class="btn btn-outline-success" onclick="nextStep(2)">Siguiente Proceso</button>
                         </div>
 
                         <div class="step-container" id="step2" style="display:none;">
