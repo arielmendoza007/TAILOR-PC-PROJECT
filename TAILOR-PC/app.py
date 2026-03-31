@@ -100,8 +100,7 @@ def ejecutar_diagnostico():
                     })
 
         # ORDENAMIENTO POR DEFECTO: Mayor ahorro primero (Menos gasto)
-        # ORDENAMIENTO POR DEFECTO: Mayor ahorro primero, pero LIMITADO AL TOP 5
-        sugerencias_ordenadas = sorted(sugerencias, key=lambda x: x['balance'], reverse=True)[:5]
+        sugerencias_ordenadas = sorted(sugerencias, key=lambda x: x['balance'], reverse=True)
         
         return render_template('resultado.html', sugerencias=sugerencias_ordenadas)
         
