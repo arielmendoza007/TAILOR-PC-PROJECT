@@ -1,0 +1,155 @@
+/* static/style.css */
+:root {
+    --bg-primary: #ffffff; /* Fondo claro por defecto */
+    --text-main: #212529;
+    --card-bg: #f8f9fa;
+    --accent: #0d6efd;
+    --border: #dee2e6;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #121212;
+    --text-main: #00ff41; /* Verde neón para contraste en oscuro */
+    --card-bg: #1e1e1e;
+    --accent: #00ff41;
+    --border: #333333;
+}
+
+/* Aplicación de variables */
+body { background-color: var(--bg-primary); color: var(--text-main); transition: 0.5s; }
+.hero-title { color: var(--text-main); font-weight: 800; }
+.card { background-color: var(--card-bg); border: 1px solid var(--border); }
+
+body {
+    background: radial-gradient(circle at center, #1a1d20 0%, #0a0a0b 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
+    border-width: 2px !important;
+}
+
+.card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+}
+
+.font-monospace {
+    letter-spacing: 1px;
+}
+
+.text-primary { color: #00ff41 !important; } /* Verde Neón */
+.border-success { border-color: #00ff41 !important; }
+.btn-outline-success {
+    color: #00ff41;
+    border-color: #00ff41;
+}
+.btn-outline-success:hover {
+    background-color: #00ff41;
+    color: #000;
+}
+
+/* Variables de color para cambio rápido */
+:root {
+    --bg-primary: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-main: #212529;
+    --accent: #0d6efd;
+    --border: #dee2e6;
+}
+
+[data-theme="dark"] {
+    --bg-primary: #0a0a0b;
+    --card-bg: #121212;
+    --text-main: #00ff41;
+    --accent: #00ff41;
+    --border: #00ff41;
+}
+
+body { background-color: var(--bg-primary); color: var(--text-main); transition: 0.3s; }
+.card { background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; }
+
+:root {
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-color: #212529;
+    --accent-color: #0d6efd;
+}
+
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --accent-color: #00ff41; /* Verde neón para el modo oscuro */
+}
+
+body { 
+    background-color: var(--bg-color); 
+    color: var(--text-color); 
+    transition: 0.3s; 
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.card { 
+    background-color: var(--card-bg); 
+    border: 1px solid rgba(0,0,0,0.1); 
+    border-radius: 15px; 
+}
+
+.btn-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.hero-title {
+    color: #ffffff; /* Blanco puro para que resalte */
+    text-shadow: 0 0 15px rgba(0, 255, 65, 0.5); /* Resplandor verde sutil */
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+.lead-text {
+    color: #00ff41 !important; /* Verde neón para el subtítulo académico */
+    font-family: 'Courier New', monospace;
+}
+
+:root {
+    --bg-main: #ffffff;
+    --text-title: #0a2e5c; /* Azul fuerte para fondo claro */
+    --text-sub: #495057;
+}
+
+[data-theme="dark"] {
+    --bg-main: #0a0a0b;
+    --text-title: #00ff41; /* Verde neón para fondo oscuro */
+    --text-sub: #e9ecef;
+}
+
+body { background-color: var(--bg-main); color: var(--text-sub); transition: 0.4s; }
+.hero-title { color: var(--text-title); text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
+
+/* Estilo para las fichas en Modo Claro (Default) [cite: 105] */
+.accordion-item {
+    background-color: #ffffff;
+    transition: transform 0.2s ease;
+}
+
+.bg-light-custom { background-color: #f8f9fa; }
+
+/* Ajustes para Modo Oscuro [cite: 207] */
+[data-theme="dark"] .accordion-item {
+    background-color: #2b3035;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .bg-light-custom { 
+    background-color: #1a1d20; 
+}
+
+[data-theme="dark"] .accordion-button {
+    background-color: #2b3035;
+    color: #00ff41; /* Verde neón para visibilidad [cite: 46] */
+}

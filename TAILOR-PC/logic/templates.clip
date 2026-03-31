@@ -1,0 +1,88 @@
+(deftemplate cpu
+   (slot modelo (type STRING))
+   (slot marca (type SYMBOL))
+   (slot socket (type SYMBOL))
+   (slot nucleos (type INTEGER))
+   (slot tdp (type INTEGER))
+   (slot precio (type FLOAT))
+   (slot generacion (type STRING)))
+
+(deftemplate gpu
+   (slot modelo (type STRING))
+   (slot longitud (type INTEGER))
+   (slot consumo (type INTEGER))
+   (slot vram (type INTEGER))
+   (slot precio (type FLOAT)))
+
+(deftemplate placa
+   (slot modelo (type STRING))
+   (slot socket (type SYMBOL))
+   (slot factor-forma (type SYMBOL))
+   (slot precio (type FLOAT)))
+
+(deftemplate gabinete
+   (slot modelo (type STRING))
+   (slot max-gpu-len (type INTEGER))
+   (slot soporte-placa (type SYMBOL))
+   (slot flujo-aire (type STRING))
+   (slot precio (type FLOAT)))
+
+;; ESTE ES EL QUE CAUSABA EL ERROR (Debe estar aquí definido)
+(deftemplate requerimiento-tecnico
+   (slot tipo (type STRING))
+   (slot nivel (type STRING)))
+
+(deftemplate usuario
+   (slot presupuesto (type FLOAT))
+   (slot uso (type STRING))
+   (slot resolucion (type STRING))
+   (slot clima (type STRING))
+   (slot prioridad (type STRING))
+   (slot streaming (type SYMBOL))
+   (slot longevidad (type SYMBOL))
+   (slot espacio-gabinete (type INTEGER) (default 400)))
+
+(deftemplate recomendacion
+   (slot prioridad (type STRING))
+   (slot razon (type STRING)))
+
+   (deftemplate fuente
+   (slot modelo (type STRING))
+   (slot watts (type INTEGER))
+   (slot precio (type FLOAT)))
+
+   ;; Definición para Fuentes de Poder
+(deftemplate fuente
+   (slot modelo (type STRING))
+   (slot watts (type INTEGER))
+   (slot precio (type FLOAT)))
+
+;; Definición para Unidades de Almacenamiento
+(deftemplate disco
+   (slot modelo (type STRING))
+   (slot tipo (type STRING)) ; SSD o HDD
+   (slot precio (type FLOAT)))
+
+   (deftemplate usuario
+   (slot presupuesto (type FLOAT))
+   (slot uso (type STRING))
+   (slot resolucion (type STRING))
+   (slot clima (type STRING))
+   (slot prioridad (type STRING))
+   (slot streaming (type SYMBOL))
+   (slot longevidad (type SYMBOL)) ; SI/NO
+   (slot almacenamiento (type STRING)) ; "velocidad" o "capacidad"
+   (slot espacio-gabinete (type INTEGER) (default 400)))
+
+(deftemplate usuario
+   (slot presupuesto (type FLOAT))
+   (slot uso (type STRING))
+   (slot resolucion (type STRING))
+   (slot clima (type STRING))
+   (slot prioridad (type STRING))
+   (slot streaming (type SYMBOL))
+   (slot longevidad (type SYMBOL))
+   (slot almacenamiento (type STRING))
+   (slot wifi (type SYMBOL))        ;; <--- ESTO ES LO QUE FALTABA
+   (slot size (type SYMBOL))        ;; <--- PARA EL TAMAÑO ATX/MICRO
+   (slot espacio-gabinete (type INTEGER) (default 400)))

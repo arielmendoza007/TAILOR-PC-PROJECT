@@ -1,0 +1,8 @@
+(defrule validar-dimensiones-gpu
+   (declare (salience 20))
+   ?u <- (usuario (espacio-gabinete ?max))
+   ?g <- (gpu (modelo ?m) (longitud ?len))
+   (test (> ?len ?max))
+=>
+   (assert (recomendacion (prioridad "CRITICA") (razon (str-cat "Incompatibilidad Fisica: La GPU " ?m " mide " ?len "mm y no cabe en el gabinete seleccionado."))))
+)

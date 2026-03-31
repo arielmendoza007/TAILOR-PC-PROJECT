@@ -1,0 +1,12 @@
+(defrule inicio-sistema
+   (declare (salience 100))
+=>
+   (printout t "Tailor-PC: Motor de inferencia iniciado correctamente." crlf)
+)
+
+(defrule fin-diagnostico
+   (declare (salience -100))
+   (recomendacion (razon ?r))
+=>
+   (assert (diagnostico-finalizado))
+)

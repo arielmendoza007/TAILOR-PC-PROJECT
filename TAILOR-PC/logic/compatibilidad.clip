@@ -1,0 +1,11 @@
+(deffacts relaciones-tecnicas
+   ;; Relación de sockets y chipsets compatibles
+   (compatible-socket LGA1700 "Intel 600")
+   (compatible-socket LGA1700 "Intel 700")
+   (compatible-socket AM5 "AMD 600")
+   
+   ;; Compatibilidad de tamaño
+   (compatible-factor-forma ATX ATX)
+   (compatible-factor-forma ATX Micro-ATX)
+   (compatible-factor-forma Micro-ATX Micro-ATX)
+)

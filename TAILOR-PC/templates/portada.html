@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Tailor-PC | Inicio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .hero-title {
+            color: var(--text-title); /* Usará los colores de las variables :root que definimos */
+            font-size: 3.5rem;
+            font-weight: 900;
+        }
+
+        .intro-card {
+            background: rgba(255, 255, 255, 0.9); /* Fondo blanco traslúcido para modo claro */
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px solid #0d6efd;
+        }
+
+        [data-theme="dark"] .intro-card {
+            background: rgba(20, 20, 25, 0.95); /* Fondo oscuro profundo */
+            border-color: #00ff41;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-5 text-center">
+        <img src="https://www.uaeh.edu.mx/identidad/imagenes/logo_uaeh_color.png" alt="UAEH" style="height: 80px;">
+        <h1 class="mt-4">Tailor-PC: Expert System</h1>
+        <p class="lead">Sistemas Basados en Conocimiento | UAEH - ICBI</p>
+        
+        <div class="card p-5 my-4 text-start">
+            <h3>Introducción</h3>
+            <p>{{ "Este sistema asiste a usuarios novatos en la configuración de computadoras a medida, reduciendo errores de compatibilidad y optimizando el presupuesto." }} [cite: 26, 29]</p>
+            <hr>
+            <h5>Integrantes:</h5>
+            <ul>
+                <li>Torres De Paz Brandon [cite: 20]</li>
+                <li>Mendoza López Ángel Ariel [cite: 21]</li>
+            </ul>
+        </div>
+        
+        <a href="/diagnostico-inicio" class="btn btn-primary btn-lg px-5">Iniciar Protocolo de Configuración</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,44 @@
+(deffacts catalogo-maestro
+   ;; CPUs (Con núcleos y TDP para reglas de desempeño)
+   (cpu (modelo "Intel Core i9-13900K") (marca Intel) (socket LGA1700) (nucleos 24) (tdp 150) (precio 12500.0))
+   (cpu (modelo "Intel Core i7-13700K") (marca Intel) (socket LGA1700) (nucleos 16) (tdp 125) (precio 8900.0))
+   (cpu (modelo "AMD Ryzen 7 7800X3D") (marca AMD) (socket AM5) (nucleos 8) (tdp 120) (precio 8500.0))
+   (cpu (modelo "AMD Ryzen 5 7600") (marca AMD) (socket AM5) (nucleos 6) (tdp 65) (precio 4100.0))
+   
+   ;; GPUs (Con VRAM obligatoria para reglas de resolución 4K)
+   (gpu (modelo "NVIDIA RTX 4090") (longitud 336) (consumo 450) (vram 24) (precio 38000.0))
+   (gpu (modelo "NVIDIA RTX 4070 Ti") (longitud 285) (consumo 285) (vram 12) (precio 15500.0))
+   (gpu (modelo "NVIDIA RTX 4060") (longitud 200) (consumo 115) (vram 8) (precio 6500.0))
+
+   ;; Placas Madre (Con sockets para reglas de compatibilidad)
+   (placa (modelo "ASUS ROG Strix Z790-E") (socket LGA1700) (factor-forma ATX) (precio 9500.0))
+   (placa (modelo "ASUS TUF Gaming B650-Plus") (socket AM5) (factor-forma ATX) (precio 4800.0))
+   (placa (modelo "Gigabyte B760M DS3H") (socket LGA1700) (factor-forma Micro-ATX) (precio 2400.0))
+
+   ;; Gabinetes (Con flujo-aire para reglas de clima cálido)
+   (gabinete (modelo "Corsair 5000D") (max-gpu-len 420) (soporte-placa ATX) (flujo-aire "alto") (precio 3200.0))
+   (gabinete (modelo "NZXT H5 Flow") (max-gpu-len 365) (soporte-placa ATX) (flujo-aire "alto") (precio 2100.0))
+   (gabinete (modelo "Cooler Master Q300L") (max-gpu-len 280) (soporte-placa Micro-ATX) (flujo-aire "medio") (precio 1150.0))
+)
+
+(deffacts catalogo-extra
+   ;; Fuentes de Poder (Crucial para la regla de "no tronar" [cite: 34, 350])
+   (fuente (modelo "EVGA 500W 80+ White") (watts 500) (precio 1100.0))
+   (fuente (modelo "Corsair RM750e 80+ Gold") (watts 750) (precio 2400.0))
+   (fuente (modelo "ASUS ROG Thor 1000W Platinum") (watts 1000) (precio 5800.0))
+
+   ;; Almacenamiento (Para completar la PC [cite: 183])
+   (disco (modelo "Kingston NV2 1TB NVMe") (tipo "SSD") (precio 1250.0))
+   (disco (modelo "Samsung 980 Pro 2TB") (tipo "SSD") (precio 3100.0))
+)
+
+(deffacts catalogo-extra
+   ;; Fuentes de Poder
+   (fuente (modelo "EVGA 500W 80+ White") (watts 500) (precio 1100.0))
+   (fuente (modelo "Corsair RM750e 80+ Gold") (watts 750) (precio 2400.0))
+   (fuente (modelo "ASUS ROG Thor 1000W Platinum") (watts 1000) (precio 5800.0))
+
+   ;; Almacenamiento
+   (disco (modelo "Kingston NV2 1TB NVMe") (tipo "SSD") (precio 1250.0))
+   (disco (modelo "Samsung 980 Pro 2TB") (tipo "SSD") (precio 3100.0))
+)

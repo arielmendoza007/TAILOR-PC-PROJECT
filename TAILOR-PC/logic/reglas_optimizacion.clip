@@ -1,0 +1,67 @@
+(defrule optimizar-gaming-alto
+   (usuario (uso "gaming") (presupuesto ?p))
+   (test (>= ?p 25000))
+=>
+   (assert (recomendacion (prioridad "ALTA") (razon "Para este presupuesto, se recomienda priorizar una GPU serie RTX 4070 para evitar cuellos de botella.")))
+)
+
+(defrule advertencia-presupuesto-bajo
+   (usuario (presupuesto ?p))
+   (test (< ?p 8000))
+=>
+   (assert (recomendacion (prioridad "MEDIA") (razon "Presupuesto limitado: Se sugiere buscar componentes de generaciones anteriores o procesadores con graficos integrados.")))
+)
+
+(defrule validar-presupuesto-total
+   (declare (salience -10)) ; Se ejecuta al final de la inferencia
+   (usuario (presupuesto ?p-max))
+   (cpu (modelo ?mc) (precio ?pc))
+   (gpu (modelo ?mg) (precio ?pg))
+   (placa (modelo ?mp) (precio ?pp))
+   (gabinete (modelo ?mgb) (precio ?pgb))
+=>
+   (bind ?total (+ ?pc ?pg ?pp ?pgb))
+   (if (> ?total ?p-max)
+      then
+      (assert (recomendacion (prioridad "ECONOMICA") (razon (str-cat "Presupuesto excedido: El costo total es $" ?total " pero tu limite es $" ?p-max ". Sugerimos bajar la gama de la GPU o CPU."))))
+      else
+      (assert (recomendacion (prioridad "EXITO") (razon (str-cat "Configuracion viable: Costo total de $" ?total ". Te sobran $" (- ?p-max ?total) " MXN."))))
+   )
+)
+
+
+(defrule validar-fuente-poder
+   (cpu (modelo ?mc) (tdp ?tc))
+   (gpu (modelo ?mg) (consumo ?tg))
+   (fuente (modelo ?mf) (watts ?wf))
+=>
+   (bind ?consumo-total (+ ?tc ?tg 100)) ; 100W extra para el resto del sistema 
+   (if (< ?wf ?consumo-total)
+      then
+      (assert (recomendacion (prioridad "CRITICA") (razon (str-cat "La fuente de " ?wf "W es insuficiente para un consumo de " ?consumo-total "W."))))))
+
+(defrule seleccion-final-detallada
+   (declare (salience -20))
+   (usuario (presupuesto ?p-max) (uso ?uso-u))
+   (cpu (modelo ?mc) (precio ?pc))
+   (gpu (modelo ?mg) (precio ?pg))
+   (placa (modelo ?mp) (precio ?pp))
+   (gabinete (modelo ?mgb) (precio ?pgb))
+   (fuente (modelo ?mf) (precio ?pf))
+   (disco (modelo ?md) (precio ?pd))
+=>
+   (bind ?total (+ ?pc ?pg ?pp ?pgb ?pf ?pd))
+   (bind ?balance (- ?p-max ?total))
+   ;; Creamos una cadena única con separadores "|" para que Python la rompa fácilmente
+   (assert (recomendacion (prioridad "EXITO") 
+           (razon (str-cat "ANALISIS: Configuración optimizada para " ?uso-u " | CPU: " ?mc " | GPU: " ?mg " | PLACA: " ?mp " | FUENTE: " ?mf " | DISCO: " ?md " | COSTO: $" ?total " | BALANCE: $" ?balance))))
+)
+
+(defrule advertencia-presupuesto-insuficiente
+   (declare (salience -20))
+   (usuario (presupuesto ?p-max))
+   (not (recomendacion (prioridad "EXITO"))) ; Si no se logró una PC completa
+=>
+   (assert (recomendacion (prioridad "CRITICA") 
+           (razon "Tu presupuesto es muy bajo para los requerimientos actuales. Intenta reducir la resolución o quitar el streaming."))))
+
