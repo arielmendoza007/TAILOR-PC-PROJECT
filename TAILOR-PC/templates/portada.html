@@ -60,7 +60,9 @@
     /* ── Hero ───────────────────────────────────── */
     .hero { padding: 64px 20px 40px; text-align: center; }
     .hero-logo {
-        height: 68px; margin-bottom: 28px;
+        max-height: 85px; /* Aquí controlamos que no se vea gigante */
+        width: auto;
+        margin-bottom: 28px;
         transition: filter .3s;
     }
     [data-theme="dark"] .hero-logo { filter: brightness(1.1) saturate(1.2); }
@@ -157,7 +159,7 @@
 </div>
 
 <div class="hero">
-    <img src="https://www.uaeh.edu.mx/identidad/imagenes/logo_uaeh_color.png" alt="UAEH" class="hero-logo">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="Tailor-PC Logo" class="hero-logo">
     <div class="hero-tag">Sistemas Basados en Conocimiento · UAEH — ICBI</div>
     <h1 class="hero-title">Tailor<span class="hi">-PC</span><br>Expert System</h1>
     <p class="hero-sub">Motor RETE · Base de conocimiento CLIPS · Recomendación adaptativa</p>
