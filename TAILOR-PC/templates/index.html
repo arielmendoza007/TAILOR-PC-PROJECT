@@ -2,107 +2,108 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Tailor-PC | Consultoría Experta</title>
+    <title>Tailor-PC | Diagnóstico</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        :root { --bg-color: #f8f9fa; --text-color: #212529; --card-bg: #ffffff; --input-bg: #ffffff; --input-text: #212529; --border-color: #dee2e6; }
-        [data-theme="dark"] { --bg-color: #1a1d20; --text-color: #e9ecef; --card-bg: #2b3035; --input-bg: #343a40; --input-text: #ffffff; --border-color: #495057; }
-        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', sans-serif; transition: 0.3s; }
-        .card { background-color: var(--card-bg); border: none; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .form-control, .form-select { background-color: var(--input-bg); border: 1px solid var(--border-color); color: var(--input-text); }
-        .form-control:focus, .form-select:focus { background-color: var(--input-bg); color: var(--input-text); }
-        .btn-toggle { position: fixed; top: 20px; right: 20px; z-index: 1000; }
-        label { font-weight: 500; margin-bottom: 8px; opacity: 0.8; }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body data-theme="dark"> 
-    <button class="btn btn-outline-info btn-toggle" onclick="toggleTheme()">🌓 Cambiar Tema</button>
+<body data-theme="light"> 
+    <script>
+        const savedTheme = localStorage.getItem('tailorTheme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+    </script>
+    <button class="btn btn-outline-info shadow" style="position:fixed; top:20px; right:20px; z-index:1000;" onclick="toggleTheme()">🌓 Tema</button>
 
     <div class="container py-5">
         <div class="row justify-content-center">
             <div class="col-md-8">
-                <div class="card p-5 position-relative">
-                    <h1 class="text-center mb-2">Bienvenido a Tailor-PC</h1>
-                    <p class="text-center text-muted mb-4">Configura tu equipo ideal con inteligencia experta</p>
-                    <hr class="mb-4" style="opacity: 0.1;">
+                <div class="card p-5 position-relative shadow-lg border-0">
+                    <h2 class="text-center mb-2 fw-bold text-primary">Parámetros del Sistema</h2>
+                    <p class="text-center mb-4 text-muted">Ajuste de variables heurísticas</p>
                     
                     <form action="/diagnostico" method="POST" id="msform">
-                        
                         <div class="step-container" id="step1">
-                            <h4 class="font-monospace text-primary">&gt; Fase 1: Capacidad Financiera</h4>
-                            <label>¿Cuál es tu presupuesto máximo (MXN)?</label>
-<input type="number" name="presupuesto" class="form-control mb-3" placeholder="Ej. 25000" min="3000" oninput="this.value = Math.abs(this.value)" required>                            <button type="button" class="btn btn-outline-success" onclick="nextStep(2)">Siguiente Proceso</button>
+                            <h5 class="text-primary mb-3">PASO 1: Recursos y Marca</h5>
+                            <label class="fw-bold">Presupuesto máximo (MXN):</label>
+                            <input type="number" name="presupuesto" class="form-control mb-3 py-2" placeholder="Ej. 25000" min="3000" required>
+                            
+                            <label class="fw-bold">Preferencia de Procesador:</label>
+                            <select name="marca_cpu" class="form-select mb-4 py-2">
+                                <option value="indistinto">El mejor costo/beneficio (Recomendado)</option>
+                                <option value="intel">Prefiero Intel Core</option>
+                                <option value="amd">Prefiero AMD Ryzen</option>
+                            </select>
+                            <button type="button" class="btn btn-primary px-4 fw-bold" onclick="nextStep(2)">Siguiente</button>
                         </div>
 
                         <div class="step-container" id="step2" style="display:none;">
-                            <h4 class="font-monospace text-primary">&gt; Fase 2: Perfil de Usuario</h4>
+                            <h5 class="text-primary mb-3">PASO 2: Enfoque Táctico</h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label>Uso Principal:</label>
-                                    <select name="uso" class="form-select" id="usoSelect">
+                                    <label class="fw-bold">Uso Principal:</label>
+                                    <select name="uso" class="form-select py-2">
                                         <option value="gaming">Gaming / Streaming</option>
                                         <option value="render">Renderizado / 3D</option>
                                         <option value="ofimatica">Ofimática / Estudio</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label>Prioridad:</label>
-                                    <select name="prioridad" class="form-select">
-                                        <option value="rendimiento">Rendimiento Máximo</option>
-                                        <option value="estetica">Estética / RGB</option>
+                                    <label class="fw-bold">Estética del Equipo:</label>
+                                    <select name="estilo_rgb" class="form-select py-2">
+                                        <option value="minimalista">Minimalista (Sin luces)</option>
+                                        <option value="rgb">Gamer (RGB Completo)</option>
                                     </select>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-outline-secondary me-2" onclick="nextStep(1)">Anterior</button>
-                            <button type="button" class="btn btn-outline-success" onclick="nextStep(3)">Siguiente Proceso</button>
+                            <button type="button" class="btn btn-outline-secondary px-4 fw-bold" onclick="nextStep(1)">Atrás</button>
+                            <button type="button" class="btn btn-primary px-4 fw-bold" onclick="nextStep(3)">Siguiente</button>
                         </div>
 
                         <div class="step-container" id="step3" style="display:none;">
-                            <h4 class="font-monospace text-primary">&gt; Fase 3: Especificaciones de Entorno</h4>
+                            <h5 class="text-primary mb-3">PASO 3: Infraestructura</h5>
                             <div class="row">
                                 <div class="col-md-6 mb-3">
-                                    <label>¿Necesitas Wi-Fi?</label>
-                                    <select name="wifi" class="form-select">
-                                        <option value="SI">Sí, integrado</option>
-                                        <option value="NO">No, uso cable</option>
+                                    <label class="fw-bold">Conectividad:</label>
+                                    <select name="wifi" class="form-select py-2">
+                                        <option value="SI">Wi-Fi Integrado</option>
+                                        <option value="NO">Ethernet (Cable)</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label>Tamaño de Gabinete:</label>
-                                    <select name="size" class="form-select">
-                                        <option value="ATX">Torre Estándar (ATX)</option>
-                                        <option value="Micro-ATX">Compacto (Micro-ATX)</option>
+                                    <label class="fw-bold">Tamaño (Gabinete):</label>
+                                    <select name="size" class="form-select py-2">
+                                        <option value="ATX">ATX (Estándar)</option>
+                                        <option value="Micro-ATX">Micro-ATX (Compacto)</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="form-check form-switch mb-4">
                                 <input class="form-check-input" type="checkbox" name="streaming" id="streaming">
-                                <label class="form-check-label" for="streaming">¿Harás Streaming pesado?</label>
+                                <label class="form-check-label fw-bold" for="streaming">Procesamiento de Streaming Simultáneo</label>
                             </div>
-                            <button type="button" class="btn btn-outline-secondary me-2" onclick="nextStep(2)">Anterior</button>
-                            <button type="button" class="btn btn-outline-success" onclick="nextStep(4)">Siguiente Proceso</button>
+                            <button type="button" class="btn btn-outline-secondary px-4 fw-bold" onclick="nextStep(2)">Atrás</button>
+                            <button type="button" class="btn btn-primary px-4 fw-bold" onclick="nextStep(4)">Siguiente</button>
                         </div>
 
                         <div class="step-container" id="step4" style="display:none;">
-                            <h4 class="font-monospace text-primary mb-3">&gt; Fase 4: Optimización Técnica</h4>
+                            <h5 class="text-primary mb-3">PASO 4: Escalabilidad</h5>
                             <div class="row">
                                 <div class="col-md-6 mb-4">
-                                    <label>¿Planeas actualizar componentes en 2 años?</label>
-                                    <select name="longevidad" class="form-select">
-                                        <option value="SI">Sí, quiero que dure (AM5/DDR5)</option>
-                                        <option value="NO">No, busco lo mejor por mi dinero hoy</option>
+                                    <label class="fw-bold">Actualización a futuro:</label>
+                                    <select name="longevidad" class="form-select py-2">
+                                        <option value="SI">Plataforma Nueva (DDR5/AM5)</option>
+                                        <option value="NO">Máximo rendimiento actual (DDR4)</option>
                                     </select>
                                 </div>
                                 <div class="col-md-6 mb-4">
-                                    <label>Prioridad de Audio:</label>
-                                    <select name="audio" class="form-select">
-                                        <option value="estandar">Estandar (Jack 3.5mm)</option>
-                                        <option value="pro">Pro/Audiófilo (Mejor DAC)</option>
+                                    <label class="fw-bold">Audio:</label>
+                                    <select name="audio" class="form-select py-2">
+                                        <option value="estandar">Audio Estándar</option>
+                                        <option value="pro">Audio de Alta Fidelidad</option>
                                     </select>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-outline-secondary me-2" onclick="nextStep(3)">Anterior</button>
-                            <button type="submit" class="btn btn-success fw-bold">GENERAR RECOMENDACIÓN FINAL</button>
+                            <button type="button" class="btn btn-outline-secondary px-4 fw-bold" onclick="nextStep(3)">Atrás</button>
+                            <button type="submit" class="btn btn-success px-4 fw-bold shadow">EJECUTAR MOTOR RETE</button>
                         </div>
                     </form>
                 </div>
@@ -110,36 +111,18 @@
         </div>
     </div>
 
-    <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(10, 10, 11, 0.98); z-index:9999; flex-direction:column; justify-content:center; align-items:center; color:#00ff41; font-family: 'Courier New', monospace;">
-        <div class="spinner-border text-success mb-4" style="width: 4rem; height: 4rem; border-width: 0.3em;" role="status"></div>
-        <h2 id="loading-text" class="fw-bold mb-3">INICIANDO MOTOR DE INFERENCIA RETE...</h2>
-        <ul id="loading-logs" class="list-unstyled text-start fs-5" style="width: 600px; opacity: 0.9;"></ul>
-    </div>
-
-    <div id="chatbot-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 2000;">
-        <button class="btn btn-dark rounded-circle p-3 shadow border border-success" onclick="toggleChat()">🤖</button>
-        <div id="chat-window" class="card shadow" style="display:none; width: 340px; position: absolute; bottom: 70px; left: 0;">
-            <div class="card-header bg-primary text-white fw-bold">Asistente Experto Tailor-PC</div>
-            <div class="card-body">
-                <div id="chat-response" class="mb-3 small p-2 bg-light text-dark rounded" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
-                    ¡Hola! Soy tu asistente de hardware. Pregúntame la hora, o elige una opción técnica:
-                </div>
-                <div class="d-flex flex-wrap gap-1 mb-3">
-                    <button class="btn btn-outline-info btn-sm" onclick="askChat('RETE')">Motor RETE</button>
-                    <button class="btn btn-outline-info btn-sm" onclick="askChat('TDP')">¿TDP?</button>
-                    <button class="btn btn-outline-info btn-sm" onclick="askChat('VRAM')">¿VRAM?</button>
-                    <button class="btn btn-outline-primary btn-sm" onclick="askChat('¿qué es el cuello de botella?')">Cuello de Botella</button>
-                </div>
-                <input type="text" id="chat-input" class="form-control" placeholder="Escribe tu duda o saluda...">
-            </div>
-        </div>
+    <div id="loading-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; flex-direction:column; justify-content:center; align-items:center;">
+        <div class="spinner-border text-primary mb-4" style="width: 3.5rem; height: 3.5rem; border-width: 0.25em;" role="status"></div>
+        <h2 id="loading-text" class="fw-bold mb-4" style="letter-spacing: 1.5px; color: var(--text-main);">SINTETIZANDO DATOS</h2>
+        <div id="loading-logs" class="text-start" style="width: 550px; max-width: 90%;"></div>
     </div>
 
     <script>
         function toggleTheme() {
             const body = document.body;
-            const current = body.getAttribute('data-theme');
-            body.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+            const target = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', target);
+            localStorage.setItem('tailorTheme', target);
         }
 
         function nextStep(step) {
@@ -147,38 +130,22 @@
             document.getElementById('step' + step).style.display = 'block';
         }
 
-        function toggleChat() {
-            const win = document.getElementById('chat-window');
-            win.style.display = win.style.display === 'none' ? 'block' : 'none';
-        }
-
-        function askChat(query) {
-            const inputField = document.getElementById('chat-input');
-            inputField.value = query;
-            inputField.dispatchEvent(new KeyboardEvent('keypress', { 'key': 'Enter' }));
-        }
-
-        // Lógica NLP Chatbot
-        document.getElementById('chat-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const q = this.value.toLowerCase().trim();
-                if(q === "") return;
-                
-                let res = "Como sistema experto, analizo la lógica de hardware. ¿Tienes dudas sobre memoria, energía o compatibilidad física?";
-                if(q.match(/(hola|buenas|qué tal|saludos|hi)/)) res = "¡Hola! Soy el cerebro detrás de Tailor-PC. Puedo explicar términos como TDP, VRAM, o cuellos de botella. ¿Qué necesitas saber?";
-                else if(q.match(/(hora|reloj|qué tiempo|time|hour)/)) res = `Son las ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Por cierto, ¿tienes dudas del formulario?`;
-                else if(q.match(/(cuello.*botella|bottleneck|limita|frena|lento)/)) res = "El cuello de botella ocurre cuando un componente frena a otro. Yo lo prevengo usando el Motor RETE.";
-                else if(q.match(/(tdp|calor|watts|energia|fuente|poder)/)) res = "El TDP es el calor generado. Yo sumo el consumo total para que tu fuente de poder no explote.";
-                else if(q.match(/(vram|video|graficos|4k|texturas)/)) res = "La VRAM es la memoria gráfica. Vital para jugar en 4K o diseño 3D sin congelamientos.";
-                else if(q.match(/(rete|motor|algoritmo)/)) res = "El Algoritmo RETE evalúa miles de combinaciones de componentes en milisegundos sin saturar la RAM.";
-
-                const chatResponse = document.getElementById('chat-response');
-                chatResponse.innerHTML = `<div class="p-2 border-start border-success border-3 bg-dark text-light rounded mb-2"><strong>Tú:</strong> ${this.value}<br><br><strong class="text-info">Tailor-PC:</strong> ${res}</div>` + chatResponse.innerHTML;
-                this.value = '';
+        function hablarFemenino(texto) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(texto);
+                utterance.lang = 'es-MX';
+                utterance.rate = 1.05;
+                utterance.pitch = 1.3; 
+                const voces = window.speechSynthesis.getVoices();
+                const vozMujer = voces.find(v => v.lang.includes('es') && (v.name.includes('Sabina') || v.name.includes('Helena') || v.name.includes('Paulina') || v.name.includes('Google')));
+                if(vozMujer) utterance.voice = vozMujer;
+                window.speechSynthesis.speak(utterance);
             }
-        });
+        }
 
-        // MAGIA VISUAL: Simulación de procesamiento RETE
+        if ('speechSynthesis' in window) { window.speechSynthesis.getVoices(); }
+
         document.getElementById('msform').addEventListener('submit', function(e) {
             e.preventDefault(); 
             const overlay = document.getElementById('loading-overlay');
@@ -186,28 +153,28 @@
             const logs = document.getElementById('loading-logs');
             
             overlay.style.display = 'flex';
+            hablarFemenino("Iniciando análisis del motor experto. Evaluando reglas de hardware estructural. Por favor, espere.");
             
             const steps = [
-                "Cargando Base de Conocimientos de Componentes...",
-                "Evaluando reglas de compatibilidad física (Sockets/ATX)...",
-                "Calculando umbrales de Cuello de Botella térmico...",
+                "Cargando Base de Conocimientos...",
+                "Evaluando reglas de compatibilidad física...",
+                "Calculando umbrales de viabilidad térmica...",
                 "Ajustando restricciones financieras...",
-                "Purgando 648 combinaciones inválidas en memoria...",
-                "Generando Top de Configuraciones Óptimas..."
+                "Purgando combinaciones inválidas...",
+                "Generando dictamen final..."
             ];
             
             let i = 0;
             const interval = setInterval(() => {
                 if(i < steps.length) {
-                    logs.innerHTML += `<li><span class="text-white">></span> ${steps[i]} <span class="text-info">[OK]</span></li>`;
+                    logs.innerHTML += `<div class="premium-log">${steps[i]} <span style="float:right; color: var(--accent-primary); font-size:0.9rem;">[OK]</span></div>`;
                     i++;
                 } else {
                     clearInterval(interval);
-                    text.innerText = "¡DIAGNÓSTICO COMPLETADO!";
-                    text.classList.replace('text-success', 'text-white');
+                    text.innerText = "ANÁLISIS COMPLETADO";
                     setTimeout(() => { document.getElementById('msform').submit(); }, 600);
                 }
-            }, 550); 
+            }, 600); 
         });
     </script>
 </body>

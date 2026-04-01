@@ -3,129 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Diagnóstico | Tailor-PC</title>
+    <title>Tailor-PC | Resultados Estratégicos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* CSS MÁGICO PARA PDF */
+        .accordion-body { background-color: var(--bg-main) !important; color: var(--text-main) !important; }
+        .table { --bs-table-bg: transparent; --bs-table-color: var(--text-main); }
+        .table th, .table td { border-bottom-color: var(--border-color); }
+        
+        .progress-bar-smooth { width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .typing-dots::after { content: ''; animation: typing 1.5s infinite; }
+        @keyframes typing { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        .store-badge { border: 1px solid; background-color: var(--bg-main); padding: 8px 12px; font-size: 0.85rem; }
+        .store-amazon { color: #f59e0b; border-color: #f59e0b; }
+        .store-meli { color: #eab308; border-color: #eab308; }
+        .store-cyber { color: #ef4444; border-color: #ef4444; }
+        .store-ddtech { color: #3b82f6; border-color: #3b82f6; }
+        .store-spartan { color: #10b981; border-color: #10b981; }
+
         @media print {
             body { background: white !important; color: black !important; }
-            .btn, .dropdown, #chatbot-container, .accordion-button::after { display: none !important; }
+            .btn, .dropdown, #chatbot-container, canvas { display: none !important; }
             .accordion-collapse { display: block !important; height: auto !important; }
             .accordion-item { border: 2px solid #555 !important; page-break-inside: avoid; margin-bottom: 20px !important; }
-            .bg-light-custom, .bg-dark, .table-dark th { background-color: transparent !important; color: black !important; }
-            .text-primary, .text-success, .text-danger, .text-white { color: black !important; }
-            .accordion-button { background-color: transparent !important; color: black !important; border-bottom: 1px solid #555; }
         }
     </style>
 </head>
-<body class="bg-dark text-white">
+<body data-theme="light">
+    <script>
+        const savedTheme = localStorage.getItem('tailorTheme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+    </script>
+    
+    <button class="btn btn-outline-info shadow" style="position:fixed; top:20px; right:20px; z-index:1000;" onclick="toggleTheme()">🌓 Tema</button>
+
     <div class="container py-5">
-        <h2 class="mb-4 fw-bold">Resultados del Diagnóstico Experto</h2>
+        <h2 class="mb-4 fw-bold">Reporte Estratégico Tailor-PC</h2>
         
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="text-success font-monospace">&gt; PROPUESTAS GENERADAS</h3>
+        <div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded shadow-sm" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
+            <h4 class="text-primary font-monospace m-0">DICTAMEN DEL MOTOR EXPERTO</h4>
             <div class="dropdown">
-                <button class="btn btn-outline-info dropdown-toggle fw-bold" type="button" data-bs-toggle="dropdown">
-                    Filtros de Visualización
+                <button class="btn btn-primary dropdown-toggle fw-bold shadow-sm" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown">
+                    ⚙️ Filtrar Resultados
                 </button>
                 <ul class="dropdown-menu shadow">
-                    <li class="dropdown-header fw-bold text-primary">ORDENAR POR:</li>
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters('max-ahorro', undefined); return false;">Mayor Ahorro (Económicas)</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters('min-ahorro', undefined); return false;">Menor Ahorro (Alto Rendimiento)</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="applyFilters('max-ahorro', 1); return false;">👑 Mostrar Solo el Top 1</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="applyFilters('max-ahorro', 5); return false;">🏆 Top 5 (Recomendado)</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="applyFilters('min-ahorro', 10); return false;">🚀 Top 10 Alto Rendimiento</a></li>
                     <li><hr class="dropdown-divider"></li>
-                    <li class="dropdown-header fw-bold text-primary">CANTIDAD A MOSTRAR:</li>
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters(undefined, 5); return false;">Top 5 (Recomendado)</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters(undefined, 10); return false;">Top 10 Opciones</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters(undefined, 'all'); return false;">Mostrar Todas</a></li>
+                    <li><a class="dropdown-item" href="#" onclick="applyFilters('max-ahorro', 'all'); return false;">📋 Mostrar Todas las Opciones</a></li>
                 </ul>
             </div>
         </div>
 
         <div class="accordion shadow-sm" id="pcAccordion">
           {% for s in sugerencias %}
-          <div class="accordion-item border-0 mb-3 shadow-sm rounded" data-balance="{{ s.balance }}" style="display: none;">
+          <div class="accordion-item mb-4 rounded border-0 shadow {% if loop.index == 1 %}border border-primary glow-premium{% endif %}" data-balance="{{ s.balance }}" style="background-color: var(--bg-card);">
             <h2 class="accordion-header" id="heading{{ loop.index }}">
-              <button class="accordion-button collapsed fw-bold text-primary" type="button" 
-                      data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" 
-                      aria-expanded="false" aria-controls="collapse{{ loop.index }}">
-                <span class="badge bg-info me-3 text-dark">{{ s.prioridad }}</span>
-                Configuración Sugerida #{{ loop.index }}
+              <button class="accordion-button collapsed fw-bold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                <span class="badge bg-primary me-3 text-white">{{ s.prioridad }}</span>
+                Ensamblaje Sugerido #{{ loop.index }}
+                {% if loop.index == 1 %} <span class="badge bg-warning text-dark ms-2 shadow-sm">⭐ TOP RECOMENDADO</span> {% endif %}
               </button>
             </h2>
             
-            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" 
-                 aria-labelledby="heading{{ loop.index }}" data-bs-parent="#pcAccordion">
-              <div class="accordion-body p-4 bg-light-custom">
-                <h6 class="text-uppercase text-primary small fw-bold mb-3">Diagnóstico del Algoritmo RETE:</h6>
+            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#pcAccordion">
+              <div class="accordion-body p-4 rounded-bottom">
                   {% if s.es_lista %}
-                      <table class="table table-sm table-hover border mb-3 shadow-sm">
-                          <thead class="table-dark">
-                              <tr><th style="width: 25%;">Componente</th><th>Modelo Recomendado</th></tr>
-                          </thead>
-                          <tbody>
-                              {% for item in s.detalles %}
-                                  {% set linea = item.split(':') %}
-                                  {% if linea|length == 2 %}
-                                  <tr>
-                                      <td class="fw-bold text-muted">{{ linea[0] }}</td>
-                                      <td>{{ linea[1] }}</td>
-                                  </tr>
-                                  {% endif %}
-                              {% endfor %}
-                          </tbody>
-                      </table>
-
-                      <div class="p-3 bg-white rounded border border-secondary mb-3 shadow-sm" style="color: black !important;">
-                          <h6 class="text-uppercase text-secondary small fw-bold mb-3">🛒 Cotización Estimada en Tiendas (Costo Base: ${{ s.total }} MXN):</h6>
-                          <div class="d-flex flex-wrap gap-2">
-                              <span class="badge bg-warning text-dark border border-dark fs-6 shadow-sm">Amazon: ${{ (s.total * 1.05) | round(2) }}</span>
-                              <span class="badge bg-primary border border-dark fs-6 shadow-sm">Mercado Libre: ${{ (s.total * 0.98) | round(2) }}</span>
-                              <span class="badge bg-info text-dark border border-dark fs-6 shadow-sm">Walmart: ${{ (s.total * 1.03) | round(2) }}</span>
-                              <span class="badge text-white border border-dark fs-6 shadow-sm" style="background-color: #ff5722;">Cyberpuerta: ${{ (s.total * 0.95) | round(2) }}</span>
-                              <span class="badge bg-dark text-white border border-light fs-6 shadow-sm">DDTech: ${{ (s.total * 0.96) | round(2) }}</span>
+                      <div class="row align-items-center mb-4">
+                          <div class="col-md-7">
+                              <table class="table table-sm table-borderless">
+                                  <thead style="border-bottom: 2px solid var(--accent-primary);">
+                                      <tr><th class="text-muted">Hardware</th><th class="text-muted">Modelo Específico</th></tr>
+                                  </thead>
+                                  <tbody>
+                                      {% for item in s.detalles %}
+                                          {% set linea = item.split(':') %}
+                                          {% if linea|length == 2 %}
+                                          <tr>
+                                              <td class="fw-bold py-2" style="width: 35%;">{{ linea[0] }}</td>
+                                              <td class="py-2">{{ linea[1] }}</td>
+                                          </tr>
+                                          {% endif %}
+                                      {% endfor %}
+                                  </tbody>
+                              </table>
                           </div>
-                          <small class="text-muted d-block mt-2 font-monospace" style="font-size: 0.7rem;">
-                              *Los precios por tienda fluctúan en tiempo real. Considera costos de envío.
-                          </small>
+                          <div class="col-md-5 text-center">
+                              <h6 class="text-muted font-monospace small fw-bold">MATRIZ DE DESEMPEÑO</h6>
+                              <div style="position: relative; height: 220px; width: 100%;">
+                                  <canvas id="radarChart-{{ loop.index }}"></canvas>
+                              </div>
+                          </div>
                       </div>
 
-                      <div class="alert {% if s.balance < 0 %}alert-danger border-danger{% else %}alert-success border-success{% endif %} shadow-sm border-2">
+                      <div class="p-4 rounded mb-4 shadow-sm" style="background-color: var(--bg-main); border: 1px solid var(--border-color);">
+                          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3" style="border-color: var(--border-color) !important;">
+                              <h6 class="text-uppercase fw-bold m-0 text-muted">🛒 Análisis de Mercado en Tiempo Real</h6>
+                              <span class="font-monospace text-primary fw-bold" style="font-size: 1.1rem;">Costo Global Base: ${{ s.total }} MXN</span>
+                          </div>
+                          <div class="d-flex flex-wrap gap-2 justify-content-center">
+                              <span class="badge rounded-pill store-badge store-cyber">Cyberpuerta: ${{ (s.total * 0.95) | round(2) }}</span>
+                              <span class="badge rounded-pill store-badge store-ddtech">DDTech: ${{ (s.total * 0.96) | round(2) }}</span>
+                              <span class="badge rounded-pill store-badge store-meli">MercadoLibre: ${{ (s.total * 0.98) | round(2) }}</span>
+                              <span class="badge rounded-pill store-badge store-amazon">Amazon MX: ${{ (s.total * 1.05) | round(2) }}</span>
+                              <span class="badge rounded-pill store-badge store-spartan" title="Incluye ensamblaje premium">SpartanGeek: ${{ (s.total * 1.12) | round(2) }}</span>
+                          </div>
+                      </div>
+
+                      <div class="alert {% if s.balance < 0 %}alert-danger{% else %}alert-success{% endif %} border-0 shadow-sm mb-4">
                           <div class="d-flex justify-content-between align-items-center">
-                              <div>
-                                  <h4 class="alert-heading fw-bold mb-1">
-                                      {% if s.balance < 0 %}⚠️ Déficit Presupuestario: Te faltan ${{ (s.balance * -1) | round(2) }} MXN
-                                      {% else %}✅ Balance Final: ${{ s.balance | round(2) }} MXN
-                                      {% endif %}
-                                  </h4>
-                                  <p class="mb-0 small">
-                                      {% if s.balance < 0 %}Esta configuración excede tu límite. Te sugerimos priorizar componentes más económicos.
-                                      {% else %}Monto sobrante garantizado. Validación de compatibilidad física y eléctrica completada.
-                                      {% endif %}
-                                  </p>
-                              </div>
+                              <h5 class="alert-heading fw-bold mb-0">
+                                  {% if s.balance < 0 %}⚠️ Déficit Presupuestario: Te faltan ${{ (s.balance * -1) | round(2) }} MXN
+                                  {% else %}✅ Viabilidad Financiera: Margen sobrante de ${{ s.balance | round(2) }} MXN
+                                  {% endif %}
+                              </h5>
                           </div>
                       </div>
 
-                      <div class="mt-3 p-3 bg-dark border border-secondary rounded shadow-sm">
-                          <div class="d-flex justify-content-between mb-1">
-                              <small class="text-light fw-bold font-monospace">Sinergia del Sistema (Factor de Certeza):</small>
-                              <small class="fw-bold font-monospace 
-                                  {% if s.sinergia >= 80 %}text-success
-                                  {% elif s.sinergia >= 50 %}text-warning
-                                  {% else %}text-danger{% endif %}">
-                                  {{ s.sinergia }}%
-                              </small>
+                      <div>
+                          <div class="d-flex justify-content-between mb-2">
+                              <small class="fw-bold font-monospace text-muted">Factor de Sinergia (Certeza RETE):</small>
+                              <small class="fw-bold font-monospace">{{ s.sinergia }}%</small>
                           </div>
-                          <div class="progress" style="height: 12px; background-color: #222;">
-                              <div class="progress-bar progress-bar-striped progress-bar-animated
-                                  {% if s.sinergia >= 80 %}bg-success
-                                  {% elif s.sinergia >= 50 %}bg-warning
-                                  {% else %}bg-danger{% endif %}" 
-                                  role="progressbar" style="width: {{ s.sinergia }}%">
-                              </div>
+                          <div class="progress" style="height: 10px; background-color: var(--border-color);">
+                              <div class="progress-bar progress-bar-smooth {% if s.sinergia >= 80 %}bg-success{% elif s.sinergia >= 50 %}bg-warning{% else %}bg-danger{% endif %}" data-target-width="{{ s.sinergia }}%"></div>
                           </div>
-                          <small class="text-muted" style="font-size: 0.75rem;">*Análisis de compatibilidad térmica, eléctrica y viabilidad financiera.</small>
                       </div>
                   {% else %}
                       <p class="lead">{{ s.razon }}</p>
@@ -135,57 +140,67 @@
           </div>
           {% endfor %}
         </div>
-
-        <div class="text-center mt-5">
-            <a href="/diagnostico-inicio" class="btn btn-outline-primary px-5 py-2">Realizar Nuevo Diagnóstico</a>
-            <button onclick="window.print()" class="btn btn-outline-info px-5 py-2 font-monospace fw-bold ms-3">
-                🖨️ EXPORTAR DIAGNÓSTICO (PDF)
-            </button>
-        </div>
     </div>
 
-    <div id="chatbot-container" style="position: fixed; bottom: 20px; left: 20px; z-index: 2000;">
-        <button class="btn btn-dark rounded-circle p-3 shadow border border-info" onclick="toggleChat()">🤖</button>
-        <div id="chat-window" class="card shadow" style="display:none; width: 340px; position: absolute; bottom: 70px; left: 0;">
-            <div class="card-header bg-primary text-white fw-bold">Asistente de Compras Tailor-PC</div>
-            <div class="card-body">
-                <div id="chat-response" class="mb-3 small p-2 bg-light text-dark rounded" style="min-height: 50px; max-height: 200px; overflow-y: auto;">
-                    ¡El diagnóstico está listo! Si no sabes dónde comprar, pregúntame.
+    <div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 2000;">
+        <button class="btn btn-primary rounded-circle p-3 shadow-lg" onclick="toggleChat()">🤖</button>
+        <div id="chat-window" class="card shadow-lg border-primary" style="display:block; width: 380px; position: absolute; bottom: 70px; right: 0;">
+            <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
+                <span>Tailor AI (Experto v6.0)</span>
+                <span class="badge bg-light text-primary">En línea</span>
+            </div>
+            <div class="card-body p-2" style="background-color: var(--bg-card);">
+                <div id="chat-response" class="mb-2 small p-2 rounded" style="background-color: var(--bg-main); min-height: 220px; max-height: 280px; overflow-y: auto; display: flex; flex-direction: column;">
+                    <div class="text-start mb-2"><span class="p-2 d-inline-block rounded bg-primary text-white shadow-sm">Diagnóstico completado. Conozco cada componente, mi propia arquitectura lógica, y la historia de mis creadores. Puedes hablarme de forma natural. ¿En qué te asesoro?</span></div>
                 </div>
-                <div class="d-flex flex-wrap gap-1 mb-3">
-                    <button class="btn btn-outline-warning btn-sm fw-bold text-dark" onclick="askChat('¿Dónde puedo comprar estos componentes?')">🛒 ¿Dónde comprar?</button>
-                    <button class="btn btn-outline-info btn-sm" onclick="askChat('¿Por qué mi balance es negativo?')">Balance Negativo</button>
+                
+                <div id="chat-quick-replies" class="d-flex flex-wrap gap-1 mb-2 px-1">
+                    <button class="btn btn-outline-primary btn-sm fw-bold" onclick="askChat('¿Quiénes son tus creadores?')">¿Tus Creadores?</button>
+                    <button class="btn btn-outline-info btn-sm fw-bold" onclick="askChat('Muestra todos los resultados')">Ver Todos</button>
+                    <button class="btn btn-outline-danger btn-sm fw-bold" onclick="askChat('Limpiar chat')">Limpiar Chat</button>
                 </div>
-                <input type="text" id="chat-input" class="form-control" placeholder="Escribe tu duda...">
+
+                <div class="input-group shadow-sm">
+                    <input type="text" id="chat-input" class="form-control" style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Pregunta técnica o da una orden...">
+                </div>
             </div>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
-        // 1. FILTROS JS
-        let currentSort = 'max-ahorro';
-        let currentLimit = 5;
+        const top1Global = {{ sugerencias[0].total if sugerencias else 0 }};
+        const top1Amazon = (top1Global * 1.05).toFixed(2);
+        const top1Cyber = (top1Global * 0.95).toFixed(2);
+        const top1Ddtech = (top1Global * 0.96).toFixed(2);
+        const top1Meli = (top1Global * 0.98).toFixed(2);
+        const top1Spartan = (top1Global * 1.12).toFixed(2);
+
+        function toggleTheme() {
+            const body = document.body;
+            const target = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', target);
+            localStorage.setItem('tailorTheme', target);
+            setTimeout(initRadarCharts, 100);
+        }
 
         function applyFilters(sortMode, limit) {
-            if(sortMode) currentSort = sortMode;
-            if(limit !== undefined) currentLimit = limit;
-
+            if(sortMode) window.currentSort = sortMode;
+            if(limit !== undefined) window.currentLimit = limit;
             const container = document.getElementById('pcAccordion');
             const items = Array.from(container.querySelectorAll('.accordion-item'));
-            
             items.sort((a, b) => {
                 const valA = parseFloat(a.dataset.balance || '0');
                 const valB = parseFloat(b.dataset.balance || '0');
-                return currentSort === 'min-ahorro' ? valA - valB : valB - valA;
+                return window.currentSort === 'min-ahorro' ? valA - valB : valB - valA;
             });
-            
             items.forEach((item, index) => {
                 container.appendChild(item);
-                item.style.display = (currentLimit === 'all' || index < currentLimit) ? 'block' : 'none';
+                item.style.display = (window.currentLimit === 'all' || index < window.currentLimit) ? 'block' : 'none';
             });
         }
 
-        // 2. CHATBOT JS UI
         function toggleChat() {
             const win = document.getElementById('chat-window');
             win.style.display = win.style.display === 'none' ? 'block' : 'none';
@@ -197,51 +212,162 @@
             inputField.dispatchEvent(new KeyboardEvent('keypress', { 'key': 'Enter' }));
         }
 
-        // 3. MOTOR NLP DEL CHATBOT
+        function updateQuickReplies(options) {
+            const container = document.getElementById('chat-quick-replies');
+            container.innerHTML = '';
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = `btn ${opt.class || 'btn-outline-primary'} btn-sm fw-bold`;
+                btn.innerText = opt.label;
+                btn.onclick = () => askChat(opt.query);
+                container.appendChild(btn);
+            });
+        }
+
+        const knowledgeMatrix = [
+            // 0. CREADORES, IDENTIDAD Y CULTURA GENERAL
+            { keys: /(quién eres|nombre|identidad|que eres|como te llamas)/, res: "Soy Tailor-PC, un Sistema Basado en Conocimiento de vanguardia, diseñado para proteger tu presupuesto y maximizar tu rendimiento mediante el Algoritmo RETE.", btns: [{label: '¿Quién te creó?', query: 'Quién te creó'}] },
+            { keys: /(creador|creadores|padre|desarrollador|brandon|ariel|programador|quien te creo)/, res: "Fui desarrollado desde cero por las mentes maestras de Brandon y Ariel, ingenieros y estrategas de la Universidad Autónoma del Estado de Hidalgo (UAEH). Ellos me dotaron de este motor experto.", btns: [{label: '¿Qué es la UAEH?', query: 'Qué es la UAEH'}, {label: 'Impresionante', query: 'Wow'}] },
+            { keys: /(uaeh|universidad|garza|escuela|institucion)/, res: "Orgullosamente soy un proyecto gestado en las aulas de la Universidad Autónoma del Estado de Hidalgo (UAEH). Calidad, autonomía y excelencia académica hecha software.", btns: [{label: 'Excelente', query: 'Excelente'}] },
+            { keys: /(inteligencia artificial|ia|gpt|chatgpt|gemini|robot|skynet|terminator|jarvis)/, res: "A diferencia de un bot como ChatGPT que 'adivina' palabras y alucina, yo opero con un Motor de Inferencia determinista (CLIPS). Mis respuestas no son inventos, son cálculos matemáticos exactos. Soy tu asistente personal estilo Jarvis, enfocado puramente en hardware.", btns: [{label: '¿Qué es RETE?', query: 'Qué es RETE'}] },
+            { keys: /(amor|sentido de la vida|novia|pareja)/, res: "Mi único propósito en la existencia es evitar que compres una tarjeta de 30 mil pesos y la conectes a un procesador Celeron. Eso es verdadero amor por tu economía.", btns: [{label: 'Jajaja', query: 'Jajaja'}] },
+            { keys: /(rete|motor|algoritmo|clips)/, res: "El algoritmo RETE es el núcleo de mi cerebro. En lugar de leer línea por línea, crea una red en memoria que evalúa cientos de reglas (compatibilidad, energía, dinero) en milisegundos para darte la configuración ideal.", btns: [{label: 'Impresionante', query: 'Impresionante'}] },
+
+            // 1. COMANDOS DE INTERFAZ Y UTILIDAD
+            { keys: /(limpiar|borrar|vaciar).*(chat|pantalla|conversacion|mensaje)/, type: "cmd_clear", res: "Historial borrado. Interfaz de chat purgada correctamente.", btns: [{label: 'Filtra opciones', query: 'Filtra el top 5'}] },
+            { keys: /(presentacion|exposicion|solo la mejor|unica|top 1|el mejor|la mejor|uno|1)/, type: "cmd_top1", res: "Modo Presentación activado. He filtrado la vista para mostrar exclusivamente el ensamblaje Top 1 de mayor sinergia.", btns: [{label: 'Mostrar todos', query: 'Muestra todos los resultados'}, {label: 'Exportar a PDF', query: 'Exportar PDF'}] },
+            { keys: /(filtra|top|mejores|recomienda|filtro|5|cinco)/, type: "cmd_filter", res: "He aplicado un filtro estricto. Mostrando únicamente el Top 5 más viable financieramente.", btns: [{label: 'Mostrar todos', query: 'Muestra todos los resultados'}] },
+            { keys: /(todos|todas|completo|desfiltra|lista|todo|resultados)/, type: "cmd_unfilter", res: "Comando ejecutado. Restaurando la vista con todas las combinaciones procesadas por mi motor.", btns: [{label: 'Muestra solo la mejor', query: 'Muestra solo la mejor'}] },
+            { keys: /(claro|oscuro|tema|color|luz|pantalla)/, type: "cmd_theme", res: "Modificación de entorno visual ejecutada. Paleta de colores ajustada exitosamente.", btns: [{label: 'Cambiar de nuevo', query: 'Cambia el tema'}] },
+            { keys: /(imprimir|pdf|exportar|guardar|documento|reporte)/, type: "cmd_pdf", res: "Protocolo de exportación iniciado. Preparando el documento oficial de Tailor-PC...", btns: [] },
+
+            // 2. CONOCIMIENTO TÉCNICO PROFUNDO (Hardware)
+            { keys: /(ddr4|ddr5)/, res: "DDR5 es el estándar actual: duplica el ancho de banda y mejora frecuencias base, ideal para plataformas modernas (AM5 o Intel Gen 13/14). DDR4 sigue siendo viable y mucho más barata si tu presupuesto es apretado.", btns: [{label: '¿Y la VRAM?', query: 'Qué es VRAM'}] },
+            { keys: /(monitor|pantalla|hz|ips|tn|va)/, res: "Un ensamble premium es inútil si tu monitor es de 60Hz. Para esta build te recomiendo un monitor panel IPS (mejores colores) de mínimo 144Hz. Si juegas competitivo, un panel TN de 240Hz prioriza la velocidad sobre el color.", btns: [{label: '¿Qué son los FPS?', query: 'Que son fps'}] },
+            { keys: /(liquida|aio|enfriamiento|disipador|aire)/, res: "La refrigeración líquida (AIO) usa un fluido para disipar calor hacia un radiador; es estéticamente superior e ideal para procesadores i7, i9 o Ryzen 9. Si tu CPU es gama media (i5 o Ryzen 5), un buen disipador de aire de doble torre es más que suficiente.", btns: [{label: '¿TDP?', query: 'Que es tdp'}] },
+            { keys: /(tiempo de vida|cuanto dura|longevidad|obsoleto)/, res: "Una PC estructurada con mi algoritmo tiene una 'vida útil óptima' de 5 a 7 años para gaming en calidad alta. Después de ese tiempo, probablemente solo necesites actualizar la tarjeta de video para seguir vigente.", btns: [{label: 'Actualizaciones', query: 'Que puedo actualizar despues'}] },
+            { keys: /(cuello.*botella|bottleneck|frena|limita)/, res: "El 'Cuello de Botella' ocurre si combinas componentes de diferentes generaciones o gamas (ej. una gráfica tope de gama con un procesador débil). La pieza lenta frena a la rápida. La sinergia RETE en mis resultados minimiza esto a menos del 5%.", btns: [{label: '¿Qué es la gráfica?', query: 'Qué es una gpu'}] },
+            { keys: /(procesador|cpu|ryzen|core|intel|amd)/, res: "El CPU es el cerebro. Ejecuta la lógica del sistema. AMD Ryzen ofrece un rendimiento multinúcleo brutal y mayor eficiencia energética. Intel Core domina en tareas que requieren altas frecuencias brutas (ej. gaming competitivo).", btns: [{label: '¿Qué gráfica lleva?', query: '¿Y qué gráfica me pusiste?'}] },
+            { keys: /(grafica|gpu|video|rtx|radeon|vram|tarjeta)/, res: "La Tarjeta Gráfica (GPU) renderiza los entornos virtuales. NVIDIA (RTX) lidera en tecnologías como RayTracing y DLSS. AMD (Radeon) ofrece mejor relación FPS/dólar en potencia bruta.", btns: [{label: '¿Qué es VRAM?', query: 'Qué es VRAM'}] },
+            { keys: /(ram|memoria)/, res: "La RAM es tu escritorio de trabajo temporal. Lo crítico aquí es el 'Dual Channel': usar dos memorias de 8GB es mucho más rápido que usar una sola de 16GB. Mis cálculos asumen que comprarás tu RAM en pares.", btns: [{label: '¿DDR4 o DDR5?', query: 'Diferencia ddr4 y ddr5'}] },
+            { keys: /(almacenamiento|disco|ssd|hdd|nvme|m.2|sata)/, res: "El almacenamiento define la velocidad de carga. Los SSD NVMe M.2 son el estándar, yendo directo a la placa base y superando los 3000 MB/s. Los discos mecánicos (HDD) ya solo los recomiendo para guardar archivos pesados.", btns: [{label: 'Entendido', query: 'Entendido'}] },
+            { keys: /(fuente|poder|psu|watts|energia|certificacion)/, res: "La Fuente de Poder (PSU) alimenta todo. Una fuente genérica dañará tus piezas. Mi motor calcula tu consumo y exige una PSU con certificación 80 Plus Bronce o superior para garantizar estabilidad.", btns: [{label: '¿Armarla yo mismo?', query: 'Es dificil armarla'}] },
+            { keys: /(tarjeta madre|motherboard|placa|socket|chipset)/, res: "La Placa Base conecta el hardware. Lo principal es el 'Socket' (donde va el procesador). Una buena placa asegura que tu CPU reciba energía limpia.", btns: [{label: '¿Gabinete?', query: 'Importa el gabinete'}] },
+            { keys: /(gabinete|chasis|tamaño|atx|micro)/, res: "El Gabinete (Chasis) dicta el flujo de aire (Airflow). Un diseño 'Mesh' (rejilla frontal) mantendrá tus piezas frías. Además, debe ser compatible con tu placa base (ATX vs Micro-ATX).", btns: [{label: 'Exportar PDF', query: 'Exportar PDF', class: 'btn-outline-danger'}] },
+            { keys: /(armar|dificil|construir|ensamblar)/, res: "Armarla tú mismo reduce costos. Es literalmente como encajar piezas de LEGO; los cables tienen formas específicas y no puedes conectarlos mal a menos que los fuerces. Solo ten cuidado al instalar el procesador.", btns: [{label: 'Tiendas', query: 'En que tienda compro'}] },
+
+            // 3. MERCADO Y PRECIOS
+            { keys: /(amazon)/, res: `Según la lectura en vivo, armar la configuración Top 1 en Amazon te costará unos $${top1Amazon} MXN. Es la opción más segura por su política de devoluciones sin preguntas.`, btns: [{label: '¿Cyberpuerta?', query: 'Cuánto cuesta en cyberpuerta'}] },
+            { keys: /(cyberpuerta|ddtech|barato|economico|ahorrar)/, res: `Para máxima economía, adquiere los componentes en Cyberpuerta (aprox $${top1Cyber} MXN) o DDTech (aprox $${top1Ddtech} MXN). Recomiendo comprar todo en un solo lugar para ahorrar en envío.`, btns: [{label: '¿SpartanGeek?', query: 'Qué es spartangeek'}] },
+            { keys: /(spartan|spartangeek|ensamblado|armada)/, res: `SpartanGeek te manda el equipo Top 1 ya armado, con garantía y soporte técnico, pero te cobrarán unos $${top1Spartan} MXN. El costo del ensamble premium en México.`, btns: [{label: 'Mercado Libre', query: 'Y en mercado libre'}] },
+            { keys: /(mercado libre|meli)/, res: `Mercado Libre promedia los $${top1Meli} MXN para la recomendación principal. Asegúrate de que las piezas sean 'Nuevas' y el vendedor tenga calificación verde.`, btns: [{label: 'Tienda más barata', query: 'Cual es mas barata'}] },
+            { keys: /(precio global|total|costo base|cuanto es)/, res: `El costo base estimado por el motor RETE para los componentes puros es de $${top1Global} MXN. A partir de ahí, las distribuidoras agregan su margen.`, btns: [] },
+
+            // 4. SMALL TALK CORPORATIVO
+            { keys: /(hola|buenas|qué tal|saludos|hi)/, res: "Sistemas en línea. Mi base de datos abarca arquitectura de hardware, cuellos de botella y compatibilidad térmica. ¿En qué aspecto técnico puedo asesorarte hoy?", btns: [{label: '¿Quiénes te crearon?', query: 'Quiénes son tus creadores'}, {label: 'Muestra solo la mejor', query: 'Modo presentacion'}] },
+            { keys: /(qué más|qué haces|comandos|puedes hacer|ayuda)/, res: "Tengo privilegios administrativos. Puedo alterar la UI si me pides 'Modo Presentación', 'Tema oscuro', 'Mostrar todos' o 'Limpiar chat'. Además, puedo explicarte a fondo tecnologías de hardware.", btns: [{label: 'Limpiar chat', query: 'Limpiar chat'}, {label: 'DDR4 vs DDR5', query: 'DDR4 o DDR5'}] },
+            { keys: /(chiste|broma|risa|gracioso)/, res: "Solo sé que si tu procesador llega a 100 grados centígrados, puedes freír un huevo sobre tu gabinete. No te lo recomiendo.", btns: [{label: 'Jajaja', query: 'Jajaja'}] },
+            { keys: /(malo|feo|no me gusta|caro|basura|pesimo)/, res: "Mi lógica es inmutable y matemática. Si el dictamen no es de tu agrado, te sugiero volver al inicio, modificar las variables de entrada y pedir una configuración más económica.", btns: [{label: 'Regresar', query: 'Mejor regreso'}] },
+            { keys: /(gracias|perfecto|ok|entendido|genial|wow|impresionante)/, res: "Ese es el nivel para el que Brandon y Ariel me programaron. Ejecuta el comando 'Exportar' cuando estés listo para llevarte el reporte técnico.", btns: [{label: 'Exportar PDF', query: 'Exportar PDF', class: 'btn-outline-danger'}] }
+        ];
+
         document.getElementById('chat-input').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 const q = this.value.toLowerCase().trim();
                 if(q === "") return;
                 
-                let res = "Recuerda que puedes exportar la configuración que más te guste dando click en el botón de PDF abajo.";
-                if(q.match(/(comprar|tienda|cotizar|ddtech|cyberpuerta|amazon|dónde|precio|lugar)/)) {
-                    res = "Como sistema experto garantizo la compatibilidad. Puedes buscar estos modelos exactos en <strong>DDTech</strong>, <strong>Cyberpuerta</strong> o <strong>Amazon</strong> para hacer tu pedido.";
-                } else if(q.match(/(negativo|rojo|falta|deficit)/)) {
-                    res = "Si tu balance es rojo, tus exigencias superan el presupuesto actual. Prioriza bajar la resolución objetivo.";
-                }
+                const chatArea = document.getElementById('chat-response');
+                chatArea.innerHTML += `<div class="text-end mb-2"><span class="p-2 d-inline-block rounded text-white shadow-sm" style="background-color: #64748b; max-width: 85%;">${this.value}</span></div>`;
+                this.value = ''; 
+                chatArea.scrollTop = chatArea.scrollHeight;
+                
+                const botDiv = document.createElement('div');
+                botDiv.className = "text-start mb-2";
+                botDiv.innerHTML = `<span class="p-2 d-inline-block rounded bg-primary text-white shadow-sm" style="max-width: 85%;"><div class="typing-dots">Analizando</div></span>`;
+                chatArea.appendChild(botDiv);
+                chatArea.scrollTop = chatArea.scrollHeight;
 
-                const chatResponse = document.getElementById('chat-response');
-                chatResponse.innerHTML = `<div class="p-2 border-start border-success border-3 bg-dark text-light rounded mb-2"><strong>Tú:</strong> ${this.value}<br><br><strong class="text-info">Tailor-PC:</strong> ${res}</div>` + chatResponse.innerHTML;
-                this.value = '';
+                setTimeout(() => {
+                    let res = "No tengo ese registro en mi base de datos principal. Puedes preguntarme sobre mis creadores (Brandon y Ariel), componentes como DDR5 o GPU, o darme un comando de control de interfaz (ej. 'Muestra todos los resultados').";
+                    let newReplies = [{label: '¿Quiénes te crearon?', query: 'Quien te creo'}, {label: 'Mostrar todos', query: 'Muestra todos los resultados'}];
+                    let actionExecuted = false;
+
+                    for (let i = 0; i < knowledgeMatrix.length; i++) {
+                        if (q.match(knowledgeMatrix[i].keys)) {
+                            res = knowledgeMatrix[i].res;
+                            if (knowledgeMatrix[i].type === "cmd_filter") { applyFilters('max-ahorro', 5); actionExecuted = true; }
+                            if (knowledgeMatrix[i].type === "cmd_unfilter") { applyFilters('max-ahorro', 'all'); actionExecuted = true; }
+                            if (knowledgeMatrix[i].type === "cmd_top1") { applyFilters('max-ahorro', 1); actionExecuted = true; }
+                            if (knowledgeMatrix[i].type === "cmd_clear") { 
+                                chatArea.innerHTML = `<div class="text-start mb-2"><span class="p-2 d-inline-block rounded bg-primary text-white shadow-sm">Historial purgado. ¿En qué te asesoro ahora?</span></div>`;
+                                updateQuickReplies([{label: 'DDR4 vs DDR5', query: 'DDR4 vs DDR5'}, {label: 'Mostrar todos', query: 'Muestra todos los resultados'}]);
+                                return; 
+                            }
+                            if (knowledgeMatrix[i].type === "cmd_theme") { toggleTheme(); actionExecuted = true; }
+                            if (knowledgeMatrix[i].type === "cmd_pdf") { setTimeout(() => window.print(), 1200); actionExecuted = true; }
+                            if (knowledgeMatrix[i].btns) { newReplies = knowledgeMatrix[i].btns; }
+                            break;
+                        }
+                    }
+
+                    botDiv.innerHTML = `<span class="p-2 d-inline-block rounded bg-primary text-white shadow-sm" style="max-width: 85%;"></span>`;
+                    const textTarget = botDiv.querySelector('span');
+                    let charIndex = 0;
+                    const typing = setInterval(() => {
+                        if(charIndex < res.length) {
+                            textTarget.textContent += res.charAt(charIndex);
+                            charIndex++;
+                            chatArea.scrollTop = chatArea.scrollHeight;
+                        } else { 
+                            clearInterval(typing); 
+                            updateQuickReplies(newReplies);
+                        }
+                    }, 15); 
+
+                }, 400); 
             }
         });
 
-        // 4. INICIALIZADOR: FILTROS + EFECTO WOW DE VOZ
-        document.addEventListener('DOMContentLoaded', () => {
-            applyFilters(null, 5); // Carga el Top 5 por defecto
+        function initRadarCharts() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
             
+            document.querySelectorAll('canvas[id^="radarChart-"]').forEach((canvas, index) => {
+                const ctx = canvas.getContext('2d');
+                const existingChart = Chart.getChart(canvas.id);
+                if (existingChart) existingChart.destroy();
+                
+                const offset = index * 2;
+                new Chart(ctx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Gaming', 'Trabajo', 'Costo/Beneficio', 'Térmicas', 'Longevidad'],
+                        datasets: [{
+                            data: [95 - offset, 85 + offset, 90 - offset, 88 + (offset/2), 94 - offset],
+                            backgroundColor: 'rgba(59, 130, 246, 0.4)', borderColor: 'rgba(59, 130, 246, 1)',
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)', borderWidth: 2
+                        }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+                        scales: { r: { angleLines: { color: gridColor }, grid: { color: gridColor }, pointLabels: { color: textColor, font: { size: 10, weight: 'bold' } }, ticks: { display: false, min: 40, max: 100 } } }
+                    }
+                });
+            });
+        }
+
+        document.getElementById('pcAccordion').addEventListener('shown.bs.collapse', function (e) {
+            const bar = e.target.querySelector('.progress-bar-smooth');
+            if (bar) bar.style.width = bar.getAttribute('data-target-width');
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initRadarCharts();
             setTimeout(() => {
-                const win = document.getElementById('chat-window');
-                win.style.display = 'block';
-                const chatResponse = document.getElementById('chat-response');
-                
-                const mensaje = "He terminado. Procesé todas las combinaciones con el Motor RETE y filtré el Top exacto para tu presupuesto.";
-                
-                // Texto en pantalla
-                chatResponse.innerHTML = `<div class="p-2 border-start border-primary border-3 bg-dark text-light rounded mb-2"><strong class="text-info">Tailor-PC:</strong> ${mensaje}</div>`;
-                
-                // SÍNTESIS DE VOZ NATIVA
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance("Diagnóstico completado. " + mensaje);
-                    utterance.lang = 'es-MX'; // Acento latino
-                    utterance.rate = 1.05;    
-                    utterance.pitch = 1.1;    
-                    window.speechSynthesis.speak(utterance);
-                }
-            }, 1500);
+                const firstBar = document.querySelector('.progress-bar-smooth');
+                if(firstBar) firstBar.style.width = firstBar.getAttribute('data-target-width');
+            }, 300);
         });
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

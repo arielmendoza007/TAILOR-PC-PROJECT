@@ -60,31 +60,27 @@
             color: var(--text);
         }
 
-        .intro-card hr {
-            border-color: var(--accent);
-        }
-
         .btn-primary {
             background-color: var(--accent);
             border-color: var(--accent);
             color: var(--button-text);
         }
-
-        .btn-primary:hover {
-            background-color: #0b5ed7;
-            border-color: #0b5ed7;
-        }
     </style>
 </head>
-<body data-theme="dark">
-    <button class="btn btn-outline-info btn-toggle" onclick="toggleTheme()">🌓 Cambiar Tema</button>
+<body data-theme="light">
+    <script>
+        const savedTheme = localStorage.getItem('tailorTheme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+    </script>
+
+    <button class="btn btn-outline-info btn-toggle shadow" onclick="toggleTheme()">🌓 Cambiar Tema</button>
 
     <div class="container py-5 text-center">
         <img src="https://www.uaeh.edu.mx/identidad/imagenes/logo_uaeh_color.png" alt="UAEH" style="height: 80px;">
         <h1 class="hero-title mt-4">Tailor-PC: Expert System</h1>
         <p class="lead-text font-monospace mt-2">Sistemas Basados en Conocimiento | UAEH - ICBI</p>
         
-        <div class="intro-card my-5 text-start shadow-lg">
+        <div class="intro-card my-5 text-start shadow-lg p-5 rounded">
             <h3 class="fw-bold mb-4">Introducción</h3>
             <p class="lead">Este sistema asiste a usuarios novatos en la configuración de computadoras a medida, reduciendo errores de compatibilidad y optimizando el presupuesto de forma inteligente.</p>
             <hr class="my-4" style="border-color: var(--accent);">
@@ -104,6 +100,7 @@
             const current = body.getAttribute('data-theme');
             const target = current === 'dark' ? 'light' : 'dark';
             body.setAttribute('data-theme', target);
+            localStorage.setItem('tailorTheme', target);
         }
     </script>
 </body>

@@ -1,155 +1,129 @@
-/* static/style.css */
+/* VARIABLES DE DISEÑO PREMIUM */
 :root {
-    --bg-primary: #ffffff; /* Fondo claro por defecto */
-    --text-main: #212529;
-    --card-bg: #f8f9fa;
-    --accent: #0d6efd;
-    --border: #dee2e6;
+    --bg-main: #f8f9fa;
+    --bg-card: #ffffff;
+    --text-main: #1e3a8a; /* Azul oscuro elegante para modo claro */
+    --text-muted: #64748b;
+    --accent-primary: #0d6efd;
+    --border-color: #e2e8f0;
+    --glass-bg: rgba(255, 255, 255, 0.85);
 }
 
 [data-theme="dark"] {
-    --bg-primary: #121212;
-    --text-main: #00ff41; /* Verde neón para contraste en oscuro */
-    --card-bg: #1e1e1e;
-    --accent: #00ff41;
-    --border: #333333;
+    /* Paleta Azul Rey Premium - ALTO CONTRASTE */
+    --bg-main: #0B1B3D; 
+    --bg-card: #152C5B;
+    --text-main: #F8FAFC; /* Blanco suavizado: alta visibilidad */
+    --text-muted: #CBD5E1; /* Gris claro fuerte */
+    --accent-primary: #3b82f6;
+    --border-color: #1e3a8a;
+    --glass-bg: rgba(11, 27, 61, 0.85);
 }
 
-/* Aplicación de variables */
-body { background-color: var(--bg-primary); color: var(--text-main); transition: 0.5s; }
-.hero-title { color: var(--text-main); font-weight: 800; }
-.card { background-color: var(--card-bg); border: 1px solid var(--border); }
-
 body {
-    background: radial-gradient(circle at center, #1a1d20 0%, #0a0a0b 100%);
-    min-height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    transition: background-color 0.4s ease, color 0.4s ease;
+    background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+    background-size: 30px 30px;
 }
 
 .card {
-    transition: all 0.3s cubic-bezier(.25,.8,.25,1);
-    border-width: 2px !important;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    color: var(--text-main);
 }
 
-.card:hover {
-    transform: scale(1.02);
-    box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+/* =========================================
+   FORZAR CONTRASTE DINÁMICO SOBRE BOOTSTRAP 
+   ========================================= */
+.text-muted { 
+    color: var(--text-muted) !important; 
 }
 
-.font-monospace {
-    letter-spacing: 1px;
+.table, 
+.table-borderless td, 
+.table-borderless th { 
+    color: var(--text-main) !important; 
 }
 
-.text-primary { color: #00ff41 !important; } /* Verde Neón */
-.border-success { border-color: #00ff41 !important; }
-.btn-outline-success {
-    color: #00ff41;
-    border-color: #00ff41;
-}
-.btn-outline-success:hover {
-    background-color: #00ff41;
-    color: #000;
+label, p, h1, h2, h3, h4, h5, h6 {
+    color: var(--text-main);
 }
 
-/* Variables de color para cambio rápido */
-:root {
-    --bg-primary: #f8f9fa;
-    --card-bg: #ffffff;
-    --text-main: #212529;
-    --accent: #0d6efd;
-    --border: #dee2e6;
+/* ACORDEÓN PREMIUM */
+.accordion-item { 
+    background-color: var(--bg-card); 
+    border-color: var(--border-color); 
+    color: var(--text-main); 
+}
+.accordion-button { 
+    background-color: var(--bg-card); 
+    color: var(--text-main); 
+}
+.accordion-button:not(.collapsed) { 
+    background-color: var(--border-color); 
+    color: var(--text-main); 
+    box-shadow: none; 
 }
 
-[data-theme="dark"] {
-    --bg-primary: #0a0a0b;
-    --card-bg: #121212;
-    --text-main: #00ff41;
-    --accent: #00ff41;
-    --border: #00ff41;
+/* BOTONES Y FORMAS */
+.text-primary { color: var(--accent-primary) !important; }
+.btn-primary { background-color: var(--accent-primary); border: none; color: white; }
+.btn-outline-info { color: var(--accent-primary); border-color: var(--accent-primary); }
+.btn-outline-info:hover { background-color: var(--accent-primary); color: white; }
+
+.form-control, .form-select {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
 }
 
-body { background-color: var(--bg-primary); color: var(--text-main); transition: 0.3s; }
-.card { background-color: var(--card-bg); border: 2px solid var(--border); border-radius: 12px; }
-
-:root {
-    --bg-color: #f8f9fa;
-    --card-bg: #ffffff;
-    --text-color: #212529;
-    --accent-color: #0d6efd;
+.form-control:focus, .form-select:focus {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
 }
 
-[data-theme="dark"] {
-    --bg-color: #121212;
-    --card-bg: #1e1e1e;
-    --text-color: #e0e0e0;
-    --accent-color: #00ff41; /* Verde neón para el modo oscuro */
+/* PANTALLA DE CARGA (Glassmorphism) */
+#loading-overlay {
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    background: var(--glass-bg);
+    color: var(--text-main);
 }
 
-body { 
-    background-color: var(--bg-color); 
-    color: var(--text-color); 
-    transition: 0.3s; 
-    font-family: 'Segoe UI', sans-serif;
+.premium-log {
+    font-size: 1.1rem;
+    font-weight: 500;
+    border-left: 4px solid var(--accent-primary);
+    padding-left: 15px;
+    margin-bottom: 15px;
+    opacity: 0;
+    animation: slideFadeIn 0.5s forwards;
+    background: linear-gradient(90deg, var(--border-color) 0%, transparent 100%);
+    padding-block: 8px;
+    border-radius: 0 8px 8px 0;
+    color: var(--text-main);
 }
 
-.card { 
-    background-color: var(--card-bg); 
-    border: 1px solid rgba(0,0,0,0.1); 
-    border-radius: 15px; 
+@keyframes slideFadeIn {
+    from { opacity: 0; transform: translateX(-15px); }
+    to { opacity: 1; transform: translateX(0); }
 }
 
-.btn-toggle {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
+/* EFECTO WOW: Pulso de Neón para el Top 1 */
+.glow-premium {
+    box-shadow: 0 0 15px var(--accent-primary);
+    border: 1px solid var(--accent-primary) !important;
+    animation: pulse-glow 2.5s infinite;
 }
 
-.hero-title {
-    color: #ffffff; /* Blanco puro para que resalte */
-    text-shadow: 0 0 15px rgba(0, 255, 65, 0.5); /* Resplandor verde sutil */
-    font-weight: 800;
-    letter-spacing: 2px;
-}
-.lead-text {
-    color: #00ff41 !important; /* Verde neón para el subtítulo académico */
-    font-family: 'Courier New', monospace;
-}
-
-:root {
-    --bg-main: #ffffff;
-    --text-title: #0a2e5c; /* Azul fuerte para fondo claro */
-    --text-sub: #495057;
-}
-
-[data-theme="dark"] {
-    --bg-main: #0a0a0b;
-    --text-title: #00ff41; /* Verde neón para fondo oscuro */
-    --text-sub: #e9ecef;
-}
-
-body { background-color: var(--bg-main); color: var(--text-sub); transition: 0.4s; }
-.hero-title { color: var(--text-title); text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-
-/* Estilo para las fichas en Modo Claro (Default) */
-.accordion-item {
-    background-color: #ffffff;
-    transition: transform 0.2s ease;
-}
-
-.bg-light-custom { background-color: #f8f9fa; }
-
-/* Ajustes para Modo Oscuro */
-[data-theme="dark"] .accordion-item {
-    background-color: #2b3035;
-    color: #ffffff;
-}
-
-[data-theme="dark"] .bg-light-custom { 
-    background-color: #1a1d20; 
-}
-
-[data-theme="dark"] .accordion-button {
-    background-color: #2b3035;
-    color: #00ff41; /* Verde neón para visibilidad  */
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+    50% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.7); }
+    100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
 }
