@@ -273,6 +273,122 @@ def chat_interactivo():
 
 
 # ══════════════════════════════════════════════════════
+#  CÁLCULO DE RADAR POR CONFIGURACIÓN
+# ══════════════════════════════════════════════════════
+def calcular_radar(detalles_str, uso, sinergia, balance, presupuesto, total, rank_idx):
+    """
+    Devuelve [gaming, trabajo, precio, termica, longevidad] (0-100).
+    Usa datos numéricos garantizados (total, balance, presupuesto, rank_idx)
+    para asegurar varianza visual real entre configuraciones.
+    """
+    d = detalles_str.lower()
+
+    # ══ PRECIO — 100% numérico, siempre diferente ══════════════
+    # Qué % del presupuesto se gastó. Más balance restante = mejor score.
+    if presupuesto and presupuesto > 0:
+        pct_gastado = (total / presupuesto) * 100   # 0-100+
+        precio = max(15, min(97, int(105 - pct_gastado)))
+        if balance < 0:   # excedió el presupuesto
+            precio = max(15, int(50 + balance / presupuesto * 50))
+    else:
+        precio = 60
+
+    # ══ GAMING — GPU tier con keywords amplios ══════════════════
+    gaming = 50
+    gpu_map = [
+        (["rtx 4090", "rtx 4080"], 96),
+        (["4070 ti", "4070 super", "rx 7900"], 88),
+        (["rtx 4070", "rx 7800", "rx 6800"], 80),
+        (["4060 ti", "rtx 3080", "rx 6750"], 73),
+        (["rtx 4060", "rtx 3070", "rx 6700"], 65),
+        (["rtx 3060", "rx 6600", "rx 6650"], 57),
+        (["rtx 3050", "rx 6500", "rx 6400"], 47),
+        (["gtx 1660", "rx 580", "rx 5700"], 38),
+        (["gtx 1050", "gtx 1650", "rx 570"], 28),
+    ]
+    found_gpu = False
+    for keywords, score in gpu_map:
+        if any(k in d for k in keywords):
+            gaming = score
+            found_gpu = True
+            break
+    if not found_gpu:
+        # Sin GPU identificable: diferencia por rank y sinergia
+        gaming = max(35, int(sinergia * 0.82) - rank_idx * 10)
+
+    if uso == "gaming":    gaming = min(97, gaming + 8)
+    if uso == "ofimatica": gaming = max(20, gaming - 18)
+    if uso == "render":    gaming = max(25, gaming - 8)
+    gaming = max(15, min(97, gaming))
+
+    # ══ TRABAJO — CPU tier con keywords amplios ══════════════════
+    trabajo = 50
+    cpu_map = [
+        (["ryzen 9 7950", "ryzen 9 7900", "i9-14", "i9-13"], 94),
+        (["ryzen 9 5950", "ryzen 9 5900", "i9-12", "i9-11"], 87),
+        (["ryzen 7 7700", "ryzen 7 7800", "i7-14", "i7-13"], 79),
+        (["ryzen 7 5800", "ryzen 7 5700", "i7-12", "i7-11"], 72),
+        (["ryzen 5 7600", "ryzen 5 7500", "i5-14", "i5-13"], 63),
+        (["ryzen 5 5600", "ryzen 5 5500", "i5-12", "i5-11"], 55),
+        (["ryzen 5 4600", "ryzen 5 3600", "i5-10"], 46),
+        (["ryzen 3", "i3"], 34),
+    ]
+    found_cpu = False
+    for keywords, score in cpu_map:
+        if any(k in d for k in keywords):
+            trabajo = score
+            found_cpu = True
+            break
+    if not found_cpu:
+        trabajo = max(30, int(sinergia * 0.78) - rank_idx * 8)
+
+    # RAM bonus
+    if any(x in d for x in ["64gb", "128gb"]): trabajo = min(97, trabajo + 12)
+    elif "32gb" in d:                           trabajo = min(97, trabajo + 6)
+    elif "8gb" in d:                            trabajo = max(20, trabajo - 8)
+
+    if uso == "render":    trabajo = min(97, trabajo + 12)
+    if uso == "ofimatica": trabajo = min(97, trabajo + 8)
+    if uso == "gaming":    trabajo = max(30, trabajo - 5)
+    trabajo = max(15, min(97, trabajo))
+
+    # ══ TÉRMICA — cooling detection ══════════════════════════════
+    termica = 65
+    cooling_map = [
+        (["360", "custom loop", "watercooling"], 92),
+        (["280mm", "280 aio"], 84),
+        (["240mm", "240 aio", " aio"], 77),
+        (["noctua nh-d15", "dark rock pro"], 82),
+        (["noctua", "arctic", "be quiet", "deepcool"], 72),
+        (["tower", "disipador"], 67),
+        (["stock", "incluido", "boxed"], 50),
+    ]
+    found_cool = False
+    for keywords, score in cooling_map:
+        if any(k in d for k in keywords):
+            termica = score
+            found_cool = True
+            break
+    if not found_cool:
+        # Varía por rank con spread real: rank 0=75, rank 1=68, rank 2=61...
+        termica = max(45, 75 - rank_idx * 7)
+
+    if "micro-atx" in d or "mini-itx" in d: termica = max(40, termica - 6)
+    termica = max(30, min(95, termica))
+
+    # ══ LONGEVIDAD — plataforma + rank ═══════════════════════════
+    longevidad = 60
+    if any(x in d for x in ["am5", "ddr5", "lga1851"]):     longevidad = 90
+    elif any(x in d for x in ["lga1700", "am4", "ddr4"]):   longevidad = 70
+    elif any(x in d for x in ["lga1200", "am3", "ddr3"]):   longevidad = 45
+
+    # Ajuste fino por rank (configs más baratas = plataforma más vieja)
+    longevidad = max(30, min(97, longevidad - rank_idx * 5))
+
+    return [int(gaming), int(trabajo), int(precio), int(termica), int(longevidad)]
+
+
+# ══════════════════════════════════════════════════════
 #  MOTOR DE DIAGNÓSTICO
 # ══════════════════════════════════════════════════════
 @app.route('/diagnostico', methods=['POST'])
@@ -294,6 +410,8 @@ def ejecutar_diagnostico():
         audio          = request.form.get('audio', 'estandar')
         marca_cpu      = request.form.get("marca_cpu", "indistinto")
         estilo_rgb     = request.form.get("estilo_rgb", "minimalista")
+        monitores      = request.form.get("monitores", "1")
+        overclocking   = request.form.get("overclocking", "ninguno")
 
         env.assert_string(
             f'(usuario (presupuesto {presupuesto}) '
@@ -344,6 +462,24 @@ def ejecutar_diagnostico():
             if (marca_cpu == "intel" and "ryzen" in detalles_str) or \
                (marca_cpu == "amd"   and "core"  in detalles_str):
                 s['sinergia'] -= 4.5
+
+            # Penalización por multi-monitor (requiere GPU más potente)
+            if monitores == "2":  s['sinergia'] -= 1.5
+            if monitores == "3":  s['sinergia'] -= 3.5
+
+            # Penalización si pide OC extremo y no hay cooler mencionado
+            if overclocking == "extremo" and not any(
+                x in detalles_str for x in ["360", "aio", "noctua", "arctic"]
+            ):
+                s['sinergia'] -= 3.0
+
+            s['sinergia'] = max(20.0, round(s['sinergia'], 1))
+
+            # Radar dinámico basado en componentes reales
+            s['radar'] = calcular_radar(
+                detalles_str, uso, s['sinergia'], s['balance'], presupuesto,
+                total=s['total'], rank_idx=i
+            )
 
         return render_template('resultado.html',
                                sugerencias=sugerencias_ordenadas,

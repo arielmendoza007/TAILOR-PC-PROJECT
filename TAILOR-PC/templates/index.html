@@ -20,30 +20,23 @@
         --sans:     'Plus Jakarta Sans', sans-serif;
     }
     [data-theme="dark"] {
-        --bg:       #080d18;
-        --bg-card:  #0f172a;
-        --text:     #e2e8f0;
-        --muted:    #94a3b8;
-        --border:   #1e293b;
-        --accent:   #3b82f6;
-        --accent-2: #a855f7;
-        --shadow:   rgba(59,130,246,.12);
+        --bg:       #080d18; --bg-card:  #0f172a;
+        --text:     #e2e8f0; --muted:    #94a3b8;
+        --border:   #1e293b; --accent:   #3b82f6;
+        --accent-2: #a855f7; --shadow:   rgba(59,130,246,.12);
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-        font-family: var(--sans);
-        background: var(--bg); color: var(--text);
+        font-family: var(--sans); background: var(--bg); color: var(--text);
         min-height: 100vh; transition: background .3s, color .3s;
         font-size: 15px; line-height: 1.6;
     }
 
-    /* ── Topbar ───────────────────────────────────── */
+    /* ── Topbar ───────────────────────────────── */
     .topbar {
         position: sticky; top: 0; z-index: 900;
         background: var(--bg-card); border-bottom: 1px solid var(--border);
-        padding: 13px 28px;
-        display: flex; align-items: center;
+        padding: 13px 28px; display: flex; align-items: center;
         box-shadow: 0 1px 20px var(--shadow);
     }
     .brand { font-weight: 800; font-size: 1.05rem; color: var(--accent); flex: 1; }
@@ -52,48 +45,73 @@
         background: transparent; color: var(--muted);
         border: 1px solid var(--border); border-radius: 9px;
         padding: 7px 16px; font-family: var(--sans);
-        font-size: .82rem; font-weight: 600; cursor: pointer;
-        transition: all .15s;
+        font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s;
     }
     .tb-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* ── Form card ────────────────────────────────── */
-    .form-wrap { max-width: 600px; margin: 36px auto; padding: 0 16px 40px; }
+    /* ── Form wrapper ─────────────────────────── */
+    .form-wrap { max-width: 620px; margin: 36px auto; padding: 0 16px 60px; }
+
+    /* ── Step pills nav ───────────────────────── */
+    .step-nav {
+        display: flex; gap: 0; margin-bottom: 28px;
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 14px; padding: 6px; overflow: hidden;
+    }
+    .step-pill {
+        flex: 1; text-align: center; padding: 9px 4px;
+        border-radius: 9px; cursor: pointer; user-select: none;
+        transition: background .2s, color .2s;
+        font-family: var(--mono); font-size: .68rem; font-weight: 700;
+        color: var(--muted); position: relative;
+    }
+    .step-pill.done   { color: var(--accent); }
+    .step-pill.active { background: var(--accent); color: #fff; }
+    .step-pill .pill-num {
+        display: block; font-size: .85rem; font-weight: 800; line-height: 1;
+        margin-bottom: 3px;
+    }
+    .step-pill .pill-label { font-size: .6rem; opacity: .85; white-space: nowrap; }
+
+    /* ── Form card ────────────────────────────── */
     .form-card {
         background: var(--bg-card); border: 1px solid var(--border);
-        border-radius: 18px; padding: 38px;
+        border-radius: 18px; padding: 36px;
         box-shadow: 0 6px 36px var(--shadow);
+        min-height: 340px; position: relative; overflow: hidden;
     }
 
-    /* ── Progress ─────────────────────────────────── */
-    .progress-row { display: flex; gap: 6px; margin-bottom: 28px; }
-    .prog-seg {
-        flex: 1; height: 5px; border-radius: 3px;
-        background: var(--border); transition: background .3s;
+    /* ── Step slide animation ─────────────────── */
+    .step-pane {
+        position: absolute; inset: 0; padding: 36px;
+        opacity: 0; pointer-events: none;
+        transform: translateX(40px);
+        transition: opacity .32s ease, transform .32s ease;
     }
-    .prog-seg.done { background: var(--accent); }
+    .step-pane.active {
+        position: relative; opacity: 1; pointer-events: all;
+        transform: translateX(0);
+    }
+    .step-pane.exit-left  { opacity: 0; transform: translateX(-40px); }
+    .step-pane.exit-right { opacity: 0; transform: translateX(40px); }
 
-    /* ── Step labels ──────────────────────────────── */
+    /* ── Labels & inputs ──────────────────────── */
     .step-tag {
         font-family: var(--mono); font-size: .7rem; font-weight: 700;
-        color: var(--accent); text-transform: uppercase; letter-spacing: 2px;
-        margin-bottom: 5px;
+        color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;
     }
-    .step-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 22px; }
+    .step-title { font-size: 1.28rem; font-weight: 800; margin-bottom: 22px; }
 
-    /* ── Inputs ───────────────────────────────────── */
     .field-label {
-        display: block; font-family: var(--mono); font-size: .72rem; font-weight: 700;
-        color: var(--muted); text-transform: uppercase; letter-spacing: .6px;
-        margin-bottom: 6px;
+        display: block; font-family: var(--mono); font-size: .7rem; font-weight: 700;
+        color: var(--muted); text-transform: uppercase; letter-spacing: .6px; margin-bottom: 6px;
     }
     .form-ctrl, .form-sel {
         width: 100%; padding: 10px 14px;
         background: var(--bg) !important; border: 1px solid var(--border) !important;
         border-radius: 10px !important; color: var(--text) !important;
-        font-family: var(--sans) !important; font-size: .9rem !important;
-        outline: none; transition: border-color .2s !important;
-        appearance: auto;
+        font-family: var(--sans) !important; font-size: .88rem !important;
+        outline: none; transition: border-color .2s, box-shadow .2s !important;
     }
     .form-ctrl:focus, .form-sel:focus {
         border-color: var(--accent) !important;
@@ -102,58 +120,90 @@
     .form-sel option { background: var(--bg-card); color: var(--text); }
     .field-mb { margin-bottom: 16px; }
 
-    /* ── Switch ───────────────────────────────────── */
-    .sw-row {
-        display: flex; align-items: center; gap: 11px;
-        padding: 12px 0; margin-bottom: 8px;
+    /* ── Option cards (radio-style) ───────────── */
+    .option-grid { display: grid; gap: 10px; }
+    .option-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    .option-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+    .opt-card {
+        border: 1.5px solid var(--border); border-radius: 12px;
+        padding: 13px 14px; cursor: pointer; transition: all .18s;
+        display: flex; align-items: flex-start; gap: 10px;
+        background: var(--bg);
     }
-    .sw-row label { font-size: .88rem; font-weight: 500; cursor: pointer; color: var(--text); }
+    .opt-card:hover { border-color: var(--accent); background: rgba(37,99,235,.04); }
+    .opt-card input[type=radio] { display: none; }
+    .opt-card.selected { border-color: var(--accent); background: rgba(37,99,235,.06); }
+    .opt-card.selected .opt-icon-wrap { background: var(--accent); color: #fff; }
+    .opt-icon-wrap {
+        width: 36px; height: 36px; border-radius: 9px;
+        background: var(--border); display: flex; align-items: center;
+        justify-content: center; font-size: 1rem; flex-shrink: 0;
+        transition: background .18s, color .18s;
+    }
+    .opt-text h5 { font-size: .88rem; font-weight: 700; margin: 0 0 2px; }
+    .opt-text p  { font-size: .74rem; color: var(--muted); margin: 0; line-height: 1.35; }
+
+    /* ── Switch toggle ────────────────────────── */
+    .sw-row {
+        display: flex; align-items: center; gap: 12px;
+        padding: 12px 0; border-bottom: 1px solid var(--border);
+    }
+    .sw-row:last-child { border-bottom: none; }
+    .sw-row label { font-size: .88rem; font-weight: 500; cursor: pointer; flex: 1; }
+    .sw-row .sw-desc { font-size: .76rem; color: var(--muted); }
+    input[type=checkbox].form-check-input {
+        width: 36px; height: 20px; cursor: pointer; flex-shrink: 0;
+    }
     input[type=checkbox].form-check-input:checked {
-        background-color: var(--accent) !important;
-        border-color: var(--accent) !important;
+        background-color: var(--accent) !important; border-color: var(--accent) !important;
     }
 
-    /* ── Navigation buttons ───────────────────────── */
+    /* ── Slider ───────────────────────────────── */
+    .slider-wrap { padding: 4px 0 8px; }
+    input[type=range] {
+        width: 100%; accent-color: var(--accent); cursor: pointer;
+    }
+    .slider-labels {
+        display: flex; justify-content: space-between;
+        font-family: var(--mono); font-size: .68rem; color: var(--muted); margin-top: 4px;
+    }
+
+    /* ── Buttons ──────────────────────────────── */
     .btn-row { display: flex; gap: 10px; margin-top: 24px; }
     .btn-next {
-        background: var(--accent); color: #fff;
-        border: none; border-radius: 10px;
-        padding: 11px 26px; font-family: var(--sans);
-        font-weight: 700; font-size: .9rem; cursor: pointer;
-        transition: background .15s;
+        background: var(--accent); color: #fff; border: none;
+        border-radius: 10px; padding: 11px 26px; font-family: var(--sans);
+        font-weight: 700; font-size: .9rem; cursor: pointer; transition: background .15s;
     }
     .btn-next:hover { background: var(--accent-2); }
     .btn-back {
-        background: transparent; color: var(--muted);
-        border: 1px solid var(--border); border-radius: 10px;
-        padding: 11px 22px; font-family: var(--sans);
-        font-weight: 600; font-size: .9rem; cursor: pointer;
-        transition: all .15s;
+        background: transparent; color: var(--muted); border: 1px solid var(--border);
+        border-radius: 10px; padding: 11px 22px; font-family: var(--sans);
+        font-weight: 600; font-size: .9rem; cursor: pointer; transition: all .15s;
     }
     .btn-back:hover { border-color: var(--accent); color: var(--accent); }
     .btn-submit {
         background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        color: #fff; border: none; border-radius: 10px;
-        padding: 12px 30px; font-family: var(--mono);
-        font-weight: 700; font-size: .88rem; cursor: pointer;
-        letter-spacing: .5px;
+        color: #fff; border: none; border-radius: 10px; padding: 12px 30px;
+        font-family: var(--mono); font-weight: 700; font-size: .88rem;
+        cursor: pointer; letter-spacing: .5px;
         box-shadow: 0 4px 20px rgba(37,99,235,.35);
         transition: opacity .15s, transform .1s;
     }
     .btn-submit:hover { opacity: .9; }
     .btn-submit:active { transform: scale(.97); }
 
-    /* ── Loading overlay ──────────────────────────── */
+    /* ── Loading overlay ──────────────────────── */
     #loading {
         display: none; position: fixed; inset: 0; z-index: 9999;
-        background: var(--bg);
-        flex-direction: column; align-items: center; justify-content: center; gap: 0;
+        background: var(--bg); flex-direction: column;
+        align-items: center; justify-content: center; gap: 0;
     }
     .spin {
         width: 48px; height: 48px;
         border: 3px solid var(--border); border-top-color: var(--accent);
-        border-radius: 50%; animation: spin .75s linear infinite;
-        margin-bottom: 22px;
+        border-radius: 50%; animation: spin .75s linear infinite; margin-bottom: 22px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     #load-title {
@@ -161,150 +211,326 @@
         color: var(--accent); letter-spacing: 2px; margin-bottom: 22px;
     }
     .log-row {
-        font-family: var(--mono); font-size: .76rem;
-        color: var(--muted); padding: 5px 0;
-        display: flex; justify-content: space-between;
-        width: 460px; max-width: 90%;
-        border-bottom: 1px solid var(--border);
+        font-family: var(--mono); font-size: .76rem; color: var(--muted);
+        padding: 5px 0; display: flex; justify-content: space-between;
+        width: 480px; max-width: 90%; border-bottom: 1px solid var(--border);
     }
     .log-ok { color: var(--accent); }
     </style>
 </head>
-
 <body data-theme="light">
 <script>document.body.setAttribute('data-theme', localStorage.getItem('tailorTheme') || 'light');</script>
 
+<!-- Topbar -->
 <div class="topbar">
     <div class="brand">Tailor-PC <span>Expert System</span></div>
     <button class="tb-btn" onclick="toggleTheme()">🌓 Tema</button>
 </div>
 
 <div class="form-wrap">
-<form action="/diagnostico" method="POST" id="msform">
-<div class="form-card">
 
-    <!-- Progress bar -->
-    <div class="progress-row" id="progress">
-        <div class="prog-seg done" id="seg1"></div>
-        <div class="prog-seg"      id="seg2"></div>
-        <div class="prog-seg"      id="seg3"></div>
-        <div class="prog-seg"      id="seg4"></div>
-    </div>
-
-    <!-- PASO 1 -->
-    <div id="step1">
-        <div class="step-tag">Paso 1 de 4</div>
-        <div class="step-title">Recursos y Marca</div>
-
-        <div class="field-mb">
-            <label class="field-label">Presupuesto máximo (MXN)</label>
-            <input type="number" name="presupuesto" class="form-ctrl"
-                   placeholder="Ej. 25000" min="3000" required>
+    <!-- Step nav pills -->
+    <div class="step-nav" id="step-nav">
+        <div class="step-pill active" id="pill-1">
+            <span class="pill-num">1</span>
+            <span class="pill-label">Recursos</span>
         </div>
-        <div class="field-mb">
-            <label class="field-label">Preferencia de Procesador</label>
-            <select name="marca_cpu" class="form-sel">
-                <option value="indistinto">Mejor costo/beneficio (Recomendado)</option>
-                <option value="intel">Prefiero Intel Core</option>
-                <option value="amd">Prefiero AMD Ryzen</option>
-            </select>
+        <div class="step-pill" id="pill-2">
+            <span class="pill-num">2</span>
+            <span class="pill-label">Objetivo</span>
         </div>
-        <div class="btn-row">
-            <button type="button" class="btn-next" onclick="goStep(2)">Siguiente →</button>
+        <div class="step-pill" id="pill-3">
+            <span class="pill-num">3</span>
+            <span class="pill-label">Entorno</span>
+        </div>
+        <div class="step-pill" id="pill-4">
+            <span class="pill-num">4</span>
+            <span class="pill-label">Almacen.</span>
+        </div>
+        <div class="step-pill" id="pill-5">
+            <span class="pill-num">5</span>
+            <span class="pill-label">Perfil</span>
         </div>
     </div>
 
-    <!-- PASO 2 -->
-    <div id="step2" style="display:none">
-        <div class="step-tag">Paso 2 de 4</div>
-        <div class="step-title">Enfoque Táctico</div>
+    <form action="/diagnostico" method="POST" id="msform">
+    <div class="form-card" id="form-card">
 
-        <div class="row g-3 mb-0">
-            <div class="col-md-6 field-mb">
-                <label class="field-label">Uso Principal</label>
-                <select name="uso" class="form-sel">
-                    <option value="gaming">Gaming / Streaming</option>
-                    <option value="render">Renderizado / 3D</option>
-                    <option value="ofimatica">Ofimática / Estudio</option>
+        <!-- ══ PASO 1: Recursos y Marca ══════════════════ -->
+        <div class="step-pane active" id="pane-1">
+            <div class="step-tag">Paso 1 de 5 · Recursos y Marca</div>
+            <div class="step-title">¿Cuánto tienes y qué prefieres?</div>
+
+            <div class="field-mb">
+                <label class="field-label">Presupuesto máximo (MXN)</label>
+                <input type="number" name="presupuesto" class="form-ctrl"
+                       placeholder="Ej. 25000" min="3000" required>
+            </div>
+
+            <div class="field-mb">
+                <label class="field-label">Prioridad de compra</label>
+                <div class="option-grid cols-3">
+                    <label class="opt-card selected" onclick="selectOpt(this,'prioridad','rendimiento')">
+                        <input type="radio" name="prioridad" value="rendimiento" checked>
+                        <div class="opt-icon-wrap">🚀</div>
+                        <div class="opt-text"><h5>Rendimiento</h5><p>Lo mejor posible</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'prioridad','precio')">
+                        <input type="radio" name="prioridad" value="precio">
+                        <div class="opt-icon-wrap">💸</div>
+                        <div class="opt-text"><h5>Precio</h5><p>Máximo ahorro</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'prioridad','equilibrio')">
+                        <input type="radio" name="prioridad" value="equilibrio">
+                        <div class="opt-icon-wrap">⚖️</div>
+                        <div class="opt-text"><h5>Equilibrio</h5><p>Costo/beneficio</p></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="field-mb">
+                <label class="field-label">Preferencia de Procesador</label>
+                <select name="marca_cpu" class="form-sel">
+                    <option value="indistinto">El mejor costo/beneficio (Recomendado)</option>
+                    <option value="intel">Prefiero Intel Core</option>
+                    <option value="amd">Prefiero AMD Ryzen</option>
                 </select>
             </div>
-            <div class="col-md-6 field-mb">
-                <label class="field-label">Estética del Equipo</label>
+
+            <div class="btn-row">
+                <button type="button" class="btn-next" onclick="goStep(2)">Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- ══ PASO 2: Uso y Resolución ══════════════════ -->
+        <div class="step-pane" id="pane-2">
+            <div class="step-tag">Paso 2 de 5 · Objetivo y Pantalla</div>
+            <div class="step-title">¿Para qué usarás el equipo?</div>
+
+            <div class="field-mb">
+                <label class="field-label">Uso principal</label>
+                <div class="option-grid cols-3">
+                    <label class="opt-card selected" onclick="selectOpt(this,'uso','gaming')">
+                        <input type="radio" name="uso" value="gaming" checked>
+                        <div class="opt-icon-wrap">🎮</div>
+                        <div class="opt-text"><h5>Gaming</h5><p>Juegos y streaming</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'uso','render')">
+                        <input type="radio" name="uso" value="render">
+                        <div class="opt-icon-wrap">🎬</div>
+                        <div class="opt-text"><h5>Creación</h5><p>Render y 3D</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'uso','ofimatica')">
+                        <input type="radio" name="uso" value="ofimatica">
+                        <div class="opt-icon-wrap">📋</div>
+                        <div class="opt-text"><h5>Oficina</h5><p>Ofimática y estudio</p></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="field-mb">
+                <label class="field-label">Resolución del monitor objetivo</label>
+                <div class="option-grid cols-3">
+                    <label class="opt-card selected" onclick="selectOpt(this,'resolucion','1080p')">
+                        <input type="radio" name="resolucion" value="1080p" checked>
+                        <div class="opt-icon-wrap">🖥️</div>
+                        <div class="opt-text"><h5>1080p</h5><p>Full HD (60-240Hz)</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'resolucion','1440p')">
+                        <input type="radio" name="resolucion" value="1440p">
+                        <div class="opt-icon-wrap">🖥️</div>
+                        <div class="opt-text"><h5>1440p</h5><p>2K QHD (144Hz+)</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'resolucion','4K')">
+                        <input type="radio" name="resolucion" value="4K">
+                        <div class="opt-icon-wrap">🖥️</div>
+                        <div class="opt-text"><h5>4K</h5><p>Ultra HD (60Hz+)</p></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="field-mb">
+                <label class="field-label">Estética del equipo</label>
                 <select name="estilo_rgb" class="form-sel">
-                    <option value="minimalista">Minimalista (Sin RGB)</option>
-                    <option value="rgb">Gamer (RGB Completo)</option>
+                    <option value="minimalista">Minimalista — Sin RGB</option>
+                    <option value="rgb">Gamer — RGB Completo</option>
                 </select>
             </div>
-        </div>
-        <div class="btn-row">
-            <button type="button" class="btn-back" onclick="goStep(1)">← Atrás</button>
-            <button type="button" class="btn-next" onclick="goStep(3)">Siguiente →</button>
-        </div>
-    </div>
 
-    <!-- PASO 3 -->
-    <div id="step3" style="display:none">
-        <div class="step-tag">Paso 3 de 4</div>
-        <div class="step-title">Infraestructura</div>
-
-        <div class="row g-3">
-            <div class="col-md-6 field-mb">
-                <label class="field-label">Conectividad</label>
-                <select name="wifi" class="form-sel">
-                    <option value="Sí">Wi-Fi Integrado</option>
-                    <option value="NO">Ethernet (Cable)</option>
-                </select>
-            </div>
-            <div class="col-md-6 field-mb">
-                <label class="field-label">Tamaño del Gabinete</label>
-                <select name="size" class="form-sel">
-                    <option value="ATX">ATX (Estándar)</option>
-                    <option value="Micro-ATX">Micro-ATX (Compacto)</option>
-                </select>
+            <div class="btn-row">
+                <button type="button" class="btn-back" onclick="goStep(1)">← Atrás</button>
+                <button type="button" class="btn-next" onclick="goStep(3)">Siguiente →</button>
             </div>
         </div>
-        <div class="sw-row">
-            <input class="form-check-input" type="checkbox" name="streaming" id="streaming">
-            <label for="streaming">Streaming simultáneo activo</label>
-        </div>
-        <div class="btn-row">
-            <button type="button" class="btn-back" onclick="goStep(2)">← Atrás</button>
-            <button type="button" class="btn-next" onclick="goStep(4)">Siguiente →</button>
-        </div>
-    </div>
 
-    <!-- PASO 4 -->
-    <div id="step4" style="display:none">
-        <div class="step-tag">Paso 4 de 4</div>
-        <div class="step-title">Escalabilidad</div>
+        <!-- ══ PASO 3: Entorno e Infraestructura ═════════ -->
+        <div class="step-pane" id="pane-3">
+            <div class="step-tag">Paso 3 de 5 · Entorno e Infraestructura</div>
+            <div class="step-title">¿Cómo es tu entorno de uso?</div>
 
-        <div class="row g-3">
-            <div class="col-md-6 field-mb">
-                <label class="field-label">Plataforma Futura</label>
-                <select name="longevidad" class="form-sel">
-                    <option value="Sí">Plataforma Nueva (DDR5 / AM5)</option>
-                    <option value="NO">Máximo rendimiento actual (DDR4)</option>
-                </select>
+            <div class="field-mb">
+                <label class="field-label">Temperatura ambiente habitual</label>
+                <div class="option-grid cols-3">
+                    <label class="opt-card" onclick="selectOpt(this,'clima','frio')">
+                        <input type="radio" name="clima" value="frio">
+                        <div class="opt-icon-wrap">❄️</div>
+                        <div class="opt-text"><h5>Frío</h5><p>Con A/C o clima fresco</p></div>
+                    </label>
+                    <label class="opt-card selected" onclick="selectOpt(this,'clima','templado')">
+                        <input type="radio" name="clima" value="templado" checked>
+                        <div class="opt-icon-wrap">🌤️</div>
+                        <div class="opt-text"><h5>Templado</h5><p>Condición normal</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'clima','calido')">
+                        <input type="radio" name="clima" value="calido">
+                        <div class="opt-icon-wrap">🌡️</div>
+                        <div class="opt-text"><h5>Cálido</h5><p>Sin ventilación o calor</p></div>
+                    </label>
+                </div>
             </div>
-            <div class="col-md-6 field-mb">
-                <label class="field-label">Audio</label>
-                <select name="audio" class="form-sel">
-                    <option value="estandar">Audio Estándar</option>
-                    <option value="pro">Audio Alta Fidelidad</option>
-                </select>
+
+            <div class="field-mb">
+                <label class="field-label">Conectividad y tamaño</label>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <select name="wifi" class="form-sel">
+                            <option value="Sí">Wi-Fi Integrado</option>
+                            <option value="NO">Ethernet (Cable)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <select name="size" class="form-sel">
+                            <option value="ATX">ATX — Gabinete Estándar</option>
+                            <option value="Micro-ATX">Micro-ATX — Compacto</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div style="border: 1px solid var(--border); border-radius: 12px; padding: 8px 14px;">
+                <div class="sw-row">
+                    <input class="form-check-input" type="checkbox" name="streaming" id="streaming">
+                    <div>
+                        <label class="mb-0" for="streaming">Streaming simultáneo activo</label>
+                        <div class="sw-desc">Codificación NVENC/OBS mientras juegas</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button type="button" class="btn-back" onclick="goStep(2)">← Atrás</button>
+                <button type="button" class="btn-next" onclick="goStep(4)">Siguiente →</button>
             </div>
         </div>
-        <div class="btn-row">
-            <button type="button" class="btn-back" onclick="goStep(3)">← Atrás</button>
-            <button type="submit" class="btn-submit">⚡ EJECUTAR MOTOR RETE</button>
-        </div>
-    </div>
 
-</div><!-- /form-card -->
-</form>
+        <!-- ══ PASO 4: Almacenamiento y Audio ═══════════ -->
+        <div class="step-pane" id="pane-4">
+            <div class="step-tag">Paso 4 de 5 · Almacenamiento y Audio</div>
+            <div class="step-title">¿Qué priorizas en almacenamiento?</div>
+
+            <div class="field-mb">
+                <label class="field-label">Prioridad de almacenamiento</label>
+                <div class="option-grid cols-2">
+                    <label class="opt-card selected" onclick="selectOpt(this,'almacenamiento','velocidad')">
+                        <input type="radio" name="almacenamiento" value="velocidad" checked>
+                        <div class="opt-icon-wrap">⚡</div>
+                        <div class="opt-text">
+                            <h5>Velocidad</h5>
+                            <p>NVMe rápido, menor capacidad. Ideal para gaming y apps</p>
+                        </div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'almacenamiento','capacidad')">
+                        <input type="radio" name="almacenamiento" value="capacidad">
+                        <div class="opt-icon-wrap">📦</div>
+                        <div class="opt-text">
+                            <h5>Capacidad</h5>
+                            <p>Más espacio aunque algo más lento. Ideal para producción</p>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="row g-3 field-mb">
+                <div class="col-md-6">
+                    <label class="field-label">Plataforma futura</label>
+                    <select name="longevidad" class="form-sel">
+                        <option value="Sí">Nueva generación (DDR5 / AM5)</option>
+                        <option value="NO">Máximo rendimiento actual (DDR4)</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="field-label">Audio</label>
+                    <select name="audio" class="form-sel">
+                        <option value="estandar">Audio Estándar</option>
+                        <option value="pro">Alta Fidelidad (DAC/Amp)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button type="button" class="btn-back" onclick="goStep(3)">← Atrás</button>
+                <button type="button" class="btn-next" onclick="goStep(5)">Siguiente →</button>
+            </div>
+        </div>
+
+        <!-- ══ PASO 5: Perfil Avanzado (NUEVO) ══════════ -->
+        <div class="step-pane" id="pane-5">
+            <div class="step-tag">Paso 5 de 5 · Perfil Avanzado</div>
+            <div class="step-title">Últimas preferencias del sistema</div>
+
+            <div class="field-mb">
+                <label class="field-label">¿Cuántos monitores usarás?</label>
+                <div class="option-grid cols-3">
+                    <label class="opt-card selected" onclick="selectOpt(this,'monitores','1'); document.getElementById('val-monitores').textContent='1 monitor'">
+                        <input type="radio" name="monitores" value="1" checked>
+                        <div class="opt-icon-wrap">🖥️</div>
+                        <div class="opt-text"><h5>1 Monitor</h5><p>Setup estándar</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'monitores','2'); document.getElementById('val-monitores').textContent='2 monitores'">
+                        <input type="radio" name="monitores" value="2">
+                        <div class="opt-icon-wrap">🖥️🖥️</div>
+                        <div class="opt-text"><h5>2 Monitores</h5><p>Dual screen</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'monitores','3')">
+                        <input type="radio" name="monitores" value="3">
+                        <div class="opt-icon-wrap">🎛️</div>
+                        <div class="opt-text"><h5>3+ Monitor</h5><p>Multi-display</p></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="field-mb">
+                <label class="field-label">Nivel de overclocking deseado</label>
+                <div class="option-grid cols-3">
+                    <label class="opt-card selected" onclick="selectOpt(this,'overclocking','ninguno')">
+                        <input type="radio" name="overclocking" value="ninguno" checked>
+                        <div class="opt-icon-wrap">😌</div>
+                        <div class="opt-text"><h5>Ninguno</h5><p>Stock, estabilidad</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'overclocking','moderado')">
+                        <input type="radio" name="overclocking" value="moderado">
+                        <div class="opt-icon-wrap">⚙️</div>
+                        <div class="opt-text"><h5>Moderado</h5><p>XMP / EXPO</p></div>
+                    </label>
+                    <label class="opt-card" onclick="selectOpt(this,'overclocking','extremo')">
+                        <input type="radio" name="overclocking" value="extremo">
+                        <div class="opt-icon-wrap">🔥</div>
+                        <div class="opt-text"><h5>Extremo</h5><p>CPU+GPU OC</p></div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="btn-row">
+                <button type="button" class="btn-back" onclick="goStep(4)">← Atrás</button>
+                <button type="submit" class="btn-submit">⚡ EJECUTAR MOTOR RETE</button>
+            </div>
+        </div>
+
+    </div><!-- /form-card -->
+    </form>
 </div>
 
-<!-- Loading -->
+<!-- Loading overlay -->
 <div id="loading">
     <div class="spin"></div>
     <div id="load-title">SINTETIZANDO DATOS</div>
@@ -312,46 +538,106 @@
 </div>
 
 <script>
-    function toggleTheme() {
-        const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.body.setAttribute('data-theme', next);
-        localStorage.setItem('tailorTheme', next);
-    }
+/* ── TEMA ──────────────────────────────────────────── */
+function toggleTheme() {
+    const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.body.setAttribute('data-theme', next);
+    localStorage.setItem('tailorTheme', next);
+}
 
-    function goStep(n) {
-        for (let i = 1; i <= 4; i++) {
-            document.getElementById('step' + i).style.display = i === n ? 'block' : 'none';
-            document.getElementById('seg' + i).classList.toggle('done', i <= n);
-        }
-    }
-
-    document.getElementById('msform').addEventListener('submit', function(e) {
-        e.preventDefault();
-        document.getElementById('loading').style.display = 'flex';
-        const steps = [
-            'Cargando base de conocimientos...',
-            'Evaluando reglas de compatibilidad física...',
-            'Calculando umbrales de viabilidad térmica...',
-            'Ajustando restricciones financieras...',
-            'Purgando combinaciones inválidas...',
-            'Generando dictamen final...'
-        ];
-        let i = 0;
-        const logs = document.getElementById('load-logs');
-        const iv = setInterval(() => {
-            if (i < steps.length) {
-                const row = document.createElement('div');
-                row.className = 'log-row';
-                row.innerHTML = `<span>${steps[i]}</span><span class="log-ok">[OK]</span>`;
-                logs.appendChild(row);
-                i++;
-            } else {
-                clearInterval(iv);
-                document.getElementById('load-title').textContent = 'ANÁLISIS COMPLETADO';
-                setTimeout(() => this.submit(), 600);
-            }
-        }, 600);
+/* ── OPTION CARDS (radio-style) ──────────────────── */
+function selectOpt(el, name, value) {
+    // Deselect all in same group
+    document.querySelectorAll(`.opt-card`).forEach(c => {
+        if (c.querySelector(`input[name="${name}"]`)) c.classList.remove('selected');
     });
+    el.classList.add('selected');
+    const radio = el.querySelector('input[type=radio]');
+    if (radio) radio.checked = true;
+}
+
+/* ── STEP NAVIGATION ─────────────────────────────── */
+let currentStep = 1;
+const TOTAL = 5;
+
+function goStep(next) {
+    const prev = currentStep;
+    if (next === prev) return;
+
+    const prevPane = document.getElementById(`pane-${prev}`);
+    const nextPane = document.getElementById(`pane-${next}`);
+
+    const goingForward = next > prev;
+
+    // Resize card height to auto (will be driven by content)
+    const card = document.getElementById('form-card');
+    card.style.minHeight = card.offsetHeight + 'px';
+
+    // Exit current
+    prevPane.classList.remove('active');
+    prevPane.classList.add(goingForward ? 'exit-left' : 'exit-right');
+
+    setTimeout(() => {
+        prevPane.classList.remove('exit-left', 'exit-right');
+        prevPane.style.display = '';
+    }, 340);
+
+    // Enter next
+    nextPane.style.display = 'block';
+    nextPane.classList.remove('exit-left', 'exit-right');
+    nextPane.style.transform = goingForward ? 'translateX(40px)' : 'translateX(-40px)';
+    nextPane.style.opacity   = '0';
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            nextPane.style.transform = '';
+            nextPane.style.opacity   = '';
+            nextPane.classList.add('active');
+        });
+    });
+
+    currentStep = next;
+    updatePills();
+}
+
+function updatePills() {
+    for (let i = 1; i <= TOTAL; i++) {
+        const pill = document.getElementById(`pill-${i}`);
+        pill.classList.remove('active', 'done');
+        if (i === currentStep) pill.classList.add('active');
+        else if (i < currentStep) pill.classList.add('done');
+    }
+}
+
+/* ── LOADING ─────────────────────────────────────── */
+document.getElementById('msform').addEventListener('submit', function(e) {
+    e.preventDefault();
+    document.getElementById('loading').style.display = 'flex';
+    const steps = [
+        'Cargando base de conocimientos...',
+        'Evaluando compatibilidad de socket y plataforma...',
+        'Calculando umbrales térmicos por clima...',
+        'Ajustando restricciones financieras...',
+        'Aplicando perfil de resolución y monitores...',
+        'Purgando combinaciones inválidas...',
+        'Generando dictamen final del motor RETE...'
+    ];
+    let i = 0;
+    const logs = document.getElementById('load-logs');
+    const iv = setInterval(() => {
+        if (i < steps.length) {
+            const row = document.createElement('div');
+            row.className = 'log-row';
+            row.innerHTML = `<span>${steps[i]}</span><span class="log-ok">[OK]</span>`;
+            logs.appendChild(row);
+            i++;
+        } else {
+            clearInterval(iv);
+            document.getElementById('load-title').textContent = 'ANÁLISIS COMPLETADO';
+            setTimeout(() => this.submit(), 600);
+        }
+    }, 550);
+});
 </script>
 </body>
 </html>

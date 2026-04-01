@@ -8,151 +8,158 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-    /* ═══════════════════════════════════════════════════════
-       VARIABLES DE TEMA
-    ═══════════════════════════════════════════════════════ */
+    /* ═══════════════ VARIABLES ═════════════════════════════ */
     :root {
-        --bg:         #f0f4ff;
-        --bg-card:    #ffffff;
-        --text:       #0d1b2a;
-        --muted:      #64748b;
-        --border:     #dde4f0;
-        --accent:     #2563eb;
-        --accent-2:   #7c3aed;
-        --green:      #059669;
-        --red:        #dc2626;
-        --shadow:     rgba(37,99,235,.10);
-        --mono:       'JetBrains Mono', monospace;
-        --sans:       'Plus Jakarta Sans', sans-serif;
+        --bg:       #f0f4ff; --bg-card:  #ffffff;
+        --text:     #0d1b2a; --muted:    #64748b;
+        --border:   #dde4f0; --accent:   #2563eb;
+        --accent-2: #7c3aed; --green:    #059669;
+        --red:      #dc2626; --shadow:   rgba(37,99,235,.10);
+        --mono:     'JetBrains Mono', monospace;
+        --sans:     'Plus Jakarta Sans', sans-serif;
     }
     [data-theme="dark"] {
-        --bg:         #080d18;
-        --bg-card:    #0f172a;
-        --text:       #e2e8f0;
-        --muted:      #94a3b8;
-        --border:     #1e293b;
-        --accent:     #3b82f6;
-        --accent-2:   #a855f7;
-        --green:      #10b981;
-        --red:        #f87171;
-        --shadow:     rgba(59,130,246,.12);
+        --bg:       #080d18; --bg-card:  #0f172a;
+        --text:     #e2e8f0; --muted:    #94a3b8;
+        --border:   #1e293b; --accent:   #3b82f6;
+        --accent-2: #a855f7; --green:    #10b981;
+        --red:      #f87171; --shadow:   rgba(59,130,246,.12);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-        font-family: var(--sans);
-        background: var(--bg);
-        color: var(--text);
-        transition: background .3s, color .3s;
-        font-size: 15px;
-        line-height: 1.6;
+        font-family: var(--sans); background: var(--bg); color: var(--text);
+        transition: background .3s, color .3s; font-size: 15px; line-height: 1.6;
     }
 
-    /* ── Topbar ─────────────────────────────────────────── */
+    /* ── Topbar ────────────────────────────────────── */
     .topbar {
         position: sticky; top: 0; z-index: 800;
-        background: var(--bg-card);
-        border-bottom: 1px solid var(--border);
-        padding: 13px 28px;
-        display: flex; align-items: center; gap: 12px;
+        background: var(--bg-card); border-bottom: 1px solid var(--border);
+        padding: 13px 28px; display: flex; align-items: center; gap: 10px;
         box-shadow: 0 1px 20px var(--shadow);
     }
-    .brand { font-weight: 800; font-size: 1.05rem; color: var(--accent); letter-spacing: -.3px; }
+    .brand { font-weight: 800; font-size: 1.05rem; color: var(--accent); }
     .brand span { color: var(--text); }
-    .topbar-gap { flex: 1; }
+    .gap { flex: 1; }
     .tb-btn {
         background: transparent; color: var(--muted);
         border: 1px solid var(--border); border-radius: 9px;
         padding: 7px 16px; font-family: var(--sans);
-        font-size: .82rem; font-weight: 600; cursor: pointer;
-        transition: all .15s; text-decoration: none; display: inline-flex; align-items: center;
+        font-size: .82rem; font-weight: 600; cursor: pointer; transition: all .15s;
+        text-decoration: none; display: inline-flex; align-items: center;
     }
     .tb-btn:hover { border-color: var(--accent); color: var(--accent); }
     .tb-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
     .tb-btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); color: #fff; }
 
-    /* ── Page header ─────────────────────────────────────── */
+    /* ═══════════════ OPTION NAVIGATOR ══════════════════════ */
+    .opt-nav-wrap {
+        position: sticky; top: 57px; z-index: 700;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        padding: 10px 0; box-shadow: 0 2px 12px var(--shadow);
+    }
+    .opt-nav {
+        display: flex; gap: 7px; overflow-x: auto; padding: 0 20px;
+        scrollbar-width: none; max-width: 960px; margin: 0 auto;
+    }
+    .opt-nav::-webkit-scrollbar { display: none; }
+
+    .nav-pill {
+        display: flex; align-items: center; gap: 7px;
+        padding: 7px 14px; border-radius: 30px; cursor: pointer;
+        border: 1.5px solid var(--border); background: var(--bg-card);
+        font-family: var(--mono); font-size: .72rem; font-weight: 700;
+        white-space: nowrap; transition: all .2s; flex-shrink: 0;
+        color: var(--muted);
+    }
+    .nav-pill:hover { border-color: var(--accent); color: var(--accent); }
+    .nav-pill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .nav-pill .pill-score { opacity: .75; font-size: .65rem; }
+
+    /* Sort mini-bar inside nav */
+    .sort-sep { width: 1px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+    .sort-mini {
+        display: flex; gap: 5px; align-items: center; flex-shrink: 0;
+    }
+    .sort-chip {
+        font-family: var(--mono); font-size: .68rem; font-weight: 600;
+        padding: 5px 10px; border-radius: 20px;
+        border: 1px solid var(--border); background: var(--bg-card);
+        color: var(--muted); cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .sort-chip:hover, .sort-chip.active {
+        background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+
+    /* ═══════════════ PAGE HEADER ═══════════════════════════ */
     .page-header { padding: 28px 0 16px; }
     .page-label {
         font-family: var(--mono); font-size: .72rem; font-weight: 700;
-        color: var(--accent); text-transform: uppercase; letter-spacing: 2px;
-        margin-bottom: 6px;
+        color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px;
     }
     .page-title { font-size: 1.8rem; font-weight: 800; letter-spacing: -.4px; }
     .page-sub { color: var(--muted); font-size: .88rem; margin-top: 5px; }
 
-    /* ── Sort toolbar ────────────────────────────────────── */
-    .sort-bar {
-        display: flex; gap: 8px; flex-wrap: wrap;
-        padding: 12px 0 20px;
-    }
-    .sort-btn {
-        font-family: var(--mono); font-size: .72rem; font-weight: 600;
-        padding: 6px 14px; border-radius: 20px;
-        border: 1px solid var(--border);
-        background: var(--bg-card); color: var(--muted);
-        cursor: pointer; transition: all .15s;
-    }
-    .sort-btn:hover, .sort-btn.active {
-        background: var(--accent); color: #fff; border-color: var(--accent);
-    }
-
-    /* ── PC Cards ────────────────────────────────────────── */
+    /* ═══════════════ PC CARDS ═══════════════════════════════ */
     .pc-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        margin-bottom: 14px;
-        overflow: hidden;
+        background: var(--bg-card); border: 1.5px solid var(--border);
+        border-radius: 18px; margin-bottom: 14px; overflow: hidden;
         box-shadow: 0 2px 16px var(--shadow);
-        transition: border-color .2s, box-shadow .2s;
+        transition: border-color .25s, box-shadow .25s, transform .25s;
     }
-    .pc-card:hover { border-color: var(--accent); box-shadow: 0 4px 28px var(--shadow); }
-    .pc-card.stores-highlight { border-color: var(--green); }
+    .pc-card:hover { border-color: rgba(37,99,235,.4); }
+    .pc-card.active-card {
+        border-color: var(--accent);
+        box-shadow: 0 6px 32px rgba(37,99,235,.18);
+        transform: translateY(-2px);
+    }
+    .pc-card.stores-hl { border-color: var(--green); }
 
-    .card-header-row {
-        display: flex; align-items: center; gap: 14px;
+    /* Card header */
+    .card-hdr {
+        display: flex; align-items: center; gap: 12px;
         padding: 17px 22px; cursor: pointer; user-select: none;
+        transition: background .15s;
     }
-    .card-header-row:hover { background: rgba(37,99,235,.03); }
+    .card-hdr:hover { background: rgba(37,99,235,.03); }
 
     .opt-badge {
         font-family: var(--mono); font-size: .68rem; font-weight: 700;
-        background: var(--accent); color: #fff;
-        padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+        background: var(--accent); color: #fff; padding: 4px 10px;
+        border-radius: 6px; white-space: nowrap; flex-shrink: 0;
+        transition: background .2s;
     }
+    .pc-card.active-card .opt-badge { background: var(--accent-2); }
+
     .opt-name { font-weight: 700; font-size: .95rem; flex: 1; }
-    .opt-price {
-        font-family: var(--mono); font-size: .8rem; font-weight: 700;
-        color: var(--muted);
+    .opt-price { font-family: var(--mono); font-size: .8rem; font-weight: 700; color: var(--muted); }
+    .opt-syn   { font-family: var(--mono); font-size: .8rem; font-weight: 700; color: var(--green); }
+    .chevron   {
+        color: var(--muted); font-size: .72rem; margin-left: 4px;
+        transition: transform .35s ease, color .2s;
     }
-    .opt-sinergia {
-        font-family: var(--mono); font-size: .8rem; font-weight: 700;
-        color: var(--green);
-    }
-    .chevron {
-        color: var(--muted); font-size: .75rem;
-        transition: transform .3s; margin-left: 4px;
-    }
-    .card-header-row.open .chevron { transform: rotate(180deg); }
+    .pc-card.active-card .chevron { transform: rotate(180deg); color: var(--accent); }
 
+    /* Card body — smooth height transition */
     .card-body {
-        display: none; padding: 22px;
-        border-top: 1px solid var(--border);
-        animation: fadeIn .22s ease;
+        max-height: 0; overflow: hidden;
+        transition: max-height .45s cubic-bezier(.4,0,.2,1), padding .45s ease;
+        padding: 0 22px;
     }
-    .card-body.open { display: block; }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+    .card-body.open {
+        max-height: 1200px;
+        padding: 22px;
+        border-top: 1px solid var(--border);
+    }
 
-    /* ── Section label ───────────────────────────────────── */
+    /* ── Section label ─────────────────────────── */
     .sec-label {
         font-family: var(--mono); font-size: .68rem; font-weight: 700;
-        color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px;
-        margin-bottom: 10px;
+        color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;
     }
 
-    /* ── Specs table ─────────────────────────────────────── */
+    /* ── Specs table ───────────────────────────── */
     .specs-tbl { width: 100%; border-collapse: collapse; font-size: .84rem; }
     .specs-tbl td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
     .specs-tbl td:first-child {
@@ -161,42 +168,57 @@
     }
     .specs-tbl tr:last-child td { border-bottom: none; }
 
-    /* ── Balance ─────────────────────────────────────────── */
+    /* ── Balance tag ───────────────────────────── */
     .balance-tag {
         display: inline-flex; align-items: center; gap: 6px;
         padding: 8px 16px; border-radius: 30px;
         font-family: var(--mono); font-weight: 700; font-size: .85rem;
     }
-    .bal-pos { background: rgba(5,150,105,.1); color: var(--green); border: 1px solid var(--green); }
-    .bal-neg { background: rgba(220,38,38,.08); color: var(--red);  border: 1px solid var(--red); }
+    .bal-pos { background: rgba(5,150,105,.1);  color: var(--green); border: 1px solid var(--green); }
+    .bal-neg { background: rgba(220,38,38,.08); color: var(--red);   border: 1px solid var(--red); }
 
-    /* ── Store grid ──────────────────────────────────────── */
+    /* ── Store grid ────────────────────────────── */
     .store-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
     .store-item {
-        background: var(--bg);
-        border: 1px solid var(--border);
+        background: var(--bg); border: 1px solid var(--border);
         border-radius: 10px; padding: 10px 13px;
-        font-family: var(--mono); font-size: .78rem;
-        transition: border-color .2s;
+        font-family: var(--mono); font-size: .78rem; transition: border-color .2s;
     }
     .store-item:hover { border-color: var(--accent); }
     .store-item .sname { display: block; color: var(--muted); font-size: .68rem; margin-bottom: 2px; }
-    .store-item .sprice { font-weight: 700; color: var(--text); }
+    .store-item .sprice { font-weight: 700; }
 
-    /* ── Radar ───────────────────────────────────────────── */
+    /* ── Radar ─────────────────────────────────── */
     .radar-wrap { height: 240px; }
 
-    /* ═══════════════════════════════════════════════════════
-       CHATBOT
-    ═══════════════════════════════════════════════════════ */
+    /* ── Prev / Next navigation ────────────────── */
+    .card-nav {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);
+    }
+    .card-nav-btn {
+        display: flex; align-items: center; gap: 6px;
+        font-family: var(--mono); font-size: .75rem; font-weight: 700;
+        padding: 8px 16px; border-radius: 9px; cursor: pointer;
+        border: 1px solid var(--border); background: var(--bg);
+        color: var(--muted); transition: all .18s;
+    }
+    .card-nav-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(37,99,235,.05); }
+    .card-nav-btn:disabled, .card-nav-btn.hidden { opacity: 0; pointer-events: none; }
+    .card-counter {
+        font-family: var(--mono); font-size: .75rem; color: var(--muted);
+        text-align: center;
+    }
+    .card-counter strong { color: var(--accent); }
+
+    /* ═══════════════ CHATBOT ═══════════════════════════════ */
     #chat-fab {
         position: fixed; bottom: 26px; right: 26px; z-index: 2000;
         width: 58px; height: 58px; border-radius: 50%;
-        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
         border: none; cursor: pointer;
         box-shadow: 0 6px 26px rgba(37,99,235,.45);
-        display: flex; align-items: center; justify-content: center;
-        font-size: 1.45rem;
+        display: flex; align-items: center; justify-content: center; font-size: 1.45rem;
         transition: transform .2s, box-shadow .2s;
     }
     #chat-fab:hover { transform: scale(1.1); box-shadow: 0 8px 34px rgba(37,99,235,.6); }
@@ -210,19 +232,13 @@
 
     #chat-panel {
         position: fixed; bottom: 96px; right: 26px; z-index: 2000;
-        width: 370px;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0,0,0,.22);
-        display: none; flex-direction: column;
-        overflow: hidden;
-        transform-origin: bottom right;
+        width: 370px; background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.22);
+        display: none; flex-direction: column; overflow: hidden; transform-origin: bottom right;
     }
     #chat-panel.show { display: flex; animation: popIn .2s ease; }
     @keyframes popIn { from{opacity:0;transform:scale(.92) translateY(14px)} to{opacity:1;transform:none} }
 
-    /* header */
     .ch-head {
         padding: 14px 16px;
         background: linear-gradient(135deg, var(--accent), var(--accent-2));
@@ -239,17 +255,14 @@
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
     .ch-close {
         margin-left: auto; background: none; border: none;
-        color: rgba(255,255,255,.75); font-size: 1.05rem; cursor: pointer;
-        transition: color .15s; line-height: 1;
+        color: rgba(255,255,255,.75); font-size: 1.05rem; cursor: pointer; line-height: 1;
     }
     .ch-close:hover { color: #fff; }
 
-    /* messages area */
     .ch-msgs {
         flex: 1; max-height: 310px; min-height: 200px;
         overflow-y: auto; padding: 14px;
-        display: flex; flex-direction: column; gap: 9px;
-        scroll-behavior: smooth;
+        display: flex; flex-direction: column; gap: 9px; scroll-behavior: smooth;
     }
     .ch-msgs::-webkit-scrollbar { width: 4px; }
     .ch-msgs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
@@ -257,7 +270,6 @@
     .msg { display: flex; gap: 7px; max-width: 93%; animation: msgIn .17s ease; }
     @keyframes msgIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:none} }
     .msg.user { align-self: flex-end; flex-direction: row-reverse; }
-
     .msg-av {
         width: 27px; height: 27px; border-radius: 50%;
         display: flex; align-items: center; justify-content: center;
@@ -265,117 +277,82 @@
     }
     .msg.bot  .msg-av { background: rgba(37,99,235,.12); color: var(--accent); }
     .msg.user .msg-av { background: var(--accent); color: #fff; }
-
-    .msg-bub {
-        padding: 9px 13px; border-radius: 13px;
-        font-size: .82rem; line-height: 1.52;
-    }
+    .msg-bub { padding: 9px 13px; border-radius: 13px; font-size: .82rem; line-height: 1.52; }
     .msg.bot .msg-bub {
         background: var(--bg); border: 1px solid var(--border);
         color: var(--text); border-bottom-left-radius: 3px;
     }
-    .msg.user .msg-bub {
-        background: var(--accent); color: #fff;
-        border-bottom-right-radius: 3px;
-    }
+    .msg.user .msg-bub { background: var(--accent); color: #fff; border-bottom-right-radius: 3px; }
 
-    /* typing */
     .typing-dots { display: flex; gap: 4px; padding: 3px 2px; }
     .typing-dots span {
-        width: 7px; height: 7px; border-radius: 50%;
-        background: var(--muted);
+        width: 7px; height: 7px; border-radius: 50%; background: var(--muted);
         animation: bounce .85s infinite;
     }
     .typing-dots span:nth-child(2) { animation-delay: .14s; }
     .typing-dots span:nth-child(3) { animation-delay: .28s; }
     @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
 
-    /* quick commands */
     .ch-quick {
         display: flex; gap: 5px; flex-wrap: wrap;
         padding: 8px 12px; border-top: 1px solid var(--border);
     }
     .qc {
         font-family: var(--mono); font-size: .68rem; font-weight: 600;
-        padding: 4px 9px; border-radius: 20px;
-        border: 1px solid var(--border);
-        background: var(--bg); color: var(--muted);
-        cursor: pointer; transition: all .15s; white-space: nowrap;
+        padding: 4px 9px; border-radius: 20px; border: 1px solid var(--border);
+        background: var(--bg); color: var(--muted); cursor: pointer; transition: all .15s;
+        white-space: nowrap;
     }
     .qc:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-    /* input row */
     .ch-input-row {
-        display: flex; gap: 7px; padding: 10px 12px;
-        border-top: 1px solid var(--border);
+        display: flex; gap: 7px; padding: 10px 12px; border-top: 1px solid var(--border);
     }
     .ch-input {
         flex: 1; background: var(--bg); border: 1px solid var(--border);
-        border-radius: 9px; padding: 8px 13px;
-        color: var(--text); font-family: var(--sans);
-        font-size: .83rem; outline: none; transition: border-color .2s;
+        border-radius: 9px; padding: 8px 13px; color: var(--text);
+        font-family: var(--sans); font-size: .83rem; outline: none; transition: border-color .2s;
     }
     .ch-input:focus { border-color: var(--accent); }
     .ch-send {
-        width: 36px; height: 36px; border-radius: 9px;
-        background: var(--accent); border: none; cursor: pointer;
-        color: #fff; font-size: .95rem;
+        width: 36px; height: 36px; border-radius: 9px; background: var(--accent);
+        border: none; cursor: pointer; color: #fff; font-size: .95rem;
         display: flex; align-items: center; justify-content: center;
         transition: background .15s, transform .1s; flex-shrink: 0;
     }
     .ch-send:hover { background: var(--accent-2); }
     .ch-send:active { transform: scale(.92); }
 
-    /* ═══════════════════════════════════════════════════════
-       BUDGET MODAL
-    ═══════════════════════════════════════════════════════ */
+    /* ═══════════════ BUDGET MODAL ══════════════════════════ */
     #budget-overlay {
         display: none; position: fixed; inset: 0; z-index: 3000;
         background: rgba(0,0,0,.52); backdrop-filter: blur(4px);
         align-items: center; justify-content: center;
     }
     #budget-overlay.show { display: flex; }
-
     .bud-modal {
         background: var(--bg-card); border: 1px solid var(--border);
         border-radius: 18px; padding: 30px; width: 350px;
-        box-shadow: 0 24px 64px rgba(0,0,0,.3);
-        animation: popIn .22s ease;
+        box-shadow: 0 24px 64px rgba(0,0,0,.3); animation: popIn .22s ease;
     }
     .bud-modal h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 18px; }
     .bud-modal label {
-        display: block; font-family: var(--mono); font-size: .7rem;
-        color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
-        margin-bottom: 5px; margin-top: 13px;
+        display: block; font-family: var(--mono); font-size: .7rem; color: var(--muted);
+        text-transform: uppercase; letter-spacing: .5px; margin-bottom: 5px; margin-top: 13px;
     }
     .bud-modal input {
-        width: 100%; padding: 9px 13px; background: var(--bg);
-        border: 1px solid var(--border); border-radius: 9px;
-        color: var(--text); font-size: .88rem; outline: none;
-        transition: border-color .2s; font-family: var(--sans);
+        width: 100%; padding: 9px 13px; background: var(--bg); border: 1px solid var(--border);
+        border-radius: 9px; color: var(--text); font-size: .88rem;
+        outline: none; transition: border-color .2s; font-family: var(--sans);
     }
     .bud-modal input:focus { border-color: var(--accent); }
-    .bud-result {
-        margin-top: 14px; padding: 13px; border-radius: 10px;
-        font-size: .85rem; font-weight: 600; display: none;
-    }
+    .bud-result { margin-top: 14px; padding: 13px; border-radius: 10px; font-size: .85rem; font-weight: 600; display: none; }
     .bud-result.pos { background: rgba(5,150,105,.1); color: var(--green); border: 1px solid var(--green); }
     .bud-result.neg { background: rgba(220,38,38,.08); color: var(--red); border: 1px solid var(--red); }
     .bud-actions { display: flex; gap: 9px; margin-top: 18px; }
-    .btn-p {
-        background: var(--accent); color: #fff; border: none;
-        border-radius: 9px; padding: 9px 20px;
-        font-family: var(--sans); font-weight: 700; font-size: .85rem;
-        cursor: pointer; transition: background .15s;
-    }
+    .btn-p { background: var(--accent); color: #fff; border: none; border-radius: 9px; padding: 9px 20px; font-family: var(--sans); font-weight: 700; font-size: .85rem; cursor: pointer; transition: background .15s; }
     .btn-p:hover { background: var(--accent-2); }
-    .btn-o {
-        background: transparent; color: var(--muted);
-        border: 1px solid var(--border); border-radius: 9px;
-        padding: 9px 18px; font-family: var(--sans);
-        font-weight: 600; font-size: .85rem; cursor: pointer;
-        transition: all .15s;
-    }
+    .btn-o { background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 9px; padding: 9px 18px; font-family: var(--sans); font-weight: 600; font-size: .85rem; cursor: pointer; transition: all .15s; }
     .btn-o:hover { border-color: var(--accent); color: var(--accent); }
     </style>
 </head>
@@ -383,35 +360,46 @@
 <body data-theme="light">
 <script>document.body.setAttribute('data-theme', localStorage.getItem('tailorTheme') || 'light');</script>
 
-<!-- ── Topbar ──────────────────────────────────────────── -->
+<!-- ── Topbar ─────────────────────────────────────── -->
 <div class="topbar">
     <div class="brand">Tailor-PC <span>Expert System</span></div>
-    <div class="topbar-gap"></div>
+    <div class="gap"></div>
     <button class="tb-btn" onclick="toggleTheme()">🌓 Tema</button>
     <a href="/diagnostico-inicio" class="tb-btn primary" style="margin-left:4px">➕ Nueva Consulta</a>
 </div>
 
-<!-- ── Main ────────────────────────────────────────────── -->
+<!-- ── Option navigator (sticky) ─────────────────── -->
+<div class="opt-nav-wrap">
+    <div class="opt-nav" id="opt-nav">
+        {% for s in sugerencias %}
+        <div class="nav-pill {% if loop.first %}active{% endif %}"
+             id="pill-{{ loop.index }}"
+             onclick="jumpTo({{ loop.index }})">
+            #{{ loop.index }} {{ s.prioridad | truncate(22, True, '…') }}
+            <span class="pill-score">⚡{{ s.sinergia }}%</span>
+        </div>
+        {% endfor %}
+        <div class="sort-sep"></div>
+        <div class="sort-mini">
+            <span class="sort-chip active" id="sc-sin" onclick="sortCards('sinergia')">⚡ Score</span>
+            <span class="sort-chip" id="sc-asc"  onclick="sortCards('precio_asc')">🔽 Precio</span>
+            <span class="sort-chip" id="sc-desc" onclick="sortCards('precio_desc')">🔼 Precio</span>
+            <span class="sort-chip" id="sc-bal"  onclick="sortCards('balance')">💚 Balance</span>
+        </div>
+    </div>
+</div>
+
+<!-- ── Main ───────────────────────────────────────── -->
 <div class="container" style="max-width:960px">
 
     <div class="page-header">
         <div class="page-label">Motor RETE — Resultados</div>
         <h1 class="page-title">Reporte Estratégico de Hardware</h1>
         <p class="page-sub" id="count-label">
-            {{ sugerencias|length }} configuración(es) generada(s) · Ordenadas por viabilidad financiera
+            {{ sugerencias|length }} configuración(es) · Ordenadas por viabilidad financiera
         </p>
     </div>
 
-    <!-- Sort bar -->
-    <div class="sort-bar">
-        <span style="font-family:var(--mono);font-size:.72rem;color:var(--muted);align-self:center;margin-right:4px">ORDENAR:</span>
-        <button class="sort-btn active" id="btn-sinergia" onclick="sortCards('sinergia')">⚡ Sinergia</button>
-        <button class="sort-btn" id="btn-asc"      onclick="sortCards('precio_asc')">🔽 Menor precio</button>
-        <button class="sort-btn" id="btn-desc"     onclick="sortCards('precio_desc')">🔼 Mayor precio</button>
-        <button class="sort-btn" id="btn-bal"      onclick="sortCards('balance')">💚 Mejor balance</button>
-    </div>
-
-    <!-- PC list -->
     <div id="pc-list">
     {% for s in sugerencias %}
     <div class="pc-card"
@@ -419,13 +407,14 @@
          data-index="{{ loop.index }}"
          data-total="{{ s.total }}"
          data-balance="{{ s.balance }}"
-         data-sinergia="{{ s.sinergia }}">
+         data-sinergia="{{ s.sinergia }}"
+         data-radar="{{ s.radar | join(',') }}">
 
-        <div class="card-header-row" id="hdr-{{ loop.index }}" onclick="toggleCard({{ loop.index }})">
+        <div class="card-hdr" id="hdr-{{ loop.index }}" onclick="toggleCard({{ loop.index }})">
             <span class="opt-badge">OPC #{{ loop.index }}</span>
             <span class="opt-name">{{ s.prioridad }}</span>
             <span class="opt-price">${{ s.total | round(0) | int }} MXN</span>
-            <span class="opt-sinergia">⚡ {{ s.sinergia }}%</span>
+            <span class="opt-syn">⚡ {{ s.sinergia }}%</span>
             <span class="chevron">▼</span>
         </div>
 
@@ -441,19 +430,17 @@
                 <!-- Specs -->
                 <div class="col-md-4">
                     <div class="sec-label">🛠 Especificaciones</div>
-                    <table class="specs-tbl">
-                        <tbody>
-                        {% for item in s.detalles %}
-                            {% set linea = item.split(':') %}
-                            {% if linea|length == 2 %}
-                            <tr>
-                                <td>{{ linea[0] }}</td>
-                                <td>{{ linea[1] }}</td>
-                            </tr>
-                            {% endif %}
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                    <table class="specs-tbl"><tbody>
+                    {% for item in s.detalles %}
+                        {% set linea = item.split(':') %}
+                        {% if linea|length == 2 %}
+                        <tr>
+                            <td>{{ linea[0] }}</td>
+                            <td>{{ linea[1] }}</td>
+                        </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody></table>
                 </div>
 
                 <!-- Financiero -->
@@ -461,32 +448,34 @@
                     <div class="sec-label">💰 Analítica Financiera</div>
                     <span class="balance-tag {% if s.balance < 0 %}bal-neg{% else %}bal-pos{% endif %}">
                         {% if s.balance >= 0 %}✅{% else %}⚠️{% endif %}
-                        Balance: ${{ s.balance | round(2) }} MXN
+                        ${{ s.balance | round(2) }} MXN
                     </span>
-
                     <div style="margin-top:18px">
                         <div class="sec-label" style="margin-top:0">Mercado Estimado</div>
                         <div class="store-grid">
-                            <div class="store-item">
-                                <span class="sname">Cyberpuerta</span>
-                                <span class="sprice">${{ (s.total * 0.95)|round(0)|int }}</span>
-                            </div>
-                            <div class="store-item">
-                                <span class="sname">DDTech</span>
-                                <span class="sprice">${{ (s.total * 0.96)|round(0)|int }}</span>
-                            </div>
-                            <div class="store-item">
-                                <span class="sname">Mercado Libre</span>
-                                <span class="sprice">${{ (s.total * 0.98)|round(0)|int }}</span>
-                            </div>
-                            <div class="store-item">
-                                <span class="sname">Amazon MX</span>
-                                <span class="sprice">${{ (s.total * 1.05)|round(0)|int }}</span>
-                            </div>
+                            <div class="store-item"><span class="sname">Cyberpuerta</span><span class="sprice">${{ (s.total * 0.95)|round(0)|int }}</span></div>
+                            <div class="store-item"><span class="sname">DDTech</span><span class="sprice">${{ (s.total * 0.96)|round(0)|int }}</span></div>
+                            <div class="store-item"><span class="sname">Mercado Libre</span><span class="sprice">${{ (s.total * 0.98)|round(0)|int }}</span></div>
+                            <div class="store-item"><span class="sname">Amazon MX</span><span class="sprice">${{ (s.total * 1.05)|round(0)|int }}</span></div>
                         </div>
                     </div>
                 </div>
 
+            </div>
+
+            <!-- Prev / Next navigation -->
+            <div class="card-nav" id="nav-{{ loop.index }}">
+                <button class="card-nav-btn" id="prev-{{ loop.index }}"
+                        onclick="navigate({{ loop.index }}, -1)">
+                    ← Anterior
+                </button>
+                <div class="card-counter">
+                    <strong>{{ loop.index }}</strong> / <span id="total-count">{{ sugerencias|length }}</span>
+                </div>
+                <button class="card-nav-btn" id="next-{{ loop.index }}"
+                        onclick="navigate({{ loop.index }}, 1)">
+                    Siguiente →
+                </button>
             </div>
         </div>
     </div>
@@ -496,23 +485,16 @@
     <div style="text-align:center;padding:60px 20px;color:var(--muted)">
         <div style="font-size:2.5rem;margin-bottom:16px">⚠️</div>
         <h3>Sin configuraciones viables</h3>
-        <p style="margin-top:8px;font-size:.9rem">El presupuesto no cubre ninguna configuración mínima. Intenta con un valor mayor.</p>
-        <a href="/diagnostico-inicio" class="tb-btn primary" style="margin-top:20px;text-decoration:none">Nueva Consulta</a>
+        <p style="margin-top:8px;font-size:.9rem">El presupuesto no cubre ninguna configuración mínima.</p>
+        <a href="/diagnostico-inicio" class="tb-btn primary" style="margin-top:20px;text-decoration:none;display:inline-block">Nueva Consulta</a>
     </div>
     {% endif %}
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     CHATBOT FAB + PANEL
-═══════════════════════════════════════════════════════ -->
-<button id="chat-fab" onclick="toggleChat()" title="Tailor AI">
-    🤖
-    <div class="fab-dot" id="fab-notif"></div>
-</button>
-
+<!-- ── Chatbot ────────────────────────────────────── -->
+<button id="chat-fab" onclick="toggleChat()">🤖<div class="fab-dot" id="fab-dot"></div></button>
 <div id="chat-panel">
-    <!-- Header -->
     <div class="ch-head">
         <div class="ch-av">🤖</div>
         <div class="ch-info">
@@ -521,31 +503,22 @@
         </div>
         <button class="ch-close" onclick="toggleChat()">✕</button>
     </div>
-
-    <!-- Mensajes -->
     <div class="ch-msgs" id="ch-msgs"></div>
-
-    <!-- Quick commands -->
     <div class="ch-quick">
         <span class="qc" onclick="quick('modo oscuro')">🌙 Oscuro</span>
         <span class="qc" onclick="quick('modo claro')">☀️ Claro</span>
         <span class="qc" onclick="quick('ordenar menor precio')">🔽 Barato</span>
-        <span class="qc" onclick="quick('ordenar mayor precio')">🔼 Caro</span>
         <span class="qc" onclick="quick('dónde comprar')">🏪 Tiendas</span>
         <span class="qc" onclick="quick('presupuesto')">💰 Finanzas</span>
         <span class="qc" onclick="quick('ayuda')">❓ Ayuda</span>
     </div>
-
-    <!-- Input -->
     <div class="ch-input-row">
         <input class="ch-input" id="ch-input" placeholder="Escribe un comando..." autocomplete="off">
         <button class="ch-send" onclick="sendChat()">➤</button>
     </div>
 </div>
 
-<!-- ═══════════════════════════════════════════════════════
-     BUDGET MODAL
-═══════════════════════════════════════════════════════ -->
+<!-- ── Budget modal ───────────────────────────────── -->
 <div id="budget-overlay" onclick="if(event.target===this)closeBudget()">
     <div class="bud-modal">
         <h3>📊 Analizador Financiero</h3>
@@ -563,33 +536,115 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-/* ─── TEMA ──────────────────────────────────────────────── */
-function toggleTheme() {
-    applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-}
-function applyTheme(mode) {
-    document.body.setAttribute('data-theme', mode);
-    localStorage.setItem('tailorTheme', mode);
+/* ── TEMA ──────────────────────────────────────────────── */
+function toggleTheme() { applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'); }
+function applyTheme(m) {
+    document.body.setAttribute('data-theme', m);
+    localStorage.setItem('tailorTheme', m);
     Object.keys(radarCache).forEach(k => renderRadar(parseInt(k)));
 }
 
-/* ─── ACCORDION ─────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════
+   CARD NAVIGATION
+═══════════════════════════════════════════════════════ */
+let openIdx = null;   // which card is currently open
+
 function toggleCard(idx) {
-    const hdr  = document.getElementById(`hdr-${idx}`);
-    const body = document.getElementById(`body-${idx}`);
-    const wasOpen = body.classList.contains('open');
-    // close all
-    document.querySelectorAll('.card-body').forEach(b => b.classList.remove('open'));
-    document.querySelectorAll('.card-header-row').forEach(h => h.classList.remove('open'));
-    if (!wasOpen) {
-        body.classList.add('open');
-        hdr.classList.add('open');
-        renderRadar(idx);
+    if (openIdx === idx) {
+        closeCard(idx);
+        openIdx = null;
+    } else {
+        if (openIdx !== null) closeCard(openIdx);
+        openCard(idx);
+        openIdx = idx;
     }
 }
 
-/* ─── SORT ──────────────────────────────────────────────── */
+function openCard(idx) {
+    const card = document.getElementById(`card-${idx}`);
+    const body = document.getElementById(`body-${idx}`);
+    if (!card || !body) return;
+
+    card.classList.add('active-card');
+    body.classList.add('open');
+    renderRadar(idx);
+    updateNavBtns(idx);
+    updatePillActive(idx);
+
+    // Smooth scroll to card (with offset for sticky bars)
+    setTimeout(() => {
+        const top = card.getBoundingClientRect().top + window.scrollY - 130;
+        window.scrollTo({ top, behavior: 'smooth' });
+    }, 60);
+}
+
+function closeCard(idx) {
+    const card = document.getElementById(`card-${idx}`);
+    const body = document.getElementById(`body-${idx}`);
+    if (!card || !body) return;
+    card.classList.remove('active-card');
+    body.classList.remove('open');
+}
+
+/* Prev / Next inside open card */
+function navigate(currentIdx, dir) {
+    const cards = getVisibleCards();
+    const pos   = cards.findIndex(c => parseInt(c.dataset.index) === currentIdx);
+    const target = cards[pos + dir];
+    if (!target) return;
+    const targetIdx = parseInt(target.dataset.index);
+    closeCard(currentIdx);
+    openCard(targetIdx);
+    openIdx = targetIdx;
+}
+
+function updateNavBtns(idx) {
+    const cards    = getVisibleCards();
+    const pos      = cards.findIndex(c => parseInt(c.dataset.index) === idx);
+    const prevBtn  = document.getElementById(`prev-${idx}`);
+    const nextBtn  = document.getElementById(`next-${idx}`);
+    if (prevBtn) prevBtn.classList.toggle('hidden', pos === 0);
+    if (nextBtn) nextBtn.classList.toggle('hidden', pos === cards.length - 1);
+
+    // Update counter
+    const counter = document.querySelector(`#nav-${idx} .card-counter strong`);
+    if (counter) counter.textContent = pos + 1;
+    document.querySelectorAll(`#nav-${idx} #total-count`).forEach(el => {
+        el.textContent = cards.length;
+    });
+}
+
+function getVisibleCards() {
+    return Array.from(document.querySelectorAll('.pc-card')).filter(c => c.style.display !== 'none');
+}
+
+/* Jump to from nav pill */
+function jumpTo(idx) {
+    if (openIdx !== null && openIdx !== idx) closeCard(openIdx);
+    if (openIdx === idx) {
+        closeCard(idx);
+        openIdx = null;
+        updatePillActive(null);
+        return;
+    }
+    openCard(idx);
+    openIdx = idx;
+}
+
+function updatePillActive(activeIdx) {
+    document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+    if (activeIdx !== null) {
+        const pill = document.getElementById(`pill-${activeIdx}`);
+        if (pill) {
+            pill.classList.add('active');
+            pill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+    }
+}
+
+/* ── SORT ──────────────────────────────────────────────── */
 function sortCards(criterio) {
+    if (openIdx !== null) { closeCard(openIdx); openIdx = null; }
     const list  = document.getElementById('pc-list');
     const cards = Array.from(list.querySelectorAll('.pc-card'));
 
@@ -603,96 +658,119 @@ function sortCards(criterio) {
         if (criterio === 'precio_asc')  return aT - bT;
         if (criterio === 'precio_desc') return bT - aT;
         if (criterio === 'balance')     return bB - aB;
-        return bS - aS; // sinergia desc (default)
+        return bS - aS;
     });
 
-    // Re-number and re-append
-    cards.forEach((card, i) => {
-        card.querySelector('.opt-badge').textContent = `OPC #${i + 1}`;
-        list.appendChild(card);
+    cards.forEach((c, i) => {
+        c.querySelector('.opt-badge').textContent = `OPC #${i + 1}`;
+        list.appendChild(c);
     });
 
-    // Update sort buttons
-    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
-    const map = { sinergia: 'btn-sinergia', precio_asc: 'btn-asc', precio_desc: 'btn-desc', balance: 'btn-bal' };
+    // Rebuild pills
+    rebuildPills();
+
+    // Update sort chips
+    document.querySelectorAll('.sort-chip').forEach(b => b.classList.remove('active'));
+    const map = { sinergia:'sc-sin', precio_asc:'sc-asc', precio_desc:'sc-desc', balance:'sc-bal' };
     if (map[criterio]) document.getElementById(map[criterio]).classList.add('active');
-
-    // Close open cards after sort
-    document.querySelectorAll('.card-body').forEach(b => b.classList.remove('open'));
-    document.querySelectorAll('.card-header-row').forEach(h => h.classList.remove('open'));
 }
 
-/* ─── FILTER TOP N ──────────────────────────────────────── */
+function rebuildPills() {
+    const nav   = document.getElementById('opt-nav');
+    const pills = Array.from(nav.querySelectorAll('.nav-pill'));
+    const cards = Array.from(document.querySelectorAll('.pc-card'));
+
+    // Remove old pills
+    pills.forEach(p => p.remove());
+
+    // Re-insert in new order before the sort-sep
+    const sep = nav.querySelector('.sort-sep');
+    cards.forEach((card, i) => {
+        const orig = card.id.replace('card-', '');
+        const syn  = card.dataset.sinergia;
+        const name = card.querySelector('.opt-name').textContent;
+        const pill = document.createElement('div');
+        pill.className = 'nav-pill';
+        pill.id = `pill-${orig}`;
+        pill.setAttribute('onclick', `jumpTo(${orig})`);
+        pill.innerHTML = `#${i+1} ${name.substring(0,18)}… <span class="pill-score">⚡${syn}%</span>`;
+        nav.insertBefore(pill, sep);
+    });
+}
+
+/* ── FILTER TOP N ──────────────────────────────────────── */
 function filterTop(n) {
+    if (openIdx !== null) { closeCard(openIdx); openIdx = null; }
     const cards = document.querySelectorAll('.pc-card');
     cards.forEach((c, i) => { c.style.display = i < n ? '' : 'none'; });
-    updateCountLabel();
-}
-function updateCountLabel() {
-    const visible = document.querySelectorAll('.pc-card:not([style*="none"])').length;
     document.getElementById('count-label').textContent =
-        `${visible} configuración(es) visibles · usa "mostrar todo" para ver todas`;
+        `${Math.min(n, cards.length)} configuración(es) visible(s) · usa "mostrar todo" para ver todas`;
 }
 
-/* ─── EXPAND FIRST ──────────────────────────────────────── */
 function expandFirst() {
     const first = document.querySelector('.pc-card:not([style*="none"])');
     if (!first) return;
-    const idx = parseInt(first.getAttribute('data-index'));
-    toggleCard(idx);
-    first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    jumpTo(parseInt(first.getAttribute('data-index')));
 }
 
-/* ─── COUNT CARDS ───────────────────────────────────────── */
 function countCards() {
     const n = document.querySelectorAll('.pc-card:not([style*="none"])').length;
-    addBotMsg(`Hay <b>${n}</b> configuración(es) visible(s) en pantalla ahora mismo.`);
+    addBotMsg(`Hay <b>${n}</b> configuración(es) visible(s) ahora mismo.`);
 }
 
-/* ─── HIGHLIGHT STORES ──────────────────────────────────── */
-function highlightStores() {
-    document.querySelectorAll('.pc-card').forEach(c => c.classList.add('stores-highlight'));
-    setTimeout(() => {
-        document.querySelectorAll('.pc-card').forEach(c => c.classList.remove('stores-highlight'));
-    }, 3000);
-}
-
-/* ─── RADAR CHARTS ──────────────────────────────────────── */
+/* ── RADAR ─────────────────────────────────────────────── */
 const radarCache = {};
 function renderRadar(idx) {
     const el = document.getElementById(`radar-${idx}`);
     if (!el) return;
     if (radarCache[idx]) { radarCache[idx].destroy(); delete radarCache[idx]; }
-    const dark = document.body.getAttribute('data-theme') === 'dark';
+
+    const card     = document.getElementById(`card-${idx}`);
+    const rawRadar = card ? card.getAttribute('data-radar') : null;
+    const vals     = rawRadar ? rawRadar.split(',').map(Number) : [60,60,60,60,60];
+    const dark     = document.body.getAttribute('data-theme') === 'dark';
+
     radarCache[idx] = new Chart(el.getContext('2d'), {
         type: 'radar',
         data: {
             labels: ['GAMING', 'TRABAJO', 'PRECIO', 'TÉRMICA', 'LONGEVIDAD'],
             datasets: [{
-                data: [95, 80, 90, 85, 92],
-                backgroundColor: 'rgba(37,99,235,.15)',
+                data: vals,
+                backgroundColor: 'rgba(37,99,235,.18)',
                 borderColor: '#2563eb',
                 pointBackgroundColor: '#2563eb',
-                borderWidth: 2, pointRadius: 3
+                pointBorderColor: '#fff', pointBorderWidth: 1,
+                borderWidth: 2, pointRadius: 4
             }]
         },
         options: {
             maintainAspectRatio: false,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}/100` } }
+            },
             scales: {
                 r: {
-                    min: 0, max: 100,
-                    grid:       { color: dark ? '#1e293b' : '#e2e8f0' },
-                    angleLines: { color: dark ? '#1e293b' : '#e2e8f0' },
-                    pointLabels:{ color: dark ? '#94a3b8' : '#64748b', font: { size: 9, family: "'JetBrains Mono'" } },
-                    ticks:      { display: false }
+                    min: 0, max: 100, beginAtZero: true,
+                    grid:        { color: dark ? '#1e293b' : '#e2e8f0' },
+                    angleLines:  { color: dark ? '#1e293b' : '#e2e8f0' },
+                    pointLabels: {
+                        color: dark ? '#94a3b8' : '#64748b',
+                        font: { size: 9, family: "'JetBrains Mono'" },
+                        callback: (label, i) => `${label} ${vals[i]}`
+                    },
+                    ticks: {
+                        display: true, stepSize: 25,
+                        color: dark ? '#475569' : '#cbd5e1',
+                        font: { size: 7 }, backdropColor: 'transparent'
+                    }
                 }
             }
         }
     });
 }
 
-/* ─── BUDGET MODAL ──────────────────────────────────────── */
+/* ── BUDGET ─────────────────────────────────────────────── */
 function openBudget()  { document.getElementById('budget-overlay').classList.add('show'); }
 function closeBudget() { document.getElementById('budget-overlay').classList.remove('show'); }
 function calcBudget() {
@@ -703,23 +781,28 @@ function calcBudget() {
     el.style.display = 'block';
     if (neto >= 0) {
         el.className = 'bud-result pos';
-        const meses = neto > 0 ? Math.ceil(25000 / neto) : '∞';
-        el.innerHTML = `✅ Disponible: <strong>$${neto.toFixed(2)} MXN/mes</strong><br><small>Podrías ahorrar para una PC en ~${meses} meses.</small>`;
+        const m = neto > 0 ? Math.ceil(25000 / neto) : '∞';
+        el.innerHTML = `✅ Disponible: <strong>$${neto.toFixed(2)}/mes</strong><br><small>PC en ~${m} meses.</small>`;
     } else {
         el.className = 'bud-result neg';
-        el.innerHTML = `⚠️ Déficit mensual: <strong>$${Math.abs(neto).toFixed(2)} MXN</strong><br><small>Conviene revisar gastos antes de planear una compra.</small>`;
+        el.innerHTML = `⚠️ Déficit: <strong>$${Math.abs(neto).toFixed(2)}/mes</strong><br><small>Revisa gastos antes de planear compra.</small>`;
     }
 }
 
-/* ══════════════════════════════════════════════════════════
-   CHATBOT
-══════════════════════════════════════════════════════════ */
-let chatOpen = false;
+/* ── HIGHLIGHT STORES ──────────────────────────────────── */
+function highlightStores() {
+    document.querySelectorAll('.pc-card').forEach(c => c.classList.add('stores-hl'));
+    setTimeout(() => document.querySelectorAll('.pc-card').forEach(c => c.classList.remove('stores-hl')), 3000);
+}
 
+/* ═══════════════════════════════════════════════════════
+   CHATBOT
+═══════════════════════════════════════════════════════ */
+let chatOpen = false;
 function toggleChat() {
     chatOpen = !chatOpen;
     document.getElementById('chat-panel').classList.toggle('show', chatOpen);
-    document.getElementById('fab-notif').style.display = chatOpen ? 'none' : '';
+    document.getElementById('fab-dot').style.display = chatOpen ? 'none' : '';
     if (chatOpen) document.getElementById('ch-input').focus();
 }
 
@@ -728,48 +811,37 @@ function addBotMsg(html) {
     const d = document.createElement('div');
     d.className = 'msg bot';
     d.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bub">${html}</div>`;
-    area.appendChild(d);
-    area.scrollTop = area.scrollHeight;
+    area.appendChild(d); area.scrollTop = area.scrollHeight;
 }
 function addUserMsg(text) {
     const area = document.getElementById('ch-msgs');
     const d = document.createElement('div');
     d.className = 'msg user';
     d.innerHTML = `<div class="msg-av">👤</div><div class="msg-bub">${text}</div>`;
-    area.appendChild(d);
-    area.scrollTop = area.scrollHeight;
+    area.appendChild(d); area.scrollTop = area.scrollHeight;
 }
 function showTyping() {
     const area = document.getElementById('ch-msgs');
     const d = document.createElement('div');
     d.className = 'msg bot'; d.id = 'typing';
     d.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bub"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-    area.appendChild(d);
-    area.scrollTop = area.scrollHeight;
+    area.appendChild(d); area.scrollTop = area.scrollHeight;
 }
 function hideTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
 
 async function sendChat() {
     const inp  = document.getElementById('ch-input');
-    const text = inp.value.trim();
-    if (!text) return;
+    const text = inp.value.trim(); if (!text) return;
     inp.value = '';
-    addUserMsg(text);
-    showTyping();
+    addUserMsg(text); showTyping();
     try {
         const res  = await fetch('/chat-interactivo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ mensaje: text })
         });
         const data = await res.json();
-        hideTyping();
-        addBotMsg(data.res);
-        handleAction(data);
-    } catch {
-        hideTyping();
-        addBotMsg('⚠️ Error de conexión con el servidor.');
-    }
+        hideTyping(); addBotMsg(data.res); handleAction(data);
+    } catch { hideTyping(); addBotMsg('⚠️ Error de conexión.'); }
 }
 
 function handleAction(data) {
@@ -783,27 +855,25 @@ function handleAction(data) {
         case 'COUNT_CARDS':      countCards(); break;
         case 'HIGHLIGHT_STORES': highlightStores(); break;
         case 'SORT':             sortCards(data.criterio); break;
-        case 'REDIRECT':         setTimeout(() => { window.location.href = data.url; }, 800); break;
+        case 'REDIRECT':         setTimeout(() => window.location.href = data.url, 800); break;
     }
 }
 
-function quick(cmd) {
-    document.getElementById('ch-input').value = cmd;
-    sendChat();
-}
+function quick(cmd) { document.getElementById('ch-input').value = cmd; sendChat(); }
+document.getElementById('ch-input').addEventListener('keypress', e => { if (e.key === 'Enter') sendChat(); });
 
-document.getElementById('ch-input').addEventListener('keypress', e => {
-    if (e.key === 'Enter') sendChat();
-});
-
-/* ─── INIT ──────────────────────────────────────────────── */
+/* ── INIT ──────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+    // Auto-abrir primera card
+    {% if sugerencias %}
+    setTimeout(() => { openCard(1); openIdx = 1; }, 300);
+    {% endif %}
+
     setTimeout(() => addBotMsg(
-        '¡Hola! Soy <b>Tailor AI</b> ⚡<br>' +
-        'Tengo <b>{{ sugerencias|length }}</b> configuración(es) listas.<br>' +
-        'Prueba: <i>"modo oscuro"</i>, <i>"ordenar menor precio"</i>, <i>"dónde comprar"</i> o <i>"ayuda"</i>.'
-    ), 350);
-    {% if sugerencias|length == 1 %}toggleCard(1);{% endif %}
+        '¡Hola! Tengo <b>{{ sugerencias|length }}</b> configuración(es) listas. ' +
+        'Usa las flechas dentro de cada tarjeta para navegar, o los botones de la barra superior. ' +
+        'Escribe <b>ayuda</b> para ver mis comandos.'
+    ), 500);
 });
 </script>
 </body>
