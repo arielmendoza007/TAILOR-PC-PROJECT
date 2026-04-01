@@ -2,106 +2,212 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tailor-PC | Inicio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #ffffff;
-            --text: #0d3b71;
-            --hero: #0d3b71;
-            --lead: #0d3b71;
-            --card: rgba(255, 255, 255, 0.96);
-            --accent: #0d6efd;
-            --border: #0d6efd;
-            --button-bg: #0d6efd;
-            --button-text: #ffffff;
-        }
+    :root {
+        --bg:       #f0f4ff;
+        --bg-card:  #ffffff;
+        --text:     #0d1b2a;
+        --muted:    #64748b;
+        --border:   #dde4f0;
+        --accent:   #2563eb;
+        --accent-2: #7c3aed;
+        --shadow:   rgba(37,99,235,.10);
+        --mono:     'JetBrains Mono', monospace;
+        --sans:     'Plus Jakarta Sans', sans-serif;
+    }
+    [data-theme="dark"] {
+        --bg:       #080d18;
+        --bg-card:  #0f172a;
+        --text:     #e2e8f0;
+        --muted:    #94a3b8;
+        --border:   #1e293b;
+        --accent:   #3b82f6;
+        --accent-2: #a855f7;
+        --shadow:   rgba(59,130,246,.12);
+    }
 
-        body[data-theme="dark"] {
-            --bg: #0a0a0b;
-            --text: #e9ecef;
-            --hero: #ffffff;
-            --lead: #00ff41;
-            --card: rgba(20, 20, 25, 0.95);
-            --accent: #00ff41;
-            --border: #00ff41;
-            --button-bg: #00ff41;
-            --button-text: #000000;
-        }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: var(--sans);
+        background: var(--bg); color: var(--text);
+        min-height: 100vh; transition: background .3s, color .3s;
+        font-size: 15px; line-height: 1.65;
+    }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            transition: 0.4s ease;
-        }
+    /* ── Topbar ─────────────────────────────────── */
+    .topbar {
+        position: sticky; top: 0; z-index: 900;
+        background: var(--bg-card); border-bottom: 1px solid var(--border);
+        padding: 13px 28px;
+        display: flex; align-items: center;
+        box-shadow: 0 1px 20px var(--shadow);
+    }
+    .brand { font-weight: 800; font-size: 1.05rem; color: var(--accent); flex: 1; }
+    .brand span { color: var(--text); }
+    .tb-btn {
+        background: transparent; color: var(--muted);
+        border: 1px solid var(--border); border-radius: 9px;
+        padding: 7px 16px; font-family: var(--sans);
+        font-size: .82rem; font-weight: 600; cursor: pointer;
+        transition: all .15s;
+    }
+    .tb-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-        .btn-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
+    /* ── Hero ───────────────────────────────────── */
+    .hero { padding: 64px 20px 40px; text-align: center; }
+    .hero-logo {
+        height: 68px; margin-bottom: 28px;
+        transition: filter .3s;
+    }
+    [data-theme="dark"] .hero-logo { filter: brightness(1.1) saturate(1.2); }
 
-        .hero-title {
-            color: var(--hero);
-            text-shadow: 0 0 8px rgba(13, 110, 253, 0.35);
-            font-weight: 900;
-        }
+    .hero-tag {
+        font-family: var(--mono); font-size: .73rem; font-weight: 700;
+        color: var(--accent); text-transform: uppercase; letter-spacing: 3px;
+        margin-bottom: 12px;
+    }
+    .hero-title {
+        font-size: clamp(1.9rem, 5vw, 2.9rem);
+        font-weight: 800; letter-spacing: -.5px; line-height: 1.15;
+        margin-bottom: 14px;
+    }
+    .hero-title .hi { color: var(--accent); }
+    .hero-sub {
+        font-family: var(--mono); font-size: .82rem;
+        color: var(--muted); margin-bottom: 36px;
+    }
 
-        .lead-text {
-            color: var(--lead);
-            font-family: 'Courier New', Courier, monospace;
-        }
+    .btn-cta {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff; text-decoration: none;
+        border-radius: 12px; padding: 15px 40px;
+        font-family: var(--mono); font-weight: 700; font-size: .9rem;
+        letter-spacing: .5px;
+        box-shadow: 0 6px 28px rgba(37,99,235,.38);
+        transition: transform .15s, box-shadow .15s;
+    }
+    .btn-cta:hover {
+        transform: translateY(-2px); color: #fff;
+        box-shadow: 0 10px 36px rgba(37,99,235,.5);
+    }
+    .btn-cta:active { transform: none; }
 
-        .intro-card {
-            background: var(--card);
-            border: 2px solid var(--accent);
-            color: var(--text);
-        }
+    /* ── Feature grid ───────────────────────────── */
+    .feat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 18px;
+        max-width: 880px; margin: 48px auto 0; padding: 0 20px;
+    }
+    .feat-card {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 14px; padding: 26px;
+        transition: border-color .2s, transform .2s;
+    }
+    .feat-card:hover { border-color: var(--accent); transform: translateY(-3px); }
+    .feat-icon { font-size: 1.7rem; margin-bottom: 10px; }
+    .feat-card h4 { font-size: .97rem; font-weight: 800; margin-bottom: 7px; }
+    .feat-card p { font-size: .84rem; color: var(--muted); line-height: 1.55; }
 
-        .btn-primary {
-            background-color: var(--accent);
-            border-color: var(--accent);
-            color: var(--button-text);
-        }
+    /* ── Team ───────────────────────────────────── */
+    .team-wrap {
+        max-width: 520px; margin: 36px auto;
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 14px; padding: 28px;
+    }
+    .team-label {
+        font-family: var(--mono); font-size: .7rem; font-weight: 700;
+        color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px;
+        margin-bottom: 14px;
+    }
+    .member {
+        display: flex; align-items: center; gap: 12px;
+        padding: 11px 0; border-bottom: 1px solid var(--border);
+    }
+    .member:last-child { border-bottom: none; }
+    .m-av {
+        width: 40px; height: 40px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-weight: 800; font-size: .85rem; flex-shrink: 0;
+    }
+    .m-name { font-weight: 700; font-size: .92rem; }
+    .m-role { font-size: .77rem; color: var(--muted); }
+
+    /* ── Footer ─────────────────────────────────── */
+    .footer {
+        text-align: center; padding: 26px;
+        font-family: var(--mono); font-size: .74rem; color: var(--muted);
+        border-top: 1px solid var(--border); margin-top: 40px;
+    }
     </style>
 </head>
+
 <body data-theme="light">
-    <script>
-        const savedTheme = localStorage.getItem('tailorTheme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
-    </script>
+<script>document.body.setAttribute('data-theme', localStorage.getItem('tailorTheme') || 'light');</script>
 
-    <button class="btn btn-outline-info btn-toggle shadow" onclick="toggleTheme()">🌓 Cambiar Tema</button>
+<div class="topbar">
+    <div class="brand">Tailor-PC <span>Expert System</span></div>
+    <button class="tb-btn" onclick="toggleTheme()">🌓 Cambiar Tema</button>
+</div>
 
-    <div class="container py-5 text-center">
-        <img src="https://www.uaeh.edu.mx/identidad/imagenes/logo_uaeh_color.png" alt="UAEH" style="height: 80px;">
-        <h1 class="hero-title mt-4">Tailor-PC: Expert System</h1>
-        <p class="lead-text font-monospace mt-2">Sistemas Basados en Conocimiento | UAEH - ICBI</p>
-        
-        <div class="intro-card my-5 text-start shadow-lg p-5 rounded">
-            <h3 class="fw-bold mb-4">Introducción</h3>
-            <p class="lead">Este sistema asiste a usuarios novatos en la configuración de computadoras a medida, reduciendo errores de compatibilidad y optimizando el presupuesto de forma inteligente.</p>
-            <hr class="my-4" style="border-color: var(--accent);">
-            <h5 class="text-uppercase fw-bold text-muted">Ingenieros de Conocimiento:</h5>
-            <ul class="list-unstyled mt-3">
-                <li><strong class="text-primary">></strong> Torres De Paz Brandon</li>
-                <li><strong class="text-primary">></strong> Mendoza López Ángel Ariel</li>
-            </ul>
-        </div>
-        
-        <a href="/diagnostico-inicio" class="btn btn-primary btn-lg px-5 py-3 fw-bold font-monospace shadow">INICIAR PROTOCOLO DE CONFIGURACIÓN</a>
+<div class="hero">
+    <img src="https://www.uaeh.edu.mx/identidad/imagenes/logo_uaeh_color.png" alt="UAEH" class="hero-logo">
+    <div class="hero-tag">Sistemas Basados en Conocimiento · UAEH — ICBI</div>
+    <h1 class="hero-title">Tailor<span class="hi">-PC</span><br>Expert System</h1>
+    <p class="hero-sub">Motor RETE · Base de conocimiento CLIPS · Recomendación adaptativa</p>
+    <a href="/diagnostico-inicio" class="btn-cta">⚡ INICIAR DIAGNÓSTICO</a>
+</div>
+
+<div class="feat-grid">
+    <div class="feat-card">
+        <div class="feat-icon">🧠</div>
+        <h4>Motor de Inferencia RETE</h4>
+        <p>Evalúa cientos de reglas de compatibilidad de hardware en milisegundos para encontrar la configuración óptima.</p>
     </div>
+    <div class="feat-card">
+        <div class="feat-icon">💰</div>
+        <h4>Optimización Financiera</h4>
+        <p>Maximiza cada peso del presupuesto seleccionando componentes con mejor costo/beneficio en el mercado mexicano.</p>
+    </div>
+    <div class="feat-card">
+        <div class="feat-icon">🔩</div>
+        <h4>Compatibilidad Garantizada</h4>
+        <p>Las reglas físicas validan socket, voltaje, formato y refrigeración antes de generar cualquier recomendación.</p>
+    </div>
+</div>
 
-    <script>
-        function toggleTheme() {
-            const body = document.body;
-            const current = body.getAttribute('data-theme');
-            const target = current === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', target);
-            localStorage.setItem('tailorTheme', target);
-        }
-    </script>
+<div class="team-wrap">
+    <div class="team-label">Ingenieros de Conocimiento</div>
+    <div class="member">
+        <div class="m-av">TB</div>
+        <div>
+            <div class="m-name">Torres De Paz Brandon</div>
+            <div class="m-role">Ingeniería del Conocimiento · CLIPS</div>
+        </div>
+    </div>
+    <div class="member">
+        <div class="m-av">ML</div>
+        <div>
+            <div class="m-name">Mendoza López Ángel Ariel</div>
+            <div class="m-role">Ingeniería del Conocimiento · CLIPS</div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">Tailor-PC Expert System · UAEH ICBI · Sistemas Basados en Conocimiento</div>
+
+<script>
+    function toggleTheme() {
+        const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.body.setAttribute('data-theme', next);
+        localStorage.setItem('tailorTheme', next);
+    }
+</script>
 </body>
 </html>

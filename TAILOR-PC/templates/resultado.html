@@ -3,371 +3,808 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tailor-PC | Resultados Estratégicos</title>
+    <title>Tailor-PC | Reporte de Ingeniería</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .accordion-body { background-color: var(--bg-main) !important; color: var(--text-main) !important; }
-        .table { --bs-table-bg: transparent; --bs-table-color: var(--text-main); }
-        .table th, .table td { border-bottom-color: var(--border-color); }
-        
-        .progress-bar-smooth { width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); }
-        .typing-dots::after { content: ''; animation: typing 1.5s infinite; }
-        @keyframes typing { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+    /* ═══════════════════════════════════════════════════════
+       VARIABLES DE TEMA
+    ═══════════════════════════════════════════════════════ */
+    :root {
+        --bg:         #f0f4ff;
+        --bg-card:    #ffffff;
+        --text:       #0d1b2a;
+        --muted:      #64748b;
+        --border:     #dde4f0;
+        --accent:     #2563eb;
+        --accent-2:   #7c3aed;
+        --green:      #059669;
+        --red:        #dc2626;
+        --shadow:     rgba(37,99,235,.10);
+        --mono:       'JetBrains Mono', monospace;
+        --sans:       'Plus Jakarta Sans', sans-serif;
+    }
+    [data-theme="dark"] {
+        --bg:         #080d18;
+        --bg-card:    #0f172a;
+        --text:       #e2e8f0;
+        --muted:      #94a3b8;
+        --border:     #1e293b;
+        --accent:     #3b82f6;
+        --accent-2:   #a855f7;
+        --green:      #10b981;
+        --red:        #f87171;
+        --shadow:     rgba(59,130,246,.12);
+    }
 
-        .store-badge { border: 1px solid; background-color: var(--bg-main); padding: 8px 12px; font-size: 0.85rem; }
-        .store-amazon { color: #f59e0b; border-color: #f59e0b; }
-        .store-meli { color: #eab308; border-color: #eab308; }
-        .store-cyber { color: #ef4444; border-color: #ef4444; }
-        .store-ddtech { color: #3b82f6; border-color: #3b82f6; }
-        .store-spartan { color: #10b981; border-color: #10b981; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        @media print {
-            body { background: white !important; color: black !important; }
-            .btn, .dropdown, #chatbot-container, canvas { display: none !important; }
-            .accordion-collapse { display: block !important; height: auto !important; }
-            .accordion-item { border: 2px solid #555 !important; page-break-inside: avoid; margin-bottom: 20px !important; }
-        }
+    body {
+        font-family: var(--sans);
+        background: var(--bg);
+        color: var(--text);
+        transition: background .3s, color .3s;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    /* ── Topbar ─────────────────────────────────────────── */
+    .topbar {
+        position: sticky; top: 0; z-index: 800;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border);
+        padding: 13px 28px;
+        display: flex; align-items: center; gap: 12px;
+        box-shadow: 0 1px 20px var(--shadow);
+    }
+    .brand { font-weight: 800; font-size: 1.05rem; color: var(--accent); letter-spacing: -.3px; }
+    .brand span { color: var(--text); }
+    .topbar-gap { flex: 1; }
+    .tb-btn {
+        background: transparent; color: var(--muted);
+        border: 1px solid var(--border); border-radius: 9px;
+        padding: 7px 16px; font-family: var(--sans);
+        font-size: .82rem; font-weight: 600; cursor: pointer;
+        transition: all .15s; text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .tb-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .tb-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .tb-btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); color: #fff; }
+
+    /* ── Page header ─────────────────────────────────────── */
+    .page-header { padding: 28px 0 16px; }
+    .page-label {
+        font-family: var(--mono); font-size: .72rem; font-weight: 700;
+        color: var(--accent); text-transform: uppercase; letter-spacing: 2px;
+        margin-bottom: 6px;
+    }
+    .page-title { font-size: 1.8rem; font-weight: 800; letter-spacing: -.4px; }
+    .page-sub { color: var(--muted); font-size: .88rem; margin-top: 5px; }
+
+    /* ── Sort toolbar ────────────────────────────────────── */
+    .sort-bar {
+        display: flex; gap: 8px; flex-wrap: wrap;
+        padding: 12px 0 20px;
+    }
+    .sort-btn {
+        font-family: var(--mono); font-size: .72rem; font-weight: 600;
+        padding: 6px 14px; border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--bg-card); color: var(--muted);
+        cursor: pointer; transition: all .15s;
+    }
+    .sort-btn:hover, .sort-btn.active {
+        background: var(--accent); color: #fff; border-color: var(--accent);
+    }
+
+    /* ── PC Cards ────────────────────────────────────────── */
+    .pc-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        margin-bottom: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 16px var(--shadow);
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .pc-card:hover { border-color: var(--accent); box-shadow: 0 4px 28px var(--shadow); }
+    .pc-card.stores-highlight { border-color: var(--green); }
+
+    .card-header-row {
+        display: flex; align-items: center; gap: 14px;
+        padding: 17px 22px; cursor: pointer; user-select: none;
+    }
+    .card-header-row:hover { background: rgba(37,99,235,.03); }
+
+    .opt-badge {
+        font-family: var(--mono); font-size: .68rem; font-weight: 700;
+        background: var(--accent); color: #fff;
+        padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+    }
+    .opt-name { font-weight: 700; font-size: .95rem; flex: 1; }
+    .opt-price {
+        font-family: var(--mono); font-size: .8rem; font-weight: 700;
+        color: var(--muted);
+    }
+    .opt-sinergia {
+        font-family: var(--mono); font-size: .8rem; font-weight: 700;
+        color: var(--green);
+    }
+    .chevron {
+        color: var(--muted); font-size: .75rem;
+        transition: transform .3s; margin-left: 4px;
+    }
+    .card-header-row.open .chevron { transform: rotate(180deg); }
+
+    .card-body {
+        display: none; padding: 22px;
+        border-top: 1px solid var(--border);
+        animation: fadeIn .22s ease;
+    }
+    .card-body.open { display: block; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:none} }
+
+    /* ── Section label ───────────────────────────────────── */
+    .sec-label {
+        font-family: var(--mono); font-size: .68rem; font-weight: 700;
+        color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px;
+        margin-bottom: 10px;
+    }
+
+    /* ── Specs table ─────────────────────────────────────── */
+    .specs-tbl { width: 100%; border-collapse: collapse; font-size: .84rem; }
+    .specs-tbl td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .specs-tbl td:first-child {
+        font-family: var(--mono); font-size: .73rem; color: var(--accent);
+        font-weight: 600; width: 36%; white-space: nowrap;
+    }
+    .specs-tbl tr:last-child td { border-bottom: none; }
+
+    /* ── Balance ─────────────────────────────────────────── */
+    .balance-tag {
+        display: inline-flex; align-items: center; gap: 6px;
+        padding: 8px 16px; border-radius: 30px;
+        font-family: var(--mono); font-weight: 700; font-size: .85rem;
+    }
+    .bal-pos { background: rgba(5,150,105,.1); color: var(--green); border: 1px solid var(--green); }
+    .bal-neg { background: rgba(220,38,38,.08); color: var(--red);  border: 1px solid var(--red); }
+
+    /* ── Store grid ──────────────────────────────────────── */
+    .store-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+    .store-item {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 10px; padding: 10px 13px;
+        font-family: var(--mono); font-size: .78rem;
+        transition: border-color .2s;
+    }
+    .store-item:hover { border-color: var(--accent); }
+    .store-item .sname { display: block; color: var(--muted); font-size: .68rem; margin-bottom: 2px; }
+    .store-item .sprice { font-weight: 700; color: var(--text); }
+
+    /* ── Radar ───────────────────────────────────────────── */
+    .radar-wrap { height: 240px; }
+
+    /* ═══════════════════════════════════════════════════════
+       CHATBOT
+    ═══════════════════════════════════════════════════════ */
+    #chat-fab {
+        position: fixed; bottom: 26px; right: 26px; z-index: 2000;
+        width: 58px; height: 58px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+        border: none; cursor: pointer;
+        box-shadow: 0 6px 26px rgba(37,99,235,.45);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.45rem;
+        transition: transform .2s, box-shadow .2s;
+    }
+    #chat-fab:hover { transform: scale(1.1); box-shadow: 0 8px 34px rgba(37,99,235,.6); }
+    #chat-fab .fab-dot {
+        position: absolute; top: 8px; right: 8px;
+        width: 10px; height: 10px; border-radius: 50%;
+        background: #ef4444; border: 2px solid var(--bg);
+        animation: ping 2s infinite;
+    }
+    @keyframes ping { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.3);opacity:.6} }
+
+    #chat-panel {
+        position: fixed; bottom: 96px; right: 26px; z-index: 2000;
+        width: 370px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,.22);
+        display: none; flex-direction: column;
+        overflow: hidden;
+        transform-origin: bottom right;
+    }
+    #chat-panel.show { display: flex; animation: popIn .2s ease; }
+    @keyframes popIn { from{opacity:0;transform:scale(.92) translateY(14px)} to{opacity:1;transform:none} }
+
+    /* header */
+    .ch-head {
+        padding: 14px 16px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        display: flex; align-items: center; gap: 11px;
+    }
+    .ch-av {
+        width: 38px; height: 38px; border-radius: 50%;
+        background: rgba(255,255,255,.2); flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .ch-info h4 { color: #fff; font-size: .92rem; font-weight: 700; margin: 0; }
+    .ch-status { display: flex; align-items: center; gap: 4px; font-size: .7rem; color: rgba(255,255,255,.8); }
+    .ch-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .ch-close {
+        margin-left: auto; background: none; border: none;
+        color: rgba(255,255,255,.75); font-size: 1.05rem; cursor: pointer;
+        transition: color .15s; line-height: 1;
+    }
+    .ch-close:hover { color: #fff; }
+
+    /* messages area */
+    .ch-msgs {
+        flex: 1; max-height: 310px; min-height: 200px;
+        overflow-y: auto; padding: 14px;
+        display: flex; flex-direction: column; gap: 9px;
+        scroll-behavior: smooth;
+    }
+    .ch-msgs::-webkit-scrollbar { width: 4px; }
+    .ch-msgs::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .msg { display: flex; gap: 7px; max-width: 93%; animation: msgIn .17s ease; }
+    @keyframes msgIn { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:none} }
+    .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+
+    .msg-av {
+        width: 27px; height: 27px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: .72rem; flex-shrink: 0; margin-top: 2px;
+    }
+    .msg.bot  .msg-av { background: rgba(37,99,235,.12); color: var(--accent); }
+    .msg.user .msg-av { background: var(--accent); color: #fff; }
+
+    .msg-bub {
+        padding: 9px 13px; border-radius: 13px;
+        font-size: .82rem; line-height: 1.52;
+    }
+    .msg.bot .msg-bub {
+        background: var(--bg); border: 1px solid var(--border);
+        color: var(--text); border-bottom-left-radius: 3px;
+    }
+    .msg.user .msg-bub {
+        background: var(--accent); color: #fff;
+        border-bottom-right-radius: 3px;
+    }
+
+    /* typing */
+    .typing-dots { display: flex; gap: 4px; padding: 3px 2px; }
+    .typing-dots span {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: var(--muted);
+        animation: bounce .85s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: .14s; }
+    .typing-dots span:nth-child(3) { animation-delay: .28s; }
+    @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+    /* quick commands */
+    .ch-quick {
+        display: flex; gap: 5px; flex-wrap: wrap;
+        padding: 8px 12px; border-top: 1px solid var(--border);
+    }
+    .qc {
+        font-family: var(--mono); font-size: .68rem; font-weight: 600;
+        padding: 4px 9px; border-radius: 20px;
+        border: 1px solid var(--border);
+        background: var(--bg); color: var(--muted);
+        cursor: pointer; transition: all .15s; white-space: nowrap;
+    }
+    .qc:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* input row */
+    .ch-input-row {
+        display: flex; gap: 7px; padding: 10px 12px;
+        border-top: 1px solid var(--border);
+    }
+    .ch-input {
+        flex: 1; background: var(--bg); border: 1px solid var(--border);
+        border-radius: 9px; padding: 8px 13px;
+        color: var(--text); font-family: var(--sans);
+        font-size: .83rem; outline: none; transition: border-color .2s;
+    }
+    .ch-input:focus { border-color: var(--accent); }
+    .ch-send {
+        width: 36px; height: 36px; border-radius: 9px;
+        background: var(--accent); border: none; cursor: pointer;
+        color: #fff; font-size: .95rem;
+        display: flex; align-items: center; justify-content: center;
+        transition: background .15s, transform .1s; flex-shrink: 0;
+    }
+    .ch-send:hover { background: var(--accent-2); }
+    .ch-send:active { transform: scale(.92); }
+
+    /* ═══════════════════════════════════════════════════════
+       BUDGET MODAL
+    ═══════════════════════════════════════════════════════ */
+    #budget-overlay {
+        display: none; position: fixed; inset: 0; z-index: 3000;
+        background: rgba(0,0,0,.52); backdrop-filter: blur(4px);
+        align-items: center; justify-content: center;
+    }
+    #budget-overlay.show { display: flex; }
+
+    .bud-modal {
+        background: var(--bg-card); border: 1px solid var(--border);
+        border-radius: 18px; padding: 30px; width: 350px;
+        box-shadow: 0 24px 64px rgba(0,0,0,.3);
+        animation: popIn .22s ease;
+    }
+    .bud-modal h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 18px; }
+    .bud-modal label {
+        display: block; font-family: var(--mono); font-size: .7rem;
+        color: var(--muted); text-transform: uppercase; letter-spacing: .5px;
+        margin-bottom: 5px; margin-top: 13px;
+    }
+    .bud-modal input {
+        width: 100%; padding: 9px 13px; background: var(--bg);
+        border: 1px solid var(--border); border-radius: 9px;
+        color: var(--text); font-size: .88rem; outline: none;
+        transition: border-color .2s; font-family: var(--sans);
+    }
+    .bud-modal input:focus { border-color: var(--accent); }
+    .bud-result {
+        margin-top: 14px; padding: 13px; border-radius: 10px;
+        font-size: .85rem; font-weight: 600; display: none;
+    }
+    .bud-result.pos { background: rgba(5,150,105,.1); color: var(--green); border: 1px solid var(--green); }
+    .bud-result.neg { background: rgba(220,38,38,.08); color: var(--red); border: 1px solid var(--red); }
+    .bud-actions { display: flex; gap: 9px; margin-top: 18px; }
+    .btn-p {
+        background: var(--accent); color: #fff; border: none;
+        border-radius: 9px; padding: 9px 20px;
+        font-family: var(--sans); font-weight: 700; font-size: .85rem;
+        cursor: pointer; transition: background .15s;
+    }
+    .btn-p:hover { background: var(--accent-2); }
+    .btn-o {
+        background: transparent; color: var(--muted);
+        border: 1px solid var(--border); border-radius: 9px;
+        padding: 9px 18px; font-family: var(--sans);
+        font-weight: 600; font-size: .85rem; cursor: pointer;
+        transition: all .15s;
+    }
+    .btn-o:hover { border-color: var(--accent); color: var(--accent); }
     </style>
 </head>
+
 <body data-theme="light">
-    <script>
-        const savedTheme = localStorage.getItem('tailorTheme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
-    </script>
-    
-    <button class="btn btn-outline-info shadow" style="position:fixed; top:20px; right:20px; z-index:1000;" onclick="toggleTheme()">🌓 Tema</button>
+<script>document.body.setAttribute('data-theme', localStorage.getItem('tailorTheme') || 'light');</script>
 
-    <div class="container py-5">
-        <h2 class="mb-4 fw-bold">Reporte Estratégico Tailor-PC</h2>
-        
-        <div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded shadow-sm" style="background-color: var(--bg-card); border: 1px solid var(--border-color);">
-            <h4 class="text-primary font-monospace m-0">DICTAMEN DEL MOTOR EXPERTO</h4>
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle fw-bold shadow-sm" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown">
-                    ⚙️ Filtrar Resultados
-                </button>
-                <ul class="dropdown-menu shadow">
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters('max-ahorro', 1); return false;">👑 Mostrar Solo el Top 1</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters('max-ahorro', 5); return false;">🏆 Top 5 (Recomendado)</a></li>
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters('min-ahorro', 10); return false;">🚀 Top 10 Alto Rendimiento</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="#" onclick="applyFilters('max-ahorro', 'all'); return false;">📋 Mostrar Todas las Opciones</a></li>
-                </ul>
-            </div>
-        </div>
+<!-- ── Topbar ──────────────────────────────────────────── -->
+<div class="topbar">
+    <div class="brand">Tailor-PC <span>Expert System</span></div>
+    <div class="topbar-gap"></div>
+    <button class="tb-btn" onclick="toggleTheme()">🌓 Tema</button>
+    <a href="/diagnostico-inicio" class="tb-btn primary" style="margin-left:4px">➕ Nueva Consulta</a>
+</div>
 
-        <div class="accordion shadow-sm" id="pcAccordion">
-          {% for s in sugerencias %}
-          <div class="accordion-item mb-4 rounded border-0 shadow {% if loop.index == 1 %}border border-primary glow-premium{% endif %}" data-balance="{{ s.balance }}" style="background-color: var(--bg-card);">
-            <h2 class="accordion-header" id="heading{{ loop.index }}">
-              <button class="accordion-button collapsed fw-bold text-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
-                <span class="badge bg-primary me-3 text-white">{{ s.prioridad }}</span>
-                Ensamblaje Sugerido #{{ loop.index }}
-                {% if loop.index == 1 %} <span class="badge bg-warning text-dark ms-2 shadow-sm">⭐ TOP RECOMENDADO</span> {% endif %}
-              </button>
-            </h2>
-            
-            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#pcAccordion">
-              <div class="accordion-body p-4 rounded-bottom">
-                  {% if s.es_lista %}
-                      <div class="row align-items-center mb-4">
-                          <div class="col-md-7">
-                              <table class="table table-sm table-borderless">
-                                  <thead style="border-bottom: 2px solid var(--accent-primary);">
-                                      <tr><th class="text-muted">Hardware</th><th class="text-muted">Modelo Específico</th></tr>
-                                  </thead>
-                                  <tbody>
-                                      {% for item in s.detalles %}
-                                          {% set linea = item.split(':') %}
-                                          {% if linea|length == 2 %}
-                                          <tr>
-                                              <td class="fw-bold py-2" style="width: 35%;">{{ linea[0] }}</td>
-                                              <td class="py-2">{{ linea[1] }}</td>
-                                          </tr>
-                                          {% endif %}
-                                      {% endfor %}
-                                  </tbody>
-                              </table>
-                          </div>
-                          <div class="col-md-5 text-center">
-                              <h6 class="text-muted font-monospace small fw-bold">MATRIZ DE DESEMPEÑO</h6>
-                              <div style="position: relative; height: 220px; width: 100%;">
-                                  <canvas id="radarChart-{{ loop.index }}"></canvas>
-                              </div>
-                          </div>
-                      </div>
+<!-- ── Main ────────────────────────────────────────────── -->
+<div class="container" style="max-width:960px">
 
-                      <div class="p-4 rounded mb-4 shadow-sm" style="background-color: var(--bg-main); border: 1px solid var(--border-color);">
-                          <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3" style="border-color: var(--border-color) !important;">
-                              <h6 class="text-uppercase fw-bold m-0 text-muted">🛒 Análisis de Mercado en Tiempo Real</h6>
-                              <span class="font-monospace text-primary fw-bold" style="font-size: 1.1rem;">Costo Global Base: ${{ s.total }} MXN</span>
-                          </div>
-                          <div class="d-flex flex-wrap gap-2 justify-content-center">
-                              <span class="badge rounded-pill store-badge store-cyber">Cyberpuerta: ${{ (s.total * 0.95) | round(2) }}</span>
-                              <span class="badge rounded-pill store-badge store-ddtech">DDTech: ${{ (s.total * 0.96) | round(2) }}</span>
-                              <span class="badge rounded-pill store-badge store-meli">MercadoLibre: ${{ (s.total * 0.98) | round(2) }}</span>
-                              <span class="badge rounded-pill store-badge store-amazon">Amazon MX: ${{ (s.total * 1.05) | round(2) }}</span>
-                              <span class="badge rounded-pill store-badge store-spartan" title="Incluye ensamblaje premium">SpartanGeek: ${{ (s.total * 1.12) | round(2) }}</span>
-                          </div>
-                      </div>
-
-                      <div class="alert {% if s.balance < 0 %}alert-danger{% else %}alert-success{% endif %} border-0 shadow-sm mb-4">
-                          <div class="d-flex justify-content-between align-items-center">
-                              <h5 class="alert-heading fw-bold mb-0">
-                                  {% if s.balance < 0 %}⚠️ Déficit Presupuestario: Te faltan ${{ (s.balance * -1) | round(2) }} MXN
-                                  {% else %}✅ Viabilidad Financiera: Margen sobrante de ${{ s.balance | round(2) }} MXN
-                                  {% endif %}
-                              </h5>
-                          </div>
-                      </div>
-
-                      <div>
-                          <div class="d-flex justify-content-between mb-2">
-                              <small class="fw-bold font-monospace text-muted">Factor de Sinergia (Certeza RETE):</small>
-                              <small class="fw-bold font-monospace">{{ s.sinergia }}%</small>
-                          </div>
-                          <div class="progress" style="height: 10px; background-color: var(--border-color);">
-                              <div class="progress-bar progress-bar-smooth {% if s.sinergia >= 80 %}bg-success{% elif s.sinergia >= 50 %}bg-warning{% else %}bg-danger{% endif %}" data-target-width="{{ s.sinergia }}%"></div>
-                          </div>
-                      </div>
-                  {% else %}
-                      <p class="lead">{{ s.razon }}</p>
-                  {% endif %}
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
+    <div class="page-header">
+        <div class="page-label">Motor RETE — Resultados</div>
+        <h1 class="page-title">Reporte Estratégico de Hardware</h1>
+        <p class="page-sub" id="count-label">
+            {{ sugerencias|length }} configuración(es) generada(s) · Ordenadas por viabilidad financiera
+        </p>
     </div>
 
-    <div id="chatbot-container" style="position: fixed; bottom: 20px; right: 20px; z-index: 2000;">
-        <button class="btn btn-primary rounded-circle p-3 shadow-lg" onclick="toggleChat()">🤖</button>
-        <div id="chat-window" class="card shadow-lg border-primary" style="display:block; width: 380px; position: absolute; bottom: 70px; right: 0;">
-            <div class="card-header bg-primary text-white fw-bold d-flex justify-content-between align-items-center">
-                <span>Tailor AI (Experto v6.0)</span>
-                <span class="badge bg-light text-primary">En línea</span>
-            </div>
-            <div class="card-body p-2" style="background-color: var(--bg-card);">
-                <div id="chat-response" class="mb-2 small p-2 rounded" style="background-color: var(--bg-main); min-height: 220px; max-height: 280px; overflow-y: auto; display: flex; flex-direction: column;">
-                    <div class="text-start mb-2"><span class="p-2 d-inline-block rounded bg-primary text-white shadow-sm">Diagnóstico completado. Conozco cada componente, mi propia arquitectura lógica, y la historia de mis creadores. Puedes hablarme de forma natural. ¿En qué te asesoro?</span></div>
-                </div>
-                
-                <div id="chat-quick-replies" class="d-flex flex-wrap gap-1 mb-2 px-1">
-                    <button class="btn btn-outline-primary btn-sm fw-bold" onclick="askChat('¿Quiénes son tus creadores?')">¿Tus Creadores?</button>
-                    <button class="btn btn-outline-info btn-sm fw-bold" onclick="askChat('Muestra todos los resultados')">Ver Todos</button>
-                    <button class="btn btn-outline-danger btn-sm fw-bold" onclick="askChat('Limpiar chat')">Limpiar Chat</button>
+    <!-- Sort bar -->
+    <div class="sort-bar">
+        <span style="font-family:var(--mono);font-size:.72rem;color:var(--muted);align-self:center;margin-right:4px">ORDENAR:</span>
+        <button class="sort-btn active" id="btn-sinergia" onclick="sortCards('sinergia')">⚡ Sinergia</button>
+        <button class="sort-btn" id="btn-asc"      onclick="sortCards('precio_asc')">🔽 Menor precio</button>
+        <button class="sort-btn" id="btn-desc"     onclick="sortCards('precio_desc')">🔼 Mayor precio</button>
+        <button class="sort-btn" id="btn-bal"      onclick="sortCards('balance')">💚 Mejor balance</button>
+    </div>
+
+    <!-- PC list -->
+    <div id="pc-list">
+    {% for s in sugerencias %}
+    <div class="pc-card"
+         id="card-{{ loop.index }}"
+         data-index="{{ loop.index }}"
+         data-total="{{ s.total }}"
+         data-balance="{{ s.balance }}"
+         data-sinergia="{{ s.sinergia }}">
+
+        <div class="card-header-row" id="hdr-{{ loop.index }}" onclick="toggleCard({{ loop.index }})">
+            <span class="opt-badge">OPC #{{ loop.index }}</span>
+            <span class="opt-name">{{ s.prioridad }}</span>
+            <span class="opt-price">${{ s.total | round(0) | int }} MXN</span>
+            <span class="opt-sinergia">⚡ {{ s.sinergia }}%</span>
+            <span class="chevron">▼</span>
+        </div>
+
+        <div class="card-body" id="body-{{ loop.index }}">
+            <div class="row g-4">
+
+                <!-- Radar -->
+                <div class="col-md-4">
+                    <div class="sec-label">Perfil de Rendimiento</div>
+                    <div class="radar-wrap"><canvas id="radar-{{ loop.index }}"></canvas></div>
                 </div>
 
-                <div class="input-group shadow-sm">
-                    <input type="text" id="chat-input" class="form-control" style="background-color: var(--bg-main); color: var(--text-main);" placeholder="Pregunta técnica o da una orden...">
+                <!-- Specs -->
+                <div class="col-md-4">
+                    <div class="sec-label">🛠 Especificaciones</div>
+                    <table class="specs-tbl">
+                        <tbody>
+                        {% for item in s.detalles %}
+                            {% set linea = item.split(':') %}
+                            {% if linea|length == 2 %}
+                            <tr>
+                                <td>{{ linea[0] }}</td>
+                                <td>{{ linea[1] }}</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
+
+                <!-- Financiero -->
+                <div class="col-md-4">
+                    <div class="sec-label">💰 Analítica Financiera</div>
+                    <span class="balance-tag {% if s.balance < 0 %}bal-neg{% else %}bal-pos{% endif %}">
+                        {% if s.balance >= 0 %}✅{% else %}⚠️{% endif %}
+                        Balance: ${{ s.balance | round(2) }} MXN
+                    </span>
+
+                    <div style="margin-top:18px">
+                        <div class="sec-label" style="margin-top:0">Mercado Estimado</div>
+                        <div class="store-grid">
+                            <div class="store-item">
+                                <span class="sname">Cyberpuerta</span>
+                                <span class="sprice">${{ (s.total * 0.95)|round(0)|int }}</span>
+                            </div>
+                            <div class="store-item">
+                                <span class="sname">DDTech</span>
+                                <span class="sprice">${{ (s.total * 0.96)|round(0)|int }}</span>
+                            </div>
+                            <div class="store-item">
+                                <span class="sname">Mercado Libre</span>
+                                <span class="sprice">${{ (s.total * 0.98)|round(0)|int }}</span>
+                            </div>
+                            <div class="store-item">
+                                <span class="sname">Amazon MX</span>
+                                <span class="sprice">${{ (s.total * 1.05)|round(0)|int }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
+    {% endfor %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% if not sugerencias %}
+    <div style="text-align:center;padding:60px 20px;color:var(--muted)">
+        <div style="font-size:2.5rem;margin-bottom:16px">⚠️</div>
+        <h3>Sin configuraciones viables</h3>
+        <p style="margin-top:8px;font-size:.9rem">El presupuesto no cubre ninguna configuración mínima. Intenta con un valor mayor.</p>
+        <a href="/diagnostico-inicio" class="tb-btn primary" style="margin-top:20px;text-decoration:none">Nueva Consulta</a>
+    </div>
+    {% endif %}
+    </div>
+</div>
 
-    <script>
-        const top1Global = {{ sugerencias[0].total if sugerencias else 0 }};
-        const top1Amazon = (top1Global * 1.05).toFixed(2);
-        const top1Cyber = (top1Global * 0.95).toFixed(2);
-        const top1Ddtech = (top1Global * 0.96).toFixed(2);
-        const top1Meli = (top1Global * 0.98).toFixed(2);
-        const top1Spartan = (top1Global * 1.12).toFixed(2);
+<!-- ═══════════════════════════════════════════════════════
+     CHATBOT FAB + PANEL
+═══════════════════════════════════════════════════════ -->
+<button id="chat-fab" onclick="toggleChat()" title="Tailor AI">
+    🤖
+    <div class="fab-dot" id="fab-notif"></div>
+</button>
 
-        function toggleTheme() {
-            const body = document.body;
-            const target = body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            body.setAttribute('data-theme', target);
-            localStorage.setItem('tailorTheme', target);
-            setTimeout(initRadarCharts, 100);
-        }
+<div id="chat-panel">
+    <!-- Header -->
+    <div class="ch-head">
+        <div class="ch-av">🤖</div>
+        <div class="ch-info">
+            <h4>Tailor AI Expert</h4>
+            <div class="ch-status"><div class="ch-dot"></div>Motor RETE en línea</div>
+        </div>
+        <button class="ch-close" onclick="toggleChat()">✕</button>
+    </div>
 
-        function applyFilters(sortMode, limit) {
-            if(sortMode) window.currentSort = sortMode;
-            if(limit !== undefined) window.currentLimit = limit;
-            const container = document.getElementById('pcAccordion');
-            const items = Array.from(container.querySelectorAll('.accordion-item'));
-            items.sort((a, b) => {
-                const valA = parseFloat(a.dataset.balance || '0');
-                const valB = parseFloat(b.dataset.balance || '0');
-                return window.currentSort === 'min-ahorro' ? valA - valB : valB - valA;
-            });
-            items.forEach((item, index) => {
-                container.appendChild(item);
-                item.style.display = (window.currentLimit === 'all' || index < window.currentLimit) ? 'block' : 'none';
-            });
-        }
+    <!-- Mensajes -->
+    <div class="ch-msgs" id="ch-msgs"></div>
 
-        function toggleChat() {
-            const win = document.getElementById('chat-window');
-            win.style.display = win.style.display === 'none' ? 'block' : 'none';
-        }
+    <!-- Quick commands -->
+    <div class="ch-quick">
+        <span class="qc" onclick="quick('modo oscuro')">🌙 Oscuro</span>
+        <span class="qc" onclick="quick('modo claro')">☀️ Claro</span>
+        <span class="qc" onclick="quick('ordenar menor precio')">🔽 Barato</span>
+        <span class="qc" onclick="quick('ordenar mayor precio')">🔼 Caro</span>
+        <span class="qc" onclick="quick('dónde comprar')">🏪 Tiendas</span>
+        <span class="qc" onclick="quick('presupuesto')">💰 Finanzas</span>
+        <span class="qc" onclick="quick('ayuda')">❓ Ayuda</span>
+    </div>
 
-        function askChat(query) {
-            const inputField = document.getElementById('chat-input');
-            inputField.value = query;
-            inputField.dispatchEvent(new KeyboardEvent('keypress', { 'key': 'Enter' }));
-        }
+    <!-- Input -->
+    <div class="ch-input-row">
+        <input class="ch-input" id="ch-input" placeholder="Escribe un comando..." autocomplete="off">
+        <button class="ch-send" onclick="sendChat()">➤</button>
+    </div>
+</div>
 
-        function updateQuickReplies(options) {
-            const container = document.getElementById('chat-quick-replies');
-            container.innerHTML = '';
-            options.forEach(opt => {
-                const btn = document.createElement('button');
-                btn.className = `btn ${opt.class || 'btn-outline-primary'} btn-sm fw-bold`;
-                btn.innerText = opt.label;
-                btn.onclick = () => askChat(opt.query);
-                container.appendChild(btn);
-            });
-        }
+<!-- ═══════════════════════════════════════════════════════
+     BUDGET MODAL
+═══════════════════════════════════════════════════════ -->
+<div id="budget-overlay" onclick="if(event.target===this)closeBudget()">
+    <div class="bud-modal">
+        <h3>📊 Analizador Financiero</h3>
+        <label>Ingresos mensuales netos (MXN)</label>
+        <input type="number" id="bud-ing" placeholder="$0.00">
+        <label>Gastos fijos mensuales (MXN)</label>
+        <input type="number" id="bud-gas" placeholder="$0.00">
+        <div class="bud-result" id="bud-res"></div>
+        <div class="bud-actions">
+            <button class="btn-p" onclick="calcBudget()">Calcular</button>
+            <button class="btn-o" onclick="closeBudget()">Cerrar</button>
+        </div>
+    </div>
+</div>
 
-        const knowledgeMatrix = [
-            // 0. CREADORES, IDENTIDAD Y CULTURA GENERAL
-            { keys: /(quién eres|nombre|identidad|que eres|como te llamas)/, res: "Soy Tailor-PC, un Sistema Basado en Conocimiento de vanguardia, diseñado para proteger tu presupuesto y maximizar tu rendimiento mediante el Algoritmo RETE.", btns: [{label: '¿Quién te creó?', query: 'Quién te creó'}] },
-            { keys: /(creador|creadores|padre|desarrollador|brandon|ariel|programador|quien te creo)/, res: "Fui desarrollado desde cero por las mentes maestras de Brandon y Ariel, ingenieros y estrategas de la Universidad Autónoma del Estado de Hidalgo (UAEH). Ellos me dotaron de este motor experto.", btns: [{label: '¿Qué es la UAEH?', query: 'Qué es la UAEH'}, {label: 'Impresionante', query: 'Wow'}] },
-            { keys: /(uaeh|universidad|garza|escuela|institucion)/, res: "Orgullosamente soy un proyecto gestado en las aulas de la Universidad Autónoma del Estado de Hidalgo (UAEH). Calidad, autonomía y excelencia académica hecha software.", btns: [{label: 'Excelente', query: 'Excelente'}] },
-            { keys: /(inteligencia artificial|ia|gpt|chatgpt|gemini|robot|skynet|terminator|jarvis)/, res: "A diferencia de un bot como ChatGPT que 'adivina' palabras y alucina, yo opero con un Motor de Inferencia determinista (CLIPS). Mis respuestas no son inventos, son cálculos matemáticos exactos. Soy tu asistente personal estilo Jarvis, enfocado puramente en hardware.", btns: [{label: '¿Qué es RETE?', query: 'Qué es RETE'}] },
-            { keys: /(amor|sentido de la vida|novia|pareja)/, res: "Mi único propósito en la existencia es evitar que compres una tarjeta de 30 mil pesos y la conectes a un procesador Celeron. Eso es verdadero amor por tu economía.", btns: [{label: 'Jajaja', query: 'Jajaja'}] },
-            { keys: /(rete|motor|algoritmo|clips)/, res: "El algoritmo RETE es el núcleo de mi cerebro. En lugar de leer línea por línea, crea una red en memoria que evalúa cientos de reglas (compatibilidad, energía, dinero) en milisegundos para darte la configuración ideal.", btns: [{label: 'Impresionante', query: 'Impresionante'}] },
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+/* ─── TEMA ──────────────────────────────────────────────── */
+function toggleTheme() {
+    applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
+function applyTheme(mode) {
+    document.body.setAttribute('data-theme', mode);
+    localStorage.setItem('tailorTheme', mode);
+    Object.keys(radarCache).forEach(k => renderRadar(parseInt(k)));
+}
 
-            // 1. COMANDOS DE INTERFAZ Y UTILIDAD
-            { keys: /(limpiar|borrar|vaciar).*(chat|pantalla|conversacion|mensaje)/, type: "cmd_clear", res: "Historial borrado. Interfaz de chat purgada correctamente.", btns: [{label: 'Filtra opciones', query: 'Filtra el top 5'}] },
-            { keys: /(presentacion|exposicion|solo la mejor|unica|top 1|el mejor|la mejor|uno|1)/, type: "cmd_top1", res: "Modo Presentación activado. He filtrado la vista para mostrar exclusivamente el ensamblaje Top 1 de mayor sinergia.", btns: [{label: 'Mostrar todos', query: 'Muestra todos los resultados'}, {label: 'Exportar a PDF', query: 'Exportar PDF'}] },
-            { keys: /(filtra|top|mejores|recomienda|filtro|5|cinco)/, type: "cmd_filter", res: "He aplicado un filtro estricto. Mostrando únicamente el Top 5 más viable financieramente.", btns: [{label: 'Mostrar todos', query: 'Muestra todos los resultados'}] },
-            { keys: /(todos|todas|completo|desfiltra|lista|todo|resultados)/, type: "cmd_unfilter", res: "Comando ejecutado. Restaurando la vista con todas las combinaciones procesadas por mi motor.", btns: [{label: 'Muestra solo la mejor', query: 'Muestra solo la mejor'}] },
-            { keys: /(claro|oscuro|tema|color|luz|pantalla)/, type: "cmd_theme", res: "Modificación de entorno visual ejecutada. Paleta de colores ajustada exitosamente.", btns: [{label: 'Cambiar de nuevo', query: 'Cambia el tema'}] },
-            { keys: /(imprimir|pdf|exportar|guardar|documento|reporte)/, type: "cmd_pdf", res: "Protocolo de exportación iniciado. Preparando el documento oficial de Tailor-PC...", btns: [] },
+/* ─── ACCORDION ─────────────────────────────────────────── */
+function toggleCard(idx) {
+    const hdr  = document.getElementById(`hdr-${idx}`);
+    const body = document.getElementById(`body-${idx}`);
+    const wasOpen = body.classList.contains('open');
+    // close all
+    document.querySelectorAll('.card-body').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.card-header-row').forEach(h => h.classList.remove('open'));
+    if (!wasOpen) {
+        body.classList.add('open');
+        hdr.classList.add('open');
+        renderRadar(idx);
+    }
+}
 
-            // 2. CONOCIMIENTO TÉCNICO PROFUNDO (Hardware)
-            { keys: /(ddr4|ddr5)/, res: "DDR5 es el estándar actual: duplica el ancho de banda y mejora frecuencias base, ideal para plataformas modernas (AM5 o Intel Gen 13/14). DDR4 sigue siendo viable y mucho más barata si tu presupuesto es apretado.", btns: [{label: '¿Y la VRAM?', query: 'Qué es VRAM'}] },
-            { keys: /(monitor|pantalla|hz|ips|tn|va)/, res: "Un ensamble premium es inútil si tu monitor es de 60Hz. Para esta build te recomiendo un monitor panel IPS (mejores colores) de mínimo 144Hz. Si juegas competitivo, un panel TN de 240Hz prioriza la velocidad sobre el color.", btns: [{label: '¿Qué son los FPS?', query: 'Que son fps'}] },
-            { keys: /(liquida|aio|enfriamiento|disipador|aire)/, res: "La refrigeración líquida (AIO) usa un fluido para disipar calor hacia un radiador; es estéticamente superior e ideal para procesadores i7, i9 o Ryzen 9. Si tu CPU es gama media (i5 o Ryzen 5), un buen disipador de aire de doble torre es más que suficiente.", btns: [{label: '¿TDP?', query: 'Que es tdp'}] },
-            { keys: /(tiempo de vida|cuanto dura|longevidad|obsoleto)/, res: "Una PC estructurada con mi algoritmo tiene una 'vida útil óptima' de 5 a 7 años para gaming en calidad alta. Después de ese tiempo, probablemente solo necesites actualizar la tarjeta de video para seguir vigente.", btns: [{label: 'Actualizaciones', query: 'Que puedo actualizar despues'}] },
-            { keys: /(cuello.*botella|bottleneck|frena|limita)/, res: "El 'Cuello de Botella' ocurre si combinas componentes de diferentes generaciones o gamas (ej. una gráfica tope de gama con un procesador débil). La pieza lenta frena a la rápida. La sinergia RETE en mis resultados minimiza esto a menos del 5%.", btns: [{label: '¿Qué es la gráfica?', query: 'Qué es una gpu'}] },
-            { keys: /(procesador|cpu|ryzen|core|intel|amd)/, res: "El CPU es el cerebro. Ejecuta la lógica del sistema. AMD Ryzen ofrece un rendimiento multinúcleo brutal y mayor eficiencia energética. Intel Core domina en tareas que requieren altas frecuencias brutas (ej. gaming competitivo).", btns: [{label: '¿Qué gráfica lleva?', query: '¿Y qué gráfica me pusiste?'}] },
-            { keys: /(grafica|gpu|video|rtx|radeon|vram|tarjeta)/, res: "La Tarjeta Gráfica (GPU) renderiza los entornos virtuales. NVIDIA (RTX) lidera en tecnologías como RayTracing y DLSS. AMD (Radeon) ofrece mejor relación FPS/dólar en potencia bruta.", btns: [{label: '¿Qué es VRAM?', query: 'Qué es VRAM'}] },
-            { keys: /(ram|memoria)/, res: "La RAM es tu escritorio de trabajo temporal. Lo crítico aquí es el 'Dual Channel': usar dos memorias de 8GB es mucho más rápido que usar una sola de 16GB. Mis cálculos asumen que comprarás tu RAM en pares.", btns: [{label: '¿DDR4 o DDR5?', query: 'Diferencia ddr4 y ddr5'}] },
-            { keys: /(almacenamiento|disco|ssd|hdd|nvme|m.2|sata)/, res: "El almacenamiento define la velocidad de carga. Los SSD NVMe M.2 son el estándar, yendo directo a la placa base y superando los 3000 MB/s. Los discos mecánicos (HDD) ya solo los recomiendo para guardar archivos pesados.", btns: [{label: 'Entendido', query: 'Entendido'}] },
-            { keys: /(fuente|poder|psu|watts|energia|certificacion)/, res: "La Fuente de Poder (PSU) alimenta todo. Una fuente genérica dañará tus piezas. Mi motor calcula tu consumo y exige una PSU con certificación 80 Plus Bronce o superior para garantizar estabilidad.", btns: [{label: '¿Armarla yo mismo?', query: 'Es dificil armarla'}] },
-            { keys: /(tarjeta madre|motherboard|placa|socket|chipset)/, res: "La Placa Base conecta el hardware. Lo principal es el 'Socket' (donde va el procesador). Una buena placa asegura que tu CPU reciba energía limpia.", btns: [{label: '¿Gabinete?', query: 'Importa el gabinete'}] },
-            { keys: /(gabinete|chasis|tamaño|atx|micro)/, res: "El Gabinete (Chasis) dicta el flujo de aire (Airflow). Un diseño 'Mesh' (rejilla frontal) mantendrá tus piezas frías. Además, debe ser compatible con tu placa base (ATX vs Micro-ATX).", btns: [{label: 'Exportar PDF', query: 'Exportar PDF', class: 'btn-outline-danger'}] },
-            { keys: /(armar|dificil|construir|ensamblar)/, res: "Armarla tú mismo reduce costos. Es literalmente como encajar piezas de LEGO; los cables tienen formas específicas y no puedes conectarlos mal a menos que los fuerces. Solo ten cuidado al instalar el procesador.", btns: [{label: 'Tiendas', query: 'En que tienda compro'}] },
+/* ─── SORT ──────────────────────────────────────────────── */
+function sortCards(criterio) {
+    const list  = document.getElementById('pc-list');
+    const cards = Array.from(list.querySelectorAll('.pc-card'));
 
-            // 3. MERCADO Y PRECIOS
-            { keys: /(amazon)/, res: `Según la lectura en vivo, armar la configuración Top 1 en Amazon te costará unos $${top1Amazon} MXN. Es la opción más segura por su política de devoluciones sin preguntas.`, btns: [{label: '¿Cyberpuerta?', query: 'Cuánto cuesta en cyberpuerta'}] },
-            { keys: /(cyberpuerta|ddtech|barato|economico|ahorrar)/, res: `Para máxima economía, adquiere los componentes en Cyberpuerta (aprox $${top1Cyber} MXN) o DDTech (aprox $${top1Ddtech} MXN). Recomiendo comprar todo en un solo lugar para ahorrar en envío.`, btns: [{label: '¿SpartanGeek?', query: 'Qué es spartangeek'}] },
-            { keys: /(spartan|spartangeek|ensamblado|armada)/, res: `SpartanGeek te manda el equipo Top 1 ya armado, con garantía y soporte técnico, pero te cobrarán unos $${top1Spartan} MXN. El costo del ensamble premium en México.`, btns: [{label: 'Mercado Libre', query: 'Y en mercado libre'}] },
-            { keys: /(mercado libre|meli)/, res: `Mercado Libre promedia los $${top1Meli} MXN para la recomendación principal. Asegúrate de que las piezas sean 'Nuevas' y el vendedor tenga calificación verde.`, btns: [{label: 'Tienda más barata', query: 'Cual es mas barata'}] },
-            { keys: /(precio global|total|costo base|cuanto es)/, res: `El costo base estimado por el motor RETE para los componentes puros es de $${top1Global} MXN. A partir de ahí, las distribuidoras agregan su margen.`, btns: [] },
+    cards.sort((a, b) => {
+        const aT = parseFloat(a.dataset.total)    || 0;
+        const bT = parseFloat(b.dataset.total)    || 0;
+        const aS = parseFloat(a.dataset.sinergia) || 0;
+        const bS = parseFloat(b.dataset.sinergia) || 0;
+        const aB = parseFloat(a.dataset.balance)  || 0;
+        const bB = parseFloat(b.dataset.balance)  || 0;
+        if (criterio === 'precio_asc')  return aT - bT;
+        if (criterio === 'precio_desc') return bT - aT;
+        if (criterio === 'balance')     return bB - aB;
+        return bS - aS; // sinergia desc (default)
+    });
 
-            // 4. SMALL TALK CORPORATIVO
-            { keys: /(hola|buenas|qué tal|saludos|hi)/, res: "Sistemas en línea. Mi base de datos abarca arquitectura de hardware, cuellos de botella y compatibilidad térmica. ¿En qué aspecto técnico puedo asesorarte hoy?", btns: [{label: '¿Quiénes te crearon?', query: 'Quiénes son tus creadores'}, {label: 'Muestra solo la mejor', query: 'Modo presentacion'}] },
-            { keys: /(qué más|qué haces|comandos|puedes hacer|ayuda)/, res: "Tengo privilegios administrativos. Puedo alterar la UI si me pides 'Modo Presentación', 'Tema oscuro', 'Mostrar todos' o 'Limpiar chat'. Además, puedo explicarte a fondo tecnologías de hardware.", btns: [{label: 'Limpiar chat', query: 'Limpiar chat'}, {label: 'DDR4 vs DDR5', query: 'DDR4 o DDR5'}] },
-            { keys: /(chiste|broma|risa|gracioso)/, res: "Solo sé que si tu procesador llega a 100 grados centígrados, puedes freír un huevo sobre tu gabinete. No te lo recomiendo.", btns: [{label: 'Jajaja', query: 'Jajaja'}] },
-            { keys: /(malo|feo|no me gusta|caro|basura|pesimo)/, res: "Mi lógica es inmutable y matemática. Si el dictamen no es de tu agrado, te sugiero volver al inicio, modificar las variables de entrada y pedir una configuración más económica.", btns: [{label: 'Regresar', query: 'Mejor regreso'}] },
-            { keys: /(gracias|perfecto|ok|entendido|genial|wow|impresionante)/, res: "Ese es el nivel para el que Brandon y Ariel me programaron. Ejecuta el comando 'Exportar' cuando estés listo para llevarte el reporte técnico.", btns: [{label: 'Exportar PDF', query: 'Exportar PDF', class: 'btn-outline-danger'}] }
-        ];
+    // Re-number and re-append
+    cards.forEach((card, i) => {
+        card.querySelector('.opt-badge').textContent = `OPC #${i + 1}`;
+        list.appendChild(card);
+    });
 
-        document.getElementById('chat-input').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const q = this.value.toLowerCase().trim();
-                if(q === "") return;
-                
-                const chatArea = document.getElementById('chat-response');
-                chatArea.innerHTML += `<div class="text-end mb-2"><span class="p-2 d-inline-block rounded text-white shadow-sm" style="background-color: #64748b; max-width: 85%;">${this.value}</span></div>`;
-                this.value = ''; 
-                chatArea.scrollTop = chatArea.scrollHeight;
-                
-                const botDiv = document.createElement('div');
-                botDiv.className = "text-start mb-2";
-                botDiv.innerHTML = `<span class="p-2 d-inline-block rounded bg-primary text-white shadow-sm" style="max-width: 85%;"><div class="typing-dots">Analizando</div></span>`;
-                chatArea.appendChild(botDiv);
-                chatArea.scrollTop = chatArea.scrollHeight;
+    // Update sort buttons
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    const map = { sinergia: 'btn-sinergia', precio_asc: 'btn-asc', precio_desc: 'btn-desc', balance: 'btn-bal' };
+    if (map[criterio]) document.getElementById(map[criterio]).classList.add('active');
 
-                setTimeout(() => {
-                    let res = "No tengo ese registro en mi base de datos principal. Puedes preguntarme sobre mis creadores (Brandon y Ariel), componentes como DDR5 o GPU, o darme un comando de control de interfaz (ej. 'Muestra todos los resultados').";
-                    let newReplies = [{label: '¿Quiénes te crearon?', query: 'Quien te creo'}, {label: 'Mostrar todos', query: 'Muestra todos los resultados'}];
-                    let actionExecuted = false;
+    // Close open cards after sort
+    document.querySelectorAll('.card-body').forEach(b => b.classList.remove('open'));
+    document.querySelectorAll('.card-header-row').forEach(h => h.classList.remove('open'));
+}
 
-                    for (let i = 0; i < knowledgeMatrix.length; i++) {
-                        if (q.match(knowledgeMatrix[i].keys)) {
-                            res = knowledgeMatrix[i].res;
-                            if (knowledgeMatrix[i].type === "cmd_filter") { applyFilters('max-ahorro', 5); actionExecuted = true; }
-                            if (knowledgeMatrix[i].type === "cmd_unfilter") { applyFilters('max-ahorro', 'all'); actionExecuted = true; }
-                            if (knowledgeMatrix[i].type === "cmd_top1") { applyFilters('max-ahorro', 1); actionExecuted = true; }
-                            if (knowledgeMatrix[i].type === "cmd_clear") { 
-                                chatArea.innerHTML = `<div class="text-start mb-2"><span class="p-2 d-inline-block rounded bg-primary text-white shadow-sm">Historial purgado. ¿En qué te asesoro ahora?</span></div>`;
-                                updateQuickReplies([{label: 'DDR4 vs DDR5', query: 'DDR4 vs DDR5'}, {label: 'Mostrar todos', query: 'Muestra todos los resultados'}]);
-                                return; 
-                            }
-                            if (knowledgeMatrix[i].type === "cmd_theme") { toggleTheme(); actionExecuted = true; }
-                            if (knowledgeMatrix[i].type === "cmd_pdf") { setTimeout(() => window.print(), 1200); actionExecuted = true; }
-                            if (knowledgeMatrix[i].btns) { newReplies = knowledgeMatrix[i].btns; }
-                            break;
-                        }
-                    }
+/* ─── FILTER TOP N ──────────────────────────────────────── */
+function filterTop(n) {
+    const cards = document.querySelectorAll('.pc-card');
+    cards.forEach((c, i) => { c.style.display = i < n ? '' : 'none'; });
+    updateCountLabel();
+}
+function updateCountLabel() {
+    const visible = document.querySelectorAll('.pc-card:not([style*="none"])').length;
+    document.getElementById('count-label').textContent =
+        `${visible} configuración(es) visibles · usa "mostrar todo" para ver todas`;
+}
 
-                    botDiv.innerHTML = `<span class="p-2 d-inline-block rounded bg-primary text-white shadow-sm" style="max-width: 85%;"></span>`;
-                    const textTarget = botDiv.querySelector('span');
-                    let charIndex = 0;
-                    const typing = setInterval(() => {
-                        if(charIndex < res.length) {
-                            textTarget.textContent += res.charAt(charIndex);
-                            charIndex++;
-                            chatArea.scrollTop = chatArea.scrollHeight;
-                        } else { 
-                            clearInterval(typing); 
-                            updateQuickReplies(newReplies);
-                        }
-                    }, 15); 
+/* ─── EXPAND FIRST ──────────────────────────────────────── */
+function expandFirst() {
+    const first = document.querySelector('.pc-card:not([style*="none"])');
+    if (!first) return;
+    const idx = parseInt(first.getAttribute('data-index'));
+    toggleCard(idx);
+    first.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
-                }, 400); 
+/* ─── COUNT CARDS ───────────────────────────────────────── */
+function countCards() {
+    const n = document.querySelectorAll('.pc-card:not([style*="none"])').length;
+    addBotMsg(`Hay <b>${n}</b> configuración(es) visible(s) en pantalla ahora mismo.`);
+}
+
+/* ─── HIGHLIGHT STORES ──────────────────────────────────── */
+function highlightStores() {
+    document.querySelectorAll('.pc-card').forEach(c => c.classList.add('stores-highlight'));
+    setTimeout(() => {
+        document.querySelectorAll('.pc-card').forEach(c => c.classList.remove('stores-highlight'));
+    }, 3000);
+}
+
+/* ─── RADAR CHARTS ──────────────────────────────────────── */
+const radarCache = {};
+function renderRadar(idx) {
+    const el = document.getElementById(`radar-${idx}`);
+    if (!el) return;
+    if (radarCache[idx]) { radarCache[idx].destroy(); delete radarCache[idx]; }
+    const dark = document.body.getAttribute('data-theme') === 'dark';
+    radarCache[idx] = new Chart(el.getContext('2d'), {
+        type: 'radar',
+        data: {
+            labels: ['GAMING', 'TRABAJO', 'PRECIO', 'TÉRMICA', 'LONGEVIDAD'],
+            datasets: [{
+                data: [95, 80, 90, 85, 92],
+                backgroundColor: 'rgba(37,99,235,.15)',
+                borderColor: '#2563eb',
+                pointBackgroundColor: '#2563eb',
+                borderWidth: 2, pointRadius: 3
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                r: {
+                    min: 0, max: 100,
+                    grid:       { color: dark ? '#1e293b' : '#e2e8f0' },
+                    angleLines: { color: dark ? '#1e293b' : '#e2e8f0' },
+                    pointLabels:{ color: dark ? '#94a3b8' : '#64748b', font: { size: 9, family: "'JetBrains Mono'" } },
+                    ticks:      { display: false }
+                }
             }
-        });
-
-        function initRadarCharts() {
-            const isDark = document.body.getAttribute('data-theme') === 'dark';
-            const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-            const textColor = isDark ? '#94a3b8' : '#64748b';
-            
-            document.querySelectorAll('canvas[id^="radarChart-"]').forEach((canvas, index) => {
-                const ctx = canvas.getContext('2d');
-                const existingChart = Chart.getChart(canvas.id);
-                if (existingChart) existingChart.destroy();
-                
-                const offset = index * 2;
-                new Chart(ctx, {
-                    type: 'radar',
-                    data: {
-                        labels: ['Gaming', 'Trabajo', 'Costo/Beneficio', 'Térmicas', 'Longevidad'],
-                        datasets: [{
-                            data: [95 - offset, 85 + offset, 90 - offset, 88 + (offset/2), 94 - offset],
-                            backgroundColor: 'rgba(59, 130, 246, 0.4)', borderColor: 'rgba(59, 130, 246, 1)',
-                            pointBackgroundColor: 'rgba(59, 130, 246, 1)', borderWidth: 2
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
-                        scales: { r: { angleLines: { color: gridColor }, grid: { color: gridColor }, pointLabels: { color: textColor, font: { size: 10, weight: 'bold' } }, ticks: { display: false, min: 40, max: 100 } } }
-                    }
-                });
-            });
         }
+    });
+}
 
-        document.getElementById('pcAccordion').addEventListener('shown.bs.collapse', function (e) {
-            const bar = e.target.querySelector('.progress-bar-smooth');
-            if (bar) bar.style.width = bar.getAttribute('data-target-width');
-        });
+/* ─── BUDGET MODAL ──────────────────────────────────────── */
+function openBudget()  { document.getElementById('budget-overlay').classList.add('show'); }
+function closeBudget() { document.getElementById('budget-overlay').classList.remove('show'); }
+function calcBudget() {
+    const ing  = parseFloat(document.getElementById('bud-ing').value) || 0;
+    const gas  = parseFloat(document.getElementById('bud-gas').value) || 0;
+    const neto = ing - gas;
+    const el   = document.getElementById('bud-res');
+    el.style.display = 'block';
+    if (neto >= 0) {
+        el.className = 'bud-result pos';
+        const meses = neto > 0 ? Math.ceil(25000 / neto) : '∞';
+        el.innerHTML = `✅ Disponible: <strong>$${neto.toFixed(2)} MXN/mes</strong><br><small>Podrías ahorrar para una PC en ~${meses} meses.</small>`;
+    } else {
+        el.className = 'bud-result neg';
+        el.innerHTML = `⚠️ Déficit mensual: <strong>$${Math.abs(neto).toFixed(2)} MXN</strong><br><small>Conviene revisar gastos antes de planear una compra.</small>`;
+    }
+}
 
-        document.addEventListener('DOMContentLoaded', () => {
-            initRadarCharts();
-            setTimeout(() => {
-                const firstBar = document.querySelector('.progress-bar-smooth');
-                if(firstBar) firstBar.style.width = firstBar.getAttribute('data-target-width');
-            }, 300);
+/* ══════════════════════════════════════════════════════════
+   CHATBOT
+══════════════════════════════════════════════════════════ */
+let chatOpen = false;
+
+function toggleChat() {
+    chatOpen = !chatOpen;
+    document.getElementById('chat-panel').classList.toggle('show', chatOpen);
+    document.getElementById('fab-notif').style.display = chatOpen ? 'none' : '';
+    if (chatOpen) document.getElementById('ch-input').focus();
+}
+
+function addBotMsg(html) {
+    const area = document.getElementById('ch-msgs');
+    const d = document.createElement('div');
+    d.className = 'msg bot';
+    d.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bub">${html}</div>`;
+    area.appendChild(d);
+    area.scrollTop = area.scrollHeight;
+}
+function addUserMsg(text) {
+    const area = document.getElementById('ch-msgs');
+    const d = document.createElement('div');
+    d.className = 'msg user';
+    d.innerHTML = `<div class="msg-av">👤</div><div class="msg-bub">${text}</div>`;
+    area.appendChild(d);
+    area.scrollTop = area.scrollHeight;
+}
+function showTyping() {
+    const area = document.getElementById('ch-msgs');
+    const d = document.createElement('div');
+    d.className = 'msg bot'; d.id = 'typing';
+    d.innerHTML = `<div class="msg-av">🤖</div><div class="msg-bub"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+    area.appendChild(d);
+    area.scrollTop = area.scrollHeight;
+}
+function hideTyping() { const el = document.getElementById('typing'); if (el) el.remove(); }
+
+async function sendChat() {
+    const inp  = document.getElementById('ch-input');
+    const text = inp.value.trim();
+    if (!text) return;
+    inp.value = '';
+    addUserMsg(text);
+    showTyping();
+    try {
+        const res  = await fetch('/chat-interactivo', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensaje: text })
         });
-    </script>
+        const data = await res.json();
+        hideTyping();
+        addBotMsg(data.res);
+        handleAction(data);
+    } catch {
+        hideTyping();
+        addBotMsg('⚠️ Error de conexión con el servidor.');
+    }
+}
+
+function handleAction(data) {
+    if (!data.accion) return;
+    switch (data.accion) {
+        case 'SET_THEME':        applyTheme(data.modo); break;
+        case 'TOGGLE_THEME':     toggleTheme(); break;
+        case 'OPEN_BUDGET':      openBudget(); break;
+        case 'FILTER_TOP':       filterTop(parseInt(data.valor)); break;
+        case 'EXPAND_FIRST':     expandFirst(); break;
+        case 'COUNT_CARDS':      countCards(); break;
+        case 'HIGHLIGHT_STORES': highlightStores(); break;
+        case 'SORT':             sortCards(data.criterio); break;
+        case 'REDIRECT':         setTimeout(() => { window.location.href = data.url; }, 800); break;
+    }
+}
+
+function quick(cmd) {
+    document.getElementById('ch-input').value = cmd;
+    sendChat();
+}
+
+document.getElementById('ch-input').addEventListener('keypress', e => {
+    if (e.key === 'Enter') sendChat();
+});
+
+/* ─── INIT ──────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => addBotMsg(
+        '¡Hola! Soy <b>Tailor AI</b> ⚡<br>' +
+        'Tengo <b>{{ sugerencias|length }}</b> configuración(es) listas.<br>' +
+        'Prueba: <i>"modo oscuro"</i>, <i>"ordenar menor precio"</i>, <i>"dónde comprar"</i> o <i>"ayuda"</i>.'
+    ), 350);
+    {% if sugerencias|length == 1 %}toggleCard(1);{% endif %}
+});
+</script>
 </body>
 </html>
