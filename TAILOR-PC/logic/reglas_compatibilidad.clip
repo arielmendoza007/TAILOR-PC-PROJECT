@@ -1,0 +1,237 @@
+;;; ============================================================
+;;; TAILOR-PC — REGLAS DE COMPATIBILIDAD FÍSICA Y TÉCNICA
+;;; Este archivo estaba VACÍO — se añaden todas las reglas
+;;; de compatibilidad que el sistema necesita para funcionar
+;;; ============================================================
+
+;; ----------------------------------------------------------
+;; 1. COMPATIBILIDAD CPU ↔ PLACA MADRE (socket)
+;;    Si el socket del CPU no coincide con el de la placa,
+;;    la combinación es físicamente imposible.
+;; ----------------------------------------------------------
+(defrule incompatibilidad-socket-cpu-placa
+   (declare (salience 50))
+   (cpu   (modelo ?mc) (socket ?sc))
+   (placa (modelo ?mp) (socket ?sp))
+   (test (neq ?sc ?sp))
+=>
+   (assert (recomendacion
+      (prioridad "CRITICA")
+      (razon (str-cat
+         "INCOMPATIBILIDAD SOCKET: El CPU " ?mc " usa socket " ?sc
+         " y la placa " ?mp " usa socket " ?sp
+         ". No son físicamente compatibles."))))
+)
+
+;; ----------------------------------------------------------
+;; 2. COMPATIBILIDAD PLACA MADRE ↔ GABINETE (factor de forma)
+;;    ATX no cabe en gabinetes Micro-ATX; Micro-ATX sí en ATX.
+;; ----------------------------------------------------------
+(defrule incompatibilidad-factor-forma
+   (declare (salience 50))
+   (placa    (modelo ?mp) (factor-forma ?ff-placa))
+   (gabinete (modelo ?mg) (soporte-placa ?ff-gab))
+   (test (not (or (eq ?ff-placa ?ff-gab)
+                  (and (eq ?ff-placa Micro-ATX) (eq ?ff-gab ATX)))))
+=>
+   (assert (recomendacion
+      (prioridad "CRITICA")
+      (razon (str-cat
+         "INCOMPATIBILIDAD FORM FACTOR: La placa " ?mp " (" ?ff-placa
+         ") no entra en el gabinete " ?mg " (soporta " ?ff-gab ")."))))
+)
+
+;; ----------------------------------------------------------
+;; 3. COMPATIBILIDAD GPU ↔ GABINETE (longitud física)
+;;    Si la GPU mide más que el espacio máximo del gabinete,
+;;    es incompatible mecánicamente.
+;; ----------------------------------------------------------
+(defrule incompatibilidad-longitud-gpu
+   (declare (salience 50))
+   (gpu      (modelo ?mg) (longitud ?len))
+   (gabinete (modelo ?mc) (max-gpu-len ?max))
+   (test (> ?len ?max))
+=>
+   (assert (recomendacion
+      (prioridad "CRITICA")
+      (razon (str-cat
+         "INCOMPATIBILIDAD FÍSICA: La GPU " ?mg " mide " ?len
+         "mm pero el gabinete " ?mc " acepta máximo " ?max "mm."))))
+)
+
+;; ----------------------------------------------------------
+;; 4. COMPATIBILIDAD RAM ↔ PLATAFORMA (DDR4 vs DDR5)
+;;    AM5 requiere DDR5 (velocidad >= 4800 MHz).
+;;    LGA1700 con chipset 600/700 acepta DDR4 o DDR5 según placa.
+;; ----------------------------------------------------------
+(defrule advertencia-ram-plataforma-am5
+   (declare (salience 40))
+   (cpu (socket AM5))
+   (ram (modelo ?mr) (velocidad ?v))
+   (test (< ?v 4800))   ; DDR4 tipicamente <= 3600, DDR5 >= 4800
+=>
+   (assert (recomendacion
+      (prioridad "ADVERTENCIA")
+      (razon (str-cat
+         "ATENCIÓN: La RAM " ?mr " parece ser DDR4 (velocidad " ?v "MHz). "
+         "La plataforma AM5 requiere DDR5. Verifica compatibilidad."))))
+)
+
+;; ----------------------------------------------------------
+;; 5. ADECUACIÓN GPU ↔ RESOLUCIÓN DEL USUARIO
+;;    GPUs con VRAM < 8GB son insuficientes para 1440p/4K serio.
+;; ----------------------------------------------------------
+(defrule gpu-insuficiente-1440p
+   (declare (salience 35))
+   (usuario (resolucion "1440p"))
+   (gpu (modelo ?mg) (vram ?v))
+   (test (< ?v 8))
+=>
+   (assert (recomendacion
+      (prioridad "ADVERTENCIA")
+      (razon (str-cat
+         "RENDIMIENTO: La GPU " ?mg " tiene solo " ?v
+         "GB de VRAM. Para 1440p se recomienda mínimo 8GB VRAM."))))
+)
+
+(defrule gpu-insuficiente-4k
+   (declare (salience 35))
+   (usuario (resolucion "4K"))
+   (gpu (modelo ?mg) (vram ?v))
+   (test (< ?v 12))
+=>
+   (assert (recomendacion
+      (prioridad "CRITICA")
+      (razon (str-cat
+         "RENDIMIENTO 4K: La GPU " ?mg " tiene " ?v
+         "GB de VRAM. Para 4K se requieren mínimo 12GB. "
+         "Texturas a máxima calidad no serán posibles."))))
+)
+
+;; ----------------------------------------------------------
+;; 6. ADECUACIÓN FUENTE DE PODER ↔ CONSUMO REAL
+;;    Verifica que la PSU tenga margen del 20% sobre consumo.
+;; ----------------------------------------------------------
+(defrule fuente-con-margen-insuficiente
+   (declare (salience 30))
+   (cpu    (tdp ?tc))
+   (gpu    (consumo ?tg))
+   (fuente (modelo ?mf) (watts ?wf))
+   (bind ?consumo-real (+ ?tc ?tg 100))
+   (bind ?margen-min   (integer (* ?consumo-real 1.2)))
+   (test (< ?wf ?margen-min))
+=>
+   (assert (recomendacion
+      (prioridad "ADVERTENCIA")
+      (razon (str-cat
+         "PSU: La fuente " ?mf " (" ?wf "W) no tiene el margen de seguridad "
+         "del 20% sobre el consumo estimado de " ?consumo-real "W. "
+         "Mínimo recomendado: " ?margen-min "W."))))
+)
+
+;; ----------------------------------------------------------
+;; 7. CUELLO DE BOTELLA CPU ↔ GPU
+;;    GPU muy cara con CPU de pocos núcleos = desperdicio.
+;; ----------------------------------------------------------
+(defrule detectar-cuello-botella
+   (declare (salience 45))
+   (cpu (modelo ?mc) (nucleos ?nc))
+   (gpu (modelo ?mg) (precio ?pg))
+   (test (and (< ?nc 6) (> ?pg 10000)))
+=>
+   (assert (recomendacion
+      (prioridad "CRITICA")
+      (razon (str-cat
+         "CUELLO DE BOTELLA: La GPU " ?mg " ($" ?pg
+         ") es demasiado potente para el CPU " ?mc
+         " (" ?nc " núcleos). El CPU limitará el rendimiento."))))
+)
+
+;; ----------------------------------------------------------
+;; 8. COMPATIBILIDAD CLIMA CÁLIDO ↔ FLUJO DE AIRE
+;;    En clima cálido se requiere gabinete con flujo "alto".
+;; ----------------------------------------------------------
+(defrule clima-calido-requiere-buen-flujo
+   (declare (salience 40))
+   (usuario  (clima "calido"))
+   (gabinete (modelo ?mg) (flujo-aire ?fa))
+   (test (neq ?fa "alto"))
+=>
+   (assert (recomendacion
+      (prioridad "ADVERTENCIA")
+      (razon (str-cat
+         "TÉRMICA: En clima cálido, el gabinete " ?mg
+         " con flujo de aire '" ?fa
+         "' puede causar throttling. Se recomienda uno con flujo alto."))))
+)
+
+;; ----------------------------------------------------------
+;; 9. GPU PESADA → REQUIERE SOPORTE
+;;    GPUs > 300mm necesitan soporte anti-sag.
+;; ----------------------------------------------------------
+(defrule gpu-larga-necesita-soporte
+   (declare (salience 30))
+   (gpu (modelo ?mg) (longitud ?len))
+   (test (> ?len 300))
+=>
+   (assert (recomendacion
+      (prioridad "TECNICA")
+      (razon (str-cat
+         "SEGURIDAD: La GPU " ?mg " mide " ?len
+         "mm y pesa considerablemente. Se incluyó soporte anti-sag "
+         "para proteger el slot PCIe de la placa madre."))))
+   (assert (requerimiento-tecnico (tipo "accesorio") (nivel "soporte")))
+)
+
+;; ----------------------------------------------------------
+;; 10. VALIDACIÓN Wi-Fi ↔ PLACA MADRE
+;;     Si el usuario pidió Wi-Fi, verificar que la placa lo tenga.
+;; ----------------------------------------------------------
+(defrule placa-sin-wifi-usuario-lo-pide
+   (declare (salience 35))
+   (usuario (wifi SI))
+   (placa   (modelo ?mp))
+   (test (not (str-index "WIFI" (upcase ?mp))))
+   (test (not (str-index "WiFi" ?mp)))
+   (test (not (str-index "AX" ?mp)))
+=>
+   (assert (recomendacion
+      (prioridad "ADVERTENCIA")
+      (razon (str-cat
+         "CONECTIVIDAD: La placa " ?mp
+         " puede no incluir Wi-Fi integrado. "
+         "Verifica el modelo o añade un adaptador PCIe Wi-Fi."))))
+)
+
+;; ----------------------------------------------------------
+;; 11. PLATAFORMA FUTURA ↔ LONGEVIDAD (AM5/DDR5)
+;;     Si el usuario quiere longevidad y el presupuesto alcanza,
+;;     priorizar AM5.
+;; ----------------------------------------------------------
+(defrule validar-longevidad-plataforma
+   (declare (salience 25))
+   (usuario (longevidad SI) (presupuesto ?p))
+   (test (>= ?p 15000))
+=>
+   (assert (requerimiento-tecnico (tipo "plataforma") (nivel "AM5")))
+   (assert (recomendacion
+      (prioridad "ALTA")
+      (razon "LONGEVIDAD: Se priorizó plataforma AM5 que soportará futuras CPUs de AMD hasta 2027+ y es compatible con DDR5.")))
+)
+
+;; ----------------------------------------------------------
+;; 12. GABINETE MICRO-ATX CON PLACA ATX
+;;     Caso imposible — confirma la regla de factor de forma.
+;; ----------------------------------------------------------
+(defrule gabinete-compacto-placa-grande
+   (declare (salience 55))
+   (usuario  (size Micro-ATX))
+   (placa    (modelo ?mp) (factor-forma ATX))
+   (gabinete (modelo ?mg) (soporte-placa Micro-ATX))
+=>
+   (assert (recomendacion
+      (prioridad "CRITICA")
+      (razon (str-cat
+         "INCOMPATIBILIDAD CRÍTICA: El usuario eligió formato Micro-ATX "
+         "pero la placa " ?mp " es ATX completa. No entra en el gabinete " ?mg "."))))
+)
