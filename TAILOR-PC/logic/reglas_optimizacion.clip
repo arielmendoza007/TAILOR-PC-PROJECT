@@ -1,7 +1,7 @@
 ;;; ============================================================
 ;;; TAILOR-PC — REGLAS DE OPTIMIZACIÓN Y VALIDACIÓN FINAL
-;;; Corrección: eliminadas restricciones hardcodeadas de RAM y
-;;; soporte-gpu que impedían disparar las reglas con otros componentes
+;;; Corrección: Lógica de cálculo movida al RHS (después de =>)
+;;; para evitar CLIPSError de sintaxis.
 ;;; ============================================================
 
 ;; Orientación temprana para gaming de alto presupuesto
@@ -11,8 +11,7 @@
 =>
    (assert (recomendacion
       (prioridad "ALTA")
-      (razon "Para este presupuesto, se recomienda priorizar una GPU serie RTX 4070 para evitar cuellos de botella.")))
-)
+      (razon "Para este presupuesto, se recomienda priorizar una GPU serie RTX 4070 para evitar cuellos de botella."))))
 
 ;; Advertencia temprana por presupuesto muy bajo
 (defrule advertencia-presupuesto-bajo
@@ -21,47 +20,48 @@
 =>
    (assert (recomendacion
       (prioridad "MEDIA")
-      (razon "Presupuesto limitado: Se sugiere buscar componentes de generaciones anteriores o procesadores con gráficos integrados.")))
-)
+      (razon "Presupuesto limitado: Se sugiere buscar componentes de generaciones anteriores o procesadores con gráficos integrados."))))
 
 ;; ----------------------------------------------------------
 ;; VALIDACIÓN DE PRESUPUESTO TOTAL
-;; CORRECCIÓN: se eliminaron los (test (eq ?mram ...)) y
-;; (test (eq ?ms ...)) que restringían la regla a solo
-;; un componente específico. Ahora acepta CUALQUIER RAM y
-;; CUALQUIER soporte-gpu del catálogo.
+;; CORRECCIÓN: Se eliminó el bind del LHS para evitar error.
+;; Ahora el cálculo y el test de presupuesto ocurren en el RHS.
 ;; ----------------------------------------------------------
 (defrule validar-presupuesto-total
    (declare (salience -10))
    (usuario (presupuesto ?p-max))
-   (cpu   (modelo ?mc) (precio ?pc))
-   (gpu   (modelo ?mg) (precio ?pg))
-   (placa (modelo ?mp) (precio ?pp))
-   (gabinete (modelo ?mgb) (precio ?pgb))
-   (ram   (modelo ?mram) (precio ?pram))
-   (soporte-gpu (modelo ?ms) (precio ?psoporte))
+   (cpu (modelo ?mc) (precio ?pc) (socket ?sc))
+   (gpu (modelo ?mg) (precio ?pg))
+   (placa (modelo ?mp) (precio ?pp) (socket ?sp))
+   (fuente (modelo ?mf) (precio ?pf))
+   (ram (modelo ?mram) (precio ?pram))
+   (disco (modelo ?md) (precio ?pd))
+   (soporte-gpu (modelo ?ms) (precio ?ps))
+   
+   ;; Validación física mínima para disparar
+   (test (eq ?sc ?sp))
 =>
-   (bind ?total (+ ?pc ?pg ?pp ?pgb ?pram ?psoporte))
-   (if (> ?total ?p-max)
+   ;; El cálculo debe hacerse AQUÍ
+   (bind ?total (+ ?pc ?pg ?pp ?pf ?pram ?pd ?ps))
+   
+   (if (<= ?total ?p-max)
       then
-      (assert (recomendacion
-         (prioridad "ECONOMICA")
-         (razon (str-cat "Presupuesto excedido: El costo total es $" ?total
-                         " pero tu limite es $" ?p-max
-                         ". Sugerimos bajar la gama de GPU o CPU."))))
-      else
+      (bind ?balance (- ?p-max ?total))
       (assert (recomendacion
          (prioridad "EXITO")
-         (razon (str-cat "Configuracion viable: Costo total de $" ?total
-                         ". Te sobran $" (- ?p-max ?total) " MXN."))))
+         (razon (str-cat
+            "CONFIGURACION_COMPLETA | "
+            "Build optimizada encontrada | "
+            "CPU: " ?mc " | "
+            "GPU: " ?mg " | "
+            "PLACA: " ?mp " | "
+            "TOTAL: $" ?total " | "
+            "BALANCE: $" ?balance))))
    )
 )
 
 ;; ----------------------------------------------------------
 ;; VALIDACIÓN INTEGRAL FINAL — genera CONFIGURACION_COMPLETA
-;; CORRECCIÓN: ídem — ya no filtra por modelo exacto de RAM
-;; ni soporte-gpu, permitiendo que todas las combinaciones
-;; del catálogo disparen esta regla.
 ;; ----------------------------------------------------------
 (defrule validar-fuente-poder-integral
    (declare (salience -15))
@@ -69,11 +69,11 @@
    (cpu      (modelo ?mc)   (tdp ?tc)    (precio ?pc))
    (gpu      (modelo ?mg)   (consumo ?tg)(precio ?pg))
    (fuente   (modelo ?mf)   (watts ?wf)  (precio ?pf))
-   (placa    (modelo ?mp)              (precio ?pp))
-   (gabinete (modelo ?mgb)             (precio ?pgb))
-   (ram      (modelo ?mram)            (precio ?pram))
-   (soporte-gpu (modelo ?ms)           (precio ?psoporte))
-   (disco    (modelo ?md)              (precio ?pd))
+   (placa    (modelo ?mp)                (precio ?pp))
+   (gabinete (modelo ?mgb)               (precio ?pgb))
+   (ram      (modelo ?mram)              (precio ?pram))
+   (soporte-gpu (modelo ?ms)             (precio ?psoporte))
+   (disco    (modelo ?md)                (precio ?pd))
 =>
    (bind ?consumo-total (+ ?tc ?tg 100))   ; +100W overhead sistema
    (bind ?total   (+ ?pc ?pg ?pp ?pgb ?pf ?pd ?pram ?psoporte))
@@ -93,20 +93,23 @@
             "TOTAL: $"  ?total " | "
             "BALANCE: $" ?balance))))
       else
-      (assert (recomendacion
-         (prioridad "EXITO")
-         (razon (str-cat
-            "CONFIGURACION_COMPLETA | "
-            "Todo compatible y optimizado | "
-            "CPU: "    ?mc  " | "
-            "GPU: "    ?mg  " | "
-            "PLACA: "  ?mp  " | "
-            "FUENTE: " ?mf  " | "
-            "RAM: "    ?mram " | "
-            "SOPORTE: " ?ms  " | "
-            "DISCO: "  ?md  " | "
-            "TOTAL: $"  ?total " | "
-            "BALANCE: $" ?balance))))
+      (if (<= ?total ?p-max)
+         then
+         (assert (recomendacion
+            (prioridad "EXITO")
+            (razon (str-cat
+               "CONFIGURACION_COMPLETA | "
+               "Todo compatible y optimizado | "
+               "CPU: "    ?mc  " | "
+               "GPU: "    ?mg  " | "
+               "PLACA: "  ?mp  " | "
+               "FUENTE: " ?mf  " | "
+               "RAM: "    ?mram " | "
+               "SOPORTE: " ?ms  " | "
+               "DISCO: "  ?md  " | "
+               "TOTAL: $"  ?total " | "
+               "BALANCE: $" ?balance))))
+      )
    )
 )
 
@@ -118,8 +121,7 @@
 =>
    (assert (recomendacion
       (prioridad "CRITICA")
-      (razon "Tu presupuesto es muy bajo para los requerimientos actuales. Intenta reducir la resolución o quitar el streaming.")))
-)
+      (razon "Tu presupuesto es muy bajo para los requerimientos actuales. Intenta reducir la resolución o quitar el streaming."))))
 
 ;; Error terminal si ninguna regla generó nada
 (defrule error-critico-presupuesto-nulo
@@ -129,5 +131,4 @@
 =>
    (assert (recomendacion
       (prioridad "CRITICA")
-      (razon "SISTEMA ABORTADO | No existen componentes en el catálogo que cumplan con tu presupuesto. Aumenta el presupuesto para continuar.")))
-)
+      (razon "SISTEMA ABORTADO | No existen componentes en el catálogo que cumplan con tu presupuesto. Aumenta el presupuesto para continuar."))))

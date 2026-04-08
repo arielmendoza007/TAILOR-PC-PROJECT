@@ -41,3 +41,33 @@
    (soporte-gpu (modelo "Cooler Master GPU Bracket") (precio 450.0))
 )
 
+(deffacts catalogo-maestro
+   ;; CPUs Gama Alta
+   (cpu (modelo "Intel Core i9-13900K") (marca Intel) (socket LGA1700) (nucleos 24) (tdp 150) (precio 12500.0))
+   (cpu (modelo "AMD Ryzen 7 7800X3D") (marca AMD) (socket AM5) (nucleos 8) (tdp 120) (precio 8500.0))
+   ;; CPUs Económicos (NUEVOS)
+   (cpu (modelo "Intel Core i3-12100F") (marca Intel) (socket LGA1700) (nucleos 4) (tdp 58) (precio 1900.0))
+   (cpu (modelo "AMD Ryzen 5 5600G") (marca AMD) (socket AM4) (nucleos 6) (tdp 65) (precio 2400.0))
+   
+   ;; GPUs Gama Alta
+   (gpu (modelo "NVIDIA RTX 4080") (longitud 310) (consumo 320) (vram 16) (precio 24000.0))
+   ;; GPUs Económicas (NUEVAS)
+   (gpu (modelo "NVIDIA GTX 1650") (longitud 145) (consumo 75) (vram 4) (precio 3200.0))
+   (gpu (modelo "AMD RX 6600") (longitud 190) (consumo 132) (vram 8) (precio 4500.0))
+   (gpu (modelo "GRAFICOS INTEGRADOS") (longitud 0) (consumo 0) (vram 2) (precio 0.0))
+
+   ;; Placas
+   (placa (modelo "ASUS ROG STRIX Z790") (socket LGA1700) (factor-forma ATX) (precio 7500.0))
+   (placa (modelo "Gigabyte H610M-K") (socket LGA1700) (factor-forma Micro-ATX) (precio 1600.0))
+   (placa (modelo "ASRock B450M-HDV") (socket AM4) (factor-forma Micro-ATX) (precio 1400.0))
+
+   ;; Gabinetes
+   (gabinete (modelo "Corsair 4000D") (max-gpu-len 360) (soporte-placa ATX) (flujo-aire "alto") (precio 1800.0))
+   (gabinete (modelo "Acteck Kiruna") (max-gpu-len 250) (soporte-placa Micro-ATX) (flujo-aire "bajo") (precio 600.0))
+
+   ;; RAM, Discos y Fuentes (Económicos)
+   (ram (modelo "Kingston Fury 8GB DDR4") (capacidad 8) (velocidad 3200) (precio 500.0))
+   (disco (modelo "Kingston NV2 500GB") (tipo "SSD") (precio 700.0))
+   (fuente (modelo "XPG Pylon 450W") (watts 450) (precio 900.0))
+   (soporte-gpu (modelo "N/A") (precio 0.0))
+)

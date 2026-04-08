@@ -1,3 +1,4 @@
+;; logic/templates.clip
 (deftemplate cpu
    (slot modelo (type STRING))
    (slot marca (type SYMBOL))
@@ -27,19 +28,26 @@
    (slot flujo-aire (type STRING))
    (slot precio (type FLOAT)))
 
-;; Nueva plantilla para Memoria RAM
 (deftemplate ram
    (slot modelo (type STRING))
-   (slot capacidad (type INTEGER)) ; GB
-   (slot velocidad (type INTEGER)) ; MHz
+   (slot capacidad (type INTEGER))
+   (slot velocidad (type INTEGER))
    (slot precio (type FLOAT)))
 
-;; Nueva plantilla para Soporte de GPU
 (deftemplate soporte-gpu
    (slot modelo (type STRING))
    (slot precio (type FLOAT)))
 
-;; ESTE ES EL QUE CAUSABA EL ERROR (Debe estar aquí definido)
+(deftemplate disco
+   (slot modelo (type STRING))
+   (slot tipo (type STRING))
+   (slot precio (type FLOAT)))
+
+(deftemplate fuente
+   (slot modelo (type STRING))
+   (slot watts (type INTEGER))
+   (slot precio (type FLOAT)))
+
 (deftemplate requerimiento-tecnico
    (slot tipo (type STRING))
    (slot nivel (type STRING)))
@@ -52,50 +60,14 @@
    (slot prioridad (type STRING))
    (slot streaming (type SYMBOL))
    (slot longevidad (type SYMBOL))
+   (slot almacenamiento (type STRING))
+   (slot wifi (type SYMBOL))        
+   (slot size (type SYMBOL))        
+   (slot audio (type STRING))       
    (slot espacio-gabinete (type INTEGER) (default 400)))
 
 (deftemplate recomendacion
    (slot prioridad (type STRING))
    (slot razon (type STRING)))
 
-   (deftemplate fuente
-   (slot modelo (type STRING))
-   (slot watts (type INTEGER))
-   (slot precio (type FLOAT)))
-
-   ;; Definición para Fuentes de Poder
-(deftemplate fuente
-   (slot modelo (type STRING))
-   (slot watts (type INTEGER))
-   (slot precio (type FLOAT)))
-
-;; Definición para Unidades de Almacenamiento
-(deftemplate disco
-   (slot modelo (type STRING))
-   (slot tipo (type STRING)) ; SSD o HDD
-   (slot precio (type FLOAT)))
-
-   (deftemplate usuario
-   (slot presupuesto (type FLOAT))
-   (slot uso (type STRING))
-   (slot resolucion (type STRING))
-   (slot clima (type STRING))
-   (slot prioridad (type STRING))
-   (slot streaming (type SYMBOL))
-   (slot longevidad (type SYMBOL)) ; SI/NO
-   (slot almacenamiento (type STRING)) ; "velocidad" o "capacidad"
-   (slot espacio-gabinete (type INTEGER) (default 400)))
-
-(deftemplate usuario
-   (slot presupuesto (type FLOAT))
-   (slot uso (type STRING))
-   (slot resolucion (type STRING))
-   (slot clima (type STRING))
-   (slot prioridad (type STRING))
-   (slot streaming (type SYMBOL))
-   (slot longevidad (type SYMBOL))
-   (slot almacenamiento (type STRING))
-   (slot wifi (type SYMBOL))        
-   (slot size (type SYMBOL))        
-   (slot audio (type STRING))       ;; <--- ESTO ES LO QUE FALTA PARA LA FASE 4
-   (slot espacio-gabinete (type INTEGER) (default 400)))
+(deftemplate diagnostico-finalizado)
