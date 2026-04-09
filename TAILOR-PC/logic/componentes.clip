@@ -1,73 +1,98 @@
-(deffacts catalogo-maestro
-   ;; CPUs (Con núcleos y TDP para reglas de desempeño)
+;;; ===========================================================
+;;; TAILOR-PC — CATÁLOGO DE COMPONENTES
+;;; FIX: Se eliminaron los dos (deffacts catalogo-maestro)
+;;; duplicados. CLIPS redefinía el segundo encima del primero,
+;;; perdiendo la mitad del catálogo. Ahora existe UN solo bloque
+;;; por categoría con todos los componentes fusionados.
+;;; ===========================================================
+
+;; ── CPUs ──────────────────────────────────────────────────
+(deffacts catalogo-cpu
+   ;; Gama alta Intel (LGA1700)
    (cpu (modelo "Intel Core i9-13900K") (marca Intel) (socket LGA1700) (nucleos 24) (tdp 150) (precio 12500.0))
    (cpu (modelo "Intel Core i7-13700K") (marca Intel) (socket LGA1700) (nucleos 16) (tdp 125) (precio 8900.0))
+   ;; Gama media Intel (LGA1700)
+   (cpu (modelo "Intel Core i5-12400F") (marca Intel) (socket LGA1700) (nucleos 6) (tdp 65) (precio 3200.0))
+   (cpu (modelo "Intel Core i3-12100F") (marca Intel) (socket LGA1700) (nucleos 4) (tdp 58) (precio 1900.0))
+   ;; Gama alta AMD (AM5)
    (cpu (modelo "AMD Ryzen 7 7800X3D") (marca AMD) (socket AM5) (nucleos 8) (tdp 120) (precio 8500.0))
    (cpu (modelo "AMD Ryzen 5 7600") (marca AMD) (socket AM5) (nucleos 6) (tdp 65) (precio 4100.0))
-   
-   ;; GPUs (Con VRAM obligatoria para reglas de resolución 4K)
-   (gpu (modelo "NVIDIA RTX 4090") (longitud 336) (consumo 450) (vram 24) (precio 38000.0))
-   (gpu (modelo "NVIDIA RTX 4070 Ti") (longitud 285) (consumo 285) (vram 12) (precio 15500.0))
-   (gpu (modelo "NVIDIA RTX 4060") (longitud 200) (consumo 115) (vram 8) (precio 6500.0))
-
-   ;; Placas Madre (Con sockets para reglas de compatibilidad)
-   (placa (modelo "ASUS ROG Strix Z790-E") (socket LGA1700) (factor-forma ATX) (precio 9500.0))
-   (placa (modelo "ASUS TUF Gaming B650-Plus") (socket AM5) (factor-forma ATX) (precio 4800.0))
-   (placa (modelo "Gigabyte B760M DS3H") (socket LGA1700) (factor-forma Micro-ATX) (precio 2400.0))
-
-   ;; Gabinetes (Con flujo-aire para reglas de clima cálido)
-   (gabinete (modelo "Corsair 5000D") (max-gpu-len 420) (soporte-placa ATX) (flujo-aire "alto") (precio 3200.0))
-   (gabinete (modelo "NZXT H5 Flow") (max-gpu-len 365) (soporte-placa ATX) (flujo-aire "alto") (precio 2100.0))
-   (gabinete (modelo "Cooler Master Q300L") (max-gpu-len 280) (soporte-placa Micro-ATX) (flujo-aire "medio") (precio 1150.0))
+   ;; Gama media AMD (AM4)
+   (cpu (modelo "AMD Ryzen 5 5600G") (marca AMD) (socket AM4) (nucleos 6) (tdp 65) (precio 2400.0))
+   (cpu (modelo "AMD Ryzen 3 4100") (marca AMD) (socket AM4) (nucleos 4) (tdp 65) (precio 1500.0))
 )
 
-(deffacts catalogo-extra
-   ;; Fuentes de Poder (Crucial para la regla de "no tronar")
+;; ── GPUs ──────────────────────────────────────────────────
+(deffacts catalogo-gpu
+   ;; Gama ultra
+   (gpu (modelo "NVIDIA RTX 4090") (longitud 336) (consumo 450) (vram 24) (precio 38000.0))
+   (gpu (modelo "NVIDIA RTX 4080") (longitud 310) (consumo 320) (vram 16) (precio 24000.0))
+   ;; Gama alta
+   (gpu (modelo "NVIDIA RTX 4070 Ti") (longitud 285) (consumo 285) (vram 12) (precio 15500.0))
+   (gpu (modelo "NVIDIA RTX 4070") (longitud 242) (consumo 200) (vram 12) (precio 11000.0))
+   ;; Gama media
+   (gpu (modelo "NVIDIA RTX 4060") (longitud 200) (consumo 115) (vram 8) (precio 6500.0))
+   (gpu (modelo "AMD RX 6700 XT") (longitud 267) (consumo 230) (vram 12) (precio 7500.0))
+   (gpu (modelo "AMD RX 6600") (longitud 190) (consumo 132) (vram 8) (precio 4500.0))
+   ;; Gama básica
+   (gpu (modelo "NVIDIA GTX 1660 Super") (longitud 229) (consumo 125) (vram 6) (precio 3800.0))
+   (gpu (modelo "NVIDIA GTX 1650") (longitud 145) (consumo 75) (vram 4) (precio 3200.0))
+   ;; Gráficos integrados (para ofimática sin GPU dedicada)
+   (gpu (modelo "Graficos Integrados") (longitud 0) (consumo 0) (vram 2) (precio 0.0))
+)
+
+;; ── PLACAS MADRE ──────────────────────────────────────────
+(deffacts catalogo-placas
+   ;; LGA1700 (Intel 12/13 Gen)
+   (placa (modelo "ASUS ROG Strix Z790-E") (socket LGA1700) (factor-forma ATX) (precio 9500.0))
+   (placa (modelo "ASUS ROG STRIX Z790") (socket LGA1700) (factor-forma ATX) (precio 7500.0))
+   (placa (modelo "Gigabyte B760M DS3H") (socket LGA1700) (factor-forma Micro-ATX) (precio 2400.0))
+   (placa (modelo "Gigabyte H610M-K") (socket LGA1700) (factor-forma Micro-ATX) (precio 1600.0))
+   ;; AM5 (AMD Ryzen 7000)
+   (placa (modelo "ASUS TUF Gaming B650-Plus") (socket AM5) (factor-forma ATX) (precio 4800.0))
+   ;; AM4 (AMD Ryzen 5000/3000)
+   (placa (modelo "ASRock B450M-HDV") (socket AM4) (factor-forma Micro-ATX) (precio 1400.0))
+   (placa (modelo "MSI B450 TOMAHAWK MAX") (socket AM4) (factor-forma ATX) (precio 2800.0))
+)
+
+;; ── GABINETES ─────────────────────────────────────────────
+(deffacts catalogo-gabinetes
+   ;; ATX – flujo alto
+   (gabinete (modelo "Corsair 5000D Airflow") (max-gpu-len 420) (soporte-placa ATX) (flujo-aire "alto") (precio 3200.0))
+   (gabinete (modelo "Corsair 4000D") (max-gpu-len 360) (soporte-placa ATX) (flujo-aire "alto") (precio 1800.0))
+   (gabinete (modelo "NZXT H5 Flow") (max-gpu-len 365) (soporte-placa ATX) (flujo-aire "alto") (precio 2100.0))
+   ;; Micro-ATX
+   (gabinete (modelo "Cooler Master Q300L") (max-gpu-len 280) (soporte-placa Micro-ATX) (flujo-aire "medio") (precio 1150.0))
+   (gabinete (modelo "Acteck Kiruna") (max-gpu-len 250) (soporte-placa Micro-ATX) (flujo-aire "bajo") (precio 600.0))
+)
+
+;; ── FUENTES DE PODER ──────────────────────────────────────
+(deffacts catalogo-fuentes
+   (fuente (modelo "XPG Pylon 450W 80+ Bronze") (watts 450) (precio 900.0))
    (fuente (modelo "EVGA 500W 80+ White") (watts 500) (precio 1100.0))
    (fuente (modelo "Corsair RM750e 80+ Gold") (watts 750) (precio 2400.0))
    (fuente (modelo "ASUS ROG Thor 1000W Platinum") (watts 1000) (precio 5800.0))
+)
 
-   ;; Almacenamiento (Para completar la PC)
+;; ── ALMACENAMIENTO ────────────────────────────────────────
+(deffacts catalogo-discos
+   (disco (modelo "Kingston NV2 500GB NVMe") (tipo "SSD") (precio 700.0))
    (disco (modelo "Kingston NV2 1TB NVMe") (tipo "SSD") (precio 1250.0))
-   (disco (modelo "Samsung 980 Pro 2TB") (tipo "SSD") (precio 3100.0))
+   (disco (modelo "Samsung 980 Pro 2TB NVMe") (tipo "SSD") (precio 3100.0))
 )
 
-(deffacts componentes-adicionales
-   ;; Memoria RAM
-   (ram (modelo "Corsair Vengeance 16GB") (capacidad 16) (velocidad 3200) (precio 1200.0))
-   (ram (modelo "Kingston Fury 32GB") (capacidad 32) (velocidad 5200) (precio 2800.0))
-   
-   ;; Soportes para GPUs pesadas
+;; ── MEMORIA RAM ───────────────────────────────────────────
+(deffacts catalogo-ram
+   (ram (modelo "Kingston Fury 8GB DDR4-3200") (capacidad 8) (velocidad 3200) (precio 500.0))
+   (ram (modelo "Corsair Vengeance 16GB DDR4-3200") (capacidad 16) (velocidad 3200) (precio 1200.0))
+   (ram (modelo "Kingston Fury Beast 32GB DDR4-3600") (capacidad 32) (velocidad 3600) (precio 2200.0))
+   (ram (modelo "Kingston Fury 32GB DDR5-5200") (capacidad 32) (velocidad 5200) (precio 2800.0))
+)
+
+;; ── SOPORTES GPU ──────────────────────────────────────────
+(deffacts catalogo-soportes
+   ;; Soporte simbólico para GPUs ligeras / integradas
+   (soporte-gpu (modelo "Sin soporte necesario") (precio 0.0))
+   ;; Soporte físico para GPUs pesadas (> 300 mm)
    (soporte-gpu (modelo "Cooler Master GPU Bracket") (precio 450.0))
-)
-
-(deffacts catalogo-maestro
-   ;; CPUs Gama Alta
-   (cpu (modelo "Intel Core i9-13900K") (marca Intel) (socket LGA1700) (nucleos 24) (tdp 150) (precio 12500.0))
-   (cpu (modelo "AMD Ryzen 7 7800X3D") (marca AMD) (socket AM5) (nucleos 8) (tdp 120) (precio 8500.0))
-   ;; CPUs Económicos (NUEVOS)
-   (cpu (modelo "Intel Core i3-12100F") (marca Intel) (socket LGA1700) (nucleos 4) (tdp 58) (precio 1900.0))
-   (cpu (modelo "AMD Ryzen 5 5600G") (marca AMD) (socket AM4) (nucleos 6) (tdp 65) (precio 2400.0))
-   
-   ;; GPUs Gama Alta
-   (gpu (modelo "NVIDIA RTX 4080") (longitud 310) (consumo 320) (vram 16) (precio 24000.0))
-   ;; GPUs Económicas (NUEVAS)
-   (gpu (modelo "NVIDIA GTX 1650") (longitud 145) (consumo 75) (vram 4) (precio 3200.0))
-   (gpu (modelo "AMD RX 6600") (longitud 190) (consumo 132) (vram 8) (precio 4500.0))
-   (gpu (modelo "GRAFICOS INTEGRADOS") (longitud 0) (consumo 0) (vram 2) (precio 0.0))
-
-   ;; Placas
-   (placa (modelo "ASUS ROG STRIX Z790") (socket LGA1700) (factor-forma ATX) (precio 7500.0))
-   (placa (modelo "Gigabyte H610M-K") (socket LGA1700) (factor-forma Micro-ATX) (precio 1600.0))
-   (placa (modelo "ASRock B450M-HDV") (socket AM4) (factor-forma Micro-ATX) (precio 1400.0))
-
-   ;; Gabinetes
-   (gabinete (modelo "Corsair 4000D") (max-gpu-len 360) (soporte-placa ATX) (flujo-aire "alto") (precio 1800.0))
-   (gabinete (modelo "Acteck Kiruna") (max-gpu-len 250) (soporte-placa Micro-ATX) (flujo-aire "bajo") (precio 600.0))
-
-   ;; RAM, Discos y Fuentes (Económicos)
-   (ram (modelo "Kingston Fury 8GB DDR4") (capacidad 8) (velocidad 3200) (precio 500.0))
-   (disco (modelo "Kingston NV2 500GB") (tipo "SSD") (precio 700.0))
-   (fuente (modelo "XPG Pylon 450W") (watts 450) (precio 900.0))
-   (soporte-gpu (modelo "N/A") (precio 0.0))
 )

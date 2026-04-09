@@ -1,134 +1,112 @@
-;;; ============================================================
+;;; ===========================================================
 ;;; TAILOR-PC — REGLAS DE OPTIMIZACIÓN Y VALIDACIÓN FINAL
-;;; Corrección: Lógica de cálculo movida al RHS (después de =>)
-;;; para evitar CLIPSError de sintaxis.
-;;; ============================================================
+;;; FIX: Añadido GABINETE al string de salida de la regla
+;;;      validar-fuente-poder-integral (faltaba completamente).
+;;; FIX: Eliminada validar-presupuesto-total (era menos completa
+;;;      que validar-fuente-poder-integral y generaba duplicados).
+;;; ===========================================================
 
-;; Orientación temprana para gaming de alto presupuesto
+;; ── Orientación temprana: gaming alto presupuesto ────────
 (defrule optimizar-gaming-alto
    (usuario (uso "gaming") (presupuesto ?p))
    (test (>= ?p 25000))
 =>
-   (assert (recomendacion
-      (prioridad "ALTA")
-      (razon "Para este presupuesto, se recomienda priorizar una GPU serie RTX 4070 para evitar cuellos de botella."))))
+   (assert (recomendacion (prioridad "ALTA")
+      (razon "GAMING ALTO: Con este presupuesto se recomienda GPU RTX 4070 Ti o superior para evitar cuellos de botella.")))
+)
 
-;; Advertencia temprana por presupuesto muy bajo
+;; ── Advertencia: presupuesto muy bajo ────────────────────
 (defrule advertencia-presupuesto-bajo
    (usuario (presupuesto ?p))
    (test (< ?p 8000))
 =>
-   (assert (recomendacion
-      (prioridad "MEDIA")
-      (razon "Presupuesto limitado: Se sugiere buscar componentes de generaciones anteriores o procesadores con gráficos integrados."))))
-
-;; ----------------------------------------------------------
-;; VALIDACIÓN DE PRESUPUESTO TOTAL
-;; CORRECCIÓN: Se eliminó el bind del LHS para evitar error.
-;; Ahora el cálculo y el test de presupuesto ocurren en el RHS.
-;; ----------------------------------------------------------
-(defrule validar-presupuesto-total
-   (declare (salience -10))
-   (usuario (presupuesto ?p-max))
-   (cpu (modelo ?mc) (precio ?pc) (socket ?sc))
-   (gpu (modelo ?mg) (precio ?pg))
-   (placa (modelo ?mp) (precio ?pp) (socket ?sp))
-   (fuente (modelo ?mf) (precio ?pf))
-   (ram (modelo ?mram) (precio ?pram))
-   (disco (modelo ?md) (precio ?pd))
-   (soporte-gpu (modelo ?ms) (precio ?ps))
-   
-   ;; Validación física mínima para disparar
-   (test (eq ?sc ?sp))
-=>
-   ;; El cálculo debe hacerse AQUÍ
-   (bind ?total (+ ?pc ?pg ?pp ?pf ?pram ?pd ?ps))
-   
-   (if (<= ?total ?p-max)
-      then
-      (bind ?balance (- ?p-max ?total))
-      (assert (recomendacion
-         (prioridad "EXITO")
-         (razon (str-cat
-            "CONFIGURACION_COMPLETA | "
-            "Build optimizada encontrada | "
-            "CPU: " ?mc " | "
-            "GPU: " ?mg " | "
-            "PLACA: " ?mp " | "
-            "TOTAL: $" ?total " | "
-            "BALANCE: $" ?balance))))
-   )
+   (assert (recomendacion (prioridad "MEDIA")
+      (razon "PRESUPUESTO BAJO: Se recomienda buscar componentes de generaciones anteriores o procesadores con graficos integrados.")))
 )
 
-;; ----------------------------------------------------------
-;; VALIDACIÓN INTEGRAL FINAL — genera CONFIGURACION_COMPLETA
-;; ----------------------------------------------------------
+;; ── REGLA CENTRAL: Genera CONFIGURACION_COMPLETA ─────────
+;;   FIX: Ahora incluye GABINETE en el string de salida.
+;;   Esta es la única regla que genera los resultados que el
+;;   frontend muestra al usuario.
 (defrule validar-fuente-poder-integral
    (declare (salience -15))
-   (usuario (presupuesto ?p-max))
-   (cpu      (modelo ?mc)   (tdp ?tc)    (precio ?pc))
-   (gpu      (modelo ?mg)   (consumo ?tg)(precio ?pg))
-   (fuente   (modelo ?mf)   (watts ?wf)  (precio ?pf))
-   (placa    (modelo ?mp)                (precio ?pp))
-   (gabinete (modelo ?mgb)               (precio ?pgb))
-   (ram      (modelo ?mram)              (precio ?pram))
-   (soporte-gpu (modelo ?ms)             (precio ?psoporte))
-   (disco    (modelo ?md)                (precio ?pd))
+   (usuario     (presupuesto ?p-max))
+   (cpu         (modelo ?mc)   (tdp ?tc)    (precio ?pc)  (socket ?sc))
+   (gpu         (modelo ?mg)   (consumo ?tg)(precio ?pg))
+   (fuente      (modelo ?mf)   (watts ?wf)  (precio ?pf))
+   (placa       (modelo ?mp)                (precio ?pp)  (socket ?sp))
+   (gabinete    (modelo ?mgb)               (precio ?pgb))
+   (ram         (modelo ?mram)              (precio ?pram))
+   (soporte-gpu (modelo ?ms)               (precio ?psoporte))
+   (disco       (modelo ?md)               (precio ?pd))
+   ;; Solo combinaciones con socket compatible entre CPU y placa
+   (test (eq ?sc ?sp))
 =>
-   (bind ?consumo-total (+ ?tc ?tg 100))   ; +100W overhead sistema
+   (bind ?consumo-total (+ ?tc ?tg 100))
    (bind ?total   (+ ?pc ?pg ?pp ?pgb ?pf ?pd ?pram ?psoporte))
    (bind ?balance (- ?p-max ?total))
 
-   (if (< ?wf ?consumo-total)
+   (if (<= ?total ?p-max)
       then
-      (assert (recomendacion
-         (prioridad "CRITICA")
-         (razon (str-cat
-            "CONFIGURACION_COMPLETA | "
-            "ERROR: Fuente insuficiente (" ?wf "W para " ?consumo-total "W) | "
-            "CPU: "    ?mc  " | "
-            "GPU: "    ?mg  " | "
-            "RAM: "    ?mram " | "
-            "SOPORTE: " ?ms  " | "
-            "TOTAL: $"  ?total " | "
-            "BALANCE: $" ?balance))))
-      else
-      (if (<= ?total ?p-max)
+      (if (>= ?wf ?consumo-total)
          then
+         ;; Build válida dentro del presupuesto con fuente adecuada
          (assert (recomendacion
             (prioridad "EXITO")
             (razon (str-cat
                "CONFIGURACION_COMPLETA | "
-               "Todo compatible y optimizado | "
-               "CPU: "    ?mc  " | "
-               "GPU: "    ?mg  " | "
-               "PLACA: "  ?mp  " | "
-               "FUENTE: " ?mf  " | "
-               "RAM: "    ?mram " | "
-               "SOPORTE: " ?ms  " | "
-               "DISCO: "  ?md  " | "
-               "TOTAL: $"  ?total " | "
+               "Build optimizada y compatible | "
+               "CPU: "      ?mc    " | "
+               "GPU: "      ?mg    " | "
+               "PLACA: "    ?mp    " | "
+               "GABINETE: " ?mgb   " | "
+               "FUENTE: "   ?mf    " | "
+               "RAM: "      ?mram  " | "
+               "DISCO: "    ?md    " | "
+               "SOPORTE: "  ?ms    " | "
+               "TOTAL: $"   ?total " | "
+               "BALANCE: $" ?balance))))
+         else
+         ;; Build dentro de presupuesto pero fuente insuficiente
+         (assert (recomendacion
+            (prioridad "CRITICA")
+            (razon (str-cat
+               "CONFIGURACION_COMPLETA | "
+               "ADVERTENCIA: Fuente insuficiente (" ?wf "W para " ?consumo-total "W) | "
+               "CPU: "      ?mc    " | "
+               "GPU: "      ?mg    " | "
+               "PLACA: "    ?mp    " | "
+               "GABINETE: " ?mgb   " | "
+               "FUENTE: "   ?mf    " | "
+               "RAM: "      ?mram  " | "
+               "DISCO: "    ?md    " | "
+               "SOPORTE: "  ?ms    " | "
+               "TOTAL: $"   ?total " | "
                "BALANCE: $" ?balance))))
       )
+      ;; else: build excede presupuesto, no se genera recomendación
    )
 )
 
-;; Fallback si no se armó ninguna PC completa
+;; ── Fallback: sin ninguna build viable ───────────────────
 (defrule advertencia-presupuesto-insuficiente
    (declare (salience -20))
    (usuario (presupuesto ?p-max))
    (not (recomendacion (prioridad "EXITO")))
 =>
-   (assert (recomendacion
-      (prioridad "CRITICA")
-      (razon "Tu presupuesto es muy bajo para los requerimientos actuales. Intenta reducir la resolución o quitar el streaming."))))
+   (assert (recomendacion (prioridad "CRITICA")
+      (razon (str-cat
+         "PRESUPUESTO INSUFICIENTE: Con $" ?p-max " MXN no se encontro "
+         "ninguna configuracion viable en el catalogo actual. "
+         "Intenta aumentar el presupuesto o cambiar el perfil de uso."))))
+)
 
-;; Error terminal si ninguna regla generó nada
+;; ── Error terminal: sin ningún hecho de recomendación ────
 (defrule error-critico-presupuesto-nulo
    (declare (salience -50))
    (usuario (presupuesto ?p))
    (not (recomendacion))
 =>
-   (assert (recomendacion
-      (prioridad "CRITICA")
-      (razon "SISTEMA ABORTADO | No existen componentes en el catálogo que cumplan con tu presupuesto. Aumenta el presupuesto para continuar."))))
+   (assert (recomendacion (prioridad "CRITICA")
+      (razon "SISTEMA ABORTADO: No se generaron recomendaciones. Aumenta el presupuesto e intenta de nuevo.")))
+)

@@ -1,144 +1,133 @@
+;;; ===========================================================
+;;; TAILOR-PC — REGLAS EXPERTAS DE PERFIL Y OPTIMIZACIÓN
+;;; FIX: Eliminados nombres duplicados de reglas:
+;;;   - validar-longevidad-plataforma (aparecía 3 veces)
+;;;   - detectar-cuello-botella (también en reglas_compatibilidad)
+;;;   Se conserva una versión canónica de cada regla aquí y se
+;;;   eliminó la copia en reglas_compatibilidad.
+;;; ===========================================================
+
+;; ── Perfil: Streaming exigente ────────────────────────────
 (defrule perfil-streamer-exigente
    (usuario (uso "gaming") (streaming SI))
 =>
    (assert (requerimiento-tecnico (tipo "multitarea") (nivel "alto")))
-   (assert (recomendacion (prioridad "CRITICA") (razon "Priorizando CPUs con alto conteo de nucleos para streaming."))))
+   (assert (recomendacion (prioridad "TECNICA")
+      (razon "STREAMING: Se priorizan CPUs con alto conteo de nucleos para codificacion simultanea.")))
+)
 
-(defrule validacion-clima-calido
-   (usuario (clima "calido"))
-   ?f <- (gabinete (modelo ?mod) (flujo-aire ?fa))
-   (test (neq ?fa "alto"))
-=>
-   (assert (recomendacion (prioridad "SEGURIDAD") (razon (str-cat "Gabinete " ?mod " descartado por flujo de aire insuficiente en clima calido.")))))
-
-(defrule match-gpu-resolucion-4k
-   (usuario (resolucion "4K"))
-   ?g <- (gpu (modelo ?mod) (vram ?v))
-   (test (< ?v 12))
-=>
-   (assert (recomendacion (prioridad "DESEMPENO") (razon (str-cat "La GPU " ?mod " tiene poca VRAM para texturas 4K.")))))
-
-;; Regla de seguridad física para GPUs pesadas
-(defrule sugerir-soporte-gpu
-   (gpu (modelo ?mod) (longitud ?len))
-   (test (> ?len 300)) ; Si mide más de 300mm, es pesada
-=>
-   (assert (recomendacion (prioridad "TECNICA") 
-           (razon (str-cat "Seguridad: La GPU " ?mod " es muy grande; se incluyó un soporte para evitar daños a la placa madre."))))
-   (assert (requerimiento-tecnico (tipo "accesorio") (nivel "soporte"))))
-
-   ;; Regla para Longevidad (Árbol de Decisión)
-(defrule validar-longevidad-plataforma
-   (usuario (longevidad SI) (presupuesto ?p))
-   (test (> ?p 15000))
-=>
-   (assert (recomendacion (prioridad "ALTA") 
-           (razon "Para longevidad, se seleccionó plataforma AM5 de AMD. Soporta futuras CPUs hasta 2027."))))
-
-;; Regla de Selección Estética
-(defrule sugerencia-estetica-gabinete
-   (usuario (prioridad "estetica"))
-   ?g <- (gabinete (modelo ?m) (flujo-aire "alto"))
-=>
-   (assert (recomendacion (prioridad "ESTETICA") 
-           (razon (str-cat "Se priorizó el gabinete " ?m " por su panel de cristal templado y soporte RGB.")))))
-
-;; REGLA DE LONGEVIDAD: Fuerza plataforma AM5 (DDR5) si el usuario quiere que dure
-(defrule validar-longevidad-futura
-   (usuario (longevidad SI) (presupuesto ?p))
-   (test (>= ?p 15000))
-=>
-   (assert (requerimiento-tecnico (tipo "plataforma") (nivel "AM5")))
-   (assert (recomendacion (prioridad "ALTA") 
-           (razon "Decisión de Árbol: Se seleccionó plataforma AM5 para asegurar compatibilidad con futuros procesadores hasta 2027."))))
-
-;; REGLA DE ALMACENAMIENTO: Elige entre NVMe Gen4 o mayor capacidad
-(defrule optimizar-almacenamiento
-   (usuario (almacenamiento ?tipo))
-   ?d <- (disco (modelo ?mod) (tipo ?t-real) (precio ?pr))
-=>
-   (if (eq ?tipo "velocidad")
-      then
-      (assert (recomendacion (prioridad "DESEMPENO") 
-              (razon (str-cat "Almacenamiento: Se priorizó el disco " ?mod " por su alta velocidad de lectura/escritura."))))
-      else
-      (assert (recomendacion (prioridad "CAPACIDAD") 
-              (razon (str-cat "Almacenamiento: Se seleccionó " ?mod " para maximizar el espacio de guardado."))))))
-
-;; REGLA DE CUELLO DE BOTELLA: Evita GPUs potentes con CPUs débiles
-(defrule detectar-cuello-botella
-   (cpu (modelo ?mc) (nucleos ?nc))
-   (gpu (modelo ?mg) (precio ?pg))
-   (test (and (< ?nc 6) (> ?pg 10000)))
-=>
-   (assert (recomendacion (prioridad "CRITICA") 
-           (razon (str-cat "CUIDADO: La GPU " ?mg " es demasiado potente para el CPU " ?mc ". Tendrás cuello de botella.")))))
-
-
-;; Regla para Render 3D / Edición de Video
+;; ── Perfil: Render 3D / Edición de video ─────────────────
 (defrule perfil-render-pesado
    (usuario (uso "render"))
 =>
    (assert (requerimiento-tecnico (tipo "nucleos") (nivel "maximo")))
-   (assert (recomendacion (prioridad "CRITICA") 
-           (razon "Para Render/Video: Se requiere un CPU con al menos 12 núcleos y 32GB de RAM mínimo."))))
+   (assert (recomendacion (prioridad "TECNICA")
+      (razon "RENDER/VIDEO: Se priorizan CPUs con multiples nucleos y al menos 16GB de RAM.")))
+)
 
-;; Regla para Ofimática (Ahorro)
+;; ── Perfil: Ofimática / Estudio ───────────────────────────
 (defrule perfil-ofimatica-estudio
    (usuario (uso "ofimatica"))
 =>
-   (assert (recomendacion (prioridad "ECONOMICA") 
-           (razon "Para Ofimática: No es necesaria una GPU dedicada. Un procesador con gráficos integrados (APU) es ideal."))))
+   (assert (recomendacion (prioridad "ECONOMICA")
+      (razon "OFIMATICA: No se requiere GPU dedicada. Procesadores con graficos integrados son ideales.")))
+)
 
-;; REGLA DE WIFI: Influye en la selección de la Placa Madre
-(defrule sugerir-placa-wifi
-   (usuario (wifi SI))
-   ?p <- (placa (modelo ?mod) (precio ?pr))
-   (test (str-index "WIFI" ?mod)) ; Busca placas que tengan WIFI en el nombre
+;; ── Longevidad: Plataforma AM5/DDR5 ──────────────────────
+;;   Una sola versión de esta regla (FIX: elimina las copias duplicadas)
+(defrule validar-longevidad-plataforma
+   (usuario (longevidad SI) (presupuesto ?p))
+   (test (>= ?p 15000))
 =>
-   (assert (recomendacion (prioridad "TECNICA") 
-           (razon (str-cat "Conectividad: Se seleccionó la placa " ?mod " por integrar Wi-Fi nativo.")))))
+   (assert (requerimiento-tecnico (tipo "plataforma") (nivel "AM5")))
+   (assert (recomendacion (prioridad "ALTA")
+      (razon "LONGEVIDAD: Plataforma AM5 seleccionada. Soporte garantizado para futuras CPUs AMD hasta 2027+.")))
+)
 
-;; REGLA DE ALMACENAMIENTO DINÁMICO
-(defrule balancear-disco
-   (usuario (almacenamiento "capacidad") (presupuesto ?p))
-   (test (> ?p 20000))
+;; ── Cuello de botella CPU-GPU ─────────────────────────────
+;;   Versión canónica (FIX: eliminada copia en reglas_compatibilidad)
+(defrule detectar-cuello-botella
+   (declare (salience 45))
+   (cpu (modelo ?mc) (nucleos ?nc))
+   (gpu (modelo ?mg) (precio ?pg))
+   (test (and (< ?nc 6) (> ?pg 8000)))
 =>
-   (assert (recomendacion (prioridad "CAPACIDAD") 
-           (razon "Almacenamiento: Dado tu presupuesto, se recomienda un SSD de 2TB para no comprometer espacio."))))
+   (assert (recomendacion (prioridad "ADVERTENCIA")
+      (razon (str-cat
+         "CUELLO DE BOTELLA: La GPU " ?mg " ($" ?pg
+         ") es demasiado potente para el CPU " ?mc
+         " (" ?nc " nucleos). Se perdera rendimiento."))))
+)
 
-;; Si es OFIMÁTICA, el Wi-Fi es casi obligatorio para estudiantes
+;; ── Almacenamiento: velocidad vs capacidad ────────────────
+(defrule optimizar-almacenamiento-velocidad
+   (usuario (almacenamiento "velocidad"))
+=>
+   (assert (recomendacion (prioridad "DESEMPENO")
+      (razon "ALMACENAMIENTO: Se priorizan discos NVMe para maxima velocidad de carga.")))
+)
+
+(defrule optimizar-almacenamiento-capacidad
+   (usuario (almacenamiento "capacidad"))
+=>
+   (assert (recomendacion (prioridad "CAPACIDAD")
+      (razon "ALMACENAMIENTO: Se priorizan discos de alta capacidad para proyectos y multimedia.")))
+)
+
+;; ── Wi-Fi: sugerencia para ofimática ─────────────────────
 (defrule validar-wifi-estudiante
    (usuario (uso "ofimatica") (wifi NO))
 =>
-   (assert (recomendacion (prioridad "ADVERTENCIA") 
-           (razon "Sugerencia de Experto: Para uso académico, se recomienda encarecidamente una placa con Wi-Fi para evitar depender solo de cables."))))
+   (assert (recomendacion (prioridad "ADVERTENCIA")
+      (razon "CONECTIVIDAD: Para uso academico se recomienda placa con Wi-Fi integrado.")))
+)
 
-;; Si el tamaño es Micro-ATX, debemos filtrar el gabinete
-(defrule filtrar-gabinete-compacto
-   (usuario (size Micro-ATX))
-   ?g <- (gabinete (modelo ?mod) (soporte-placa ?sup))
-   (test (neq ?sup Micro-ATX))
-=>
-   (assert (recomendacion (prioridad "CRITICA") 
-           (razon (str-cat "Incompatibilidad: El gabinete " ?mod " es demasiado grande/incompatible para una build compacta Micro-ATX.")))))
-
-;; Regla de Longevidad (Árbol de Decisión Profundo)
-(defrule validar-longevidad-plataforma
-   (usuario (longevidad SI) (presupuesto ?p))
-   (test (> ?p 15000))
-=>
-   ;; Fuerza la selección de placas AM5 y memorias DDR5
-   (assert (requerimiento-tecnico (tipo "plataforma") (nivel "AM5")))
-   (assert (recomendacion (prioridad "ALTA") 
-           (razon "Decisión Experta: Se priorizó plataforma AM5 para longevidad, asegurando compatibilidad con futuras CPUs de AMD."))))
-
-;; Regla de Audio (Fase 4 - Optimización)
+;; ── Audio premium ─────────────────────────────────────────
 (defrule sugerir-placa-audio-premium
    (usuario (audio "pro"))
-   ?p <- (placa (modelo ?mod) (precio ?pr))
-   (test (str-index "ROG" ?mod)) ; Busca placas de gama alta (ASUS ROG)
+   (placa (modelo ?mod) (precio ?pr))
+   (test (str-index "ROG" ?mod))
 =>
-   (assert (recomendacion (prioridad "TECNICA") 
-           (razon (str-cat "Audio: Se seleccionó la placa " ?mod " por su mejor códec de audio y soporte para audífonos de alta impedancia."))))
+   (assert (recomendacion (prioridad "TECNICA")
+      (razon (str-cat "AUDIO: La placa " ?mod " incluye codec de alta fidelidad para audifonos de alta impedancia."))))
+)
+
+;; ── Soporte GPU pesada ────────────────────────────────────
+(defrule sugerir-soporte-gpu
+   (gpu (modelo ?mod) (longitud ?len))
+   (test (> ?len 300))
+=>
+   (assert (recomendacion (prioridad "TECNICA")
+      (razon (str-cat "SEGURIDAD: La GPU " ?mod " (" ?len "mm) requiere soporte anti-sag para proteger el slot PCIe."))))
+   (assert (requerimiento-tecnico (tipo "accesorio") (nivel "soporte")))
+)
+
+;; ── Gabinete compacto con GPU grande ─────────────────────
+(defrule filtrar-gabinete-compacto
+   (usuario (size Micro-ATX))
+   (gabinete (modelo ?mod) (soporte-placa ?sup))
+   (test (neq ?sup Micro-ATX))
+=>
+   (assert (recomendacion (prioridad "CRITICA")
+      (razon (str-cat "INCOMPATIBILIDAD: El gabinete " ?mod " no es compatible con formato Micro-ATX."))))
+)
+
+;; ── Resolución 4K y VRAM insuficiente ────────────────────
+(defrule match-gpu-resolucion-4k
+   (usuario (resolucion "4K"))
+   (gpu (modelo ?mod) (vram ?v))
+   (test (< ?v 12))
+=>
+   (assert (recomendacion (prioridad "ADVERTENCIA")
+      (razon (str-cat "4K: La GPU " ?mod " tiene solo " ?v "GB VRAM. Para 4K se recomiendan 12GB+."))))
+)
+
+;; ── Clima calido requiere buen flujo de aire ──────────────
+(defrule validacion-clima-calido
+   (usuario (clima "calido"))
+   (gabinete (modelo ?mod) (flujo-aire ?fa))
+   (test (neq ?fa "alto"))
+=>
+   (assert (recomendacion (prioridad "ADVERTENCIA")
+      (razon (str-cat "TERMICA: En clima calido el gabinete " ?mod " con flujo '" ?fa "' puede causar throttling."))))
 )
