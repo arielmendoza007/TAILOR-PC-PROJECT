@@ -221,7 +221,6 @@
 <body data-theme="light">
 <script>document.body.setAttribute('data-theme', localStorage.getItem('tailorTheme') || 'light');</script>
 
-<!-- Topbar -->
 <div class="topbar">
     <div class="brand">Tailor-PC <span>Expert System</span></div>
     <button class="tb-btn" onclick="toggleTheme()">🌓 Tema</button>
@@ -229,7 +228,6 @@
 
 <div class="form-wrap">
 
-    <!-- Step nav pills -->
     <div class="step-nav" id="step-nav">
         <div class="step-pill active" id="pill-1">
             <span class="pill-num">1</span>
@@ -256,7 +254,6 @@
     <form action="/diagnostico" method="POST" id="msform">
     <div class="form-card" id="form-card">
 
-        <!-- ══ PASO 1: Recursos y Marca ══════════════════ -->
         <div class="step-pane active" id="pane-1">
             <div class="step-tag">Paso 1 de 5 · Recursos y Marca</div>
             <div class="step-title">¿Cuánto tienes y qué prefieres?</div>
@@ -302,7 +299,6 @@
             </div>
         </div>
 
-        <!-- ══ PASO 2: Uso y Resolución ══════════════════ -->
         <div class="step-pane" id="pane-2">
             <div class="step-tag">Paso 2 de 5 · Objetivo y Pantalla</div>
             <div class="step-title">¿Para qué usarás el equipo?</div>
@@ -363,7 +359,6 @@
             </div>
         </div>
 
-        <!-- ══ PASO 3: Entorno e Infraestructura ═════════ -->
         <div class="step-pane" id="pane-3">
             <div class="step-tag">Paso 3 de 5 · Entorno e Infraestructura</div>
             <div class="step-title">¿Cómo es tu entorno de uso?</div>
@@ -423,7 +418,6 @@
             </div>
         </div>
 
-        <!-- ══ PASO 4: Almacenamiento y Audio ═══════════ -->
         <div class="step-pane" id="pane-4">
             <div class="step-tag">Paso 4 de 5 · Almacenamiento y Audio</div>
             <div class="step-title">¿Qué priorizas en almacenamiento?</div>
@@ -473,7 +467,6 @@
             </div>
         </div>
 
-        <!-- ══ PASO 5: Perfil Avanzado (NUEVO) ══════════ -->
         <div class="step-pane" id="pane-5">
             <div class="step-tag">Paso 5 de 5 · Perfil Avanzado</div>
             <div class="step-title">Últimas preferencias del sistema</div>
@@ -526,11 +519,9 @@
             </div>
         </div>
 
-    </div><!-- /form-card -->
-    </form>
+    </div></form>
 </div>
 
-<!-- Loading overlay -->
 <div id="loading">
     <div class="spin"></div>
     <div id="load-title">SINTETIZANDO DATOS</div>
@@ -634,9 +625,9 @@ document.getElementById('msform').addEventListener('submit', function(e) {
         } else {
             clearInterval(iv);
             document.getElementById('load-title').textContent = 'ANÁLISIS COMPLETADO';
-            setTimeout(() => this.submit(), 600);
+            setTimeout(() => this.submit(), 100); 
         }
-    }, 550);
+    }, 150); 
 });
 </script>
 </body>

@@ -153,7 +153,7 @@
         font-family: var(--mono); font-size: .72rem; color: var(--muted);
         text-decoration: none; letter-spacing: 1px;
         border-bottom: 1px solid transparent;
-        transition: color .2s, border-color .2s;
+        transition: color .2s, border-color .2s; cursor: pointer;
     }
     .btn-ghost:hover { color: var(--cyan); border-color: var(--cyan); }
 
@@ -261,7 +261,7 @@
     .uaeh-text strong { color: var(--text); display: block; font-size: .68rem; margin-bottom: 1px; }
 
     /* ═══════════════════════════════════════════════════
-       SCAN LINE ANIMATION
+       SCAN LINE ANIMATION & ORBS
     ═══════════════════════════════════════════════════ */
     .scanline {
         position: fixed; left: 0; right: 0; height: 1px;
@@ -271,7 +271,6 @@
     }
     @keyframes scan { from { top: -1px; } to { top: 100vh; } }
 
-    /* Glow orbs */
     .orb {
         position: fixed; border-radius: 50%;
         filter: blur(80px); pointer-events: none; z-index: 2;
@@ -290,21 +289,84 @@
     }
     @keyframes drift1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,20px)} }
     @keyframes drift2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,-15px)} }
+
+    /* ═══════════════════════════════════════════════════
+       MODAL "CÓMO FUNCIONA" (NUEVO)
+    ═══════════════════════════════════════════════════ */
+    .hiw-modal-overlay {
+        position: fixed; inset: 0; z-index: 9999;
+        background: rgba(3, 5, 13, 0.75);
+        backdrop-filter: blur(12px);
+        display: flex; align-items: center; justify-content: center;
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.35s ease;
+    }
+    .hiw-modal-overlay.show {
+        opacity: 1; pointer-events: all;
+    }
+    .hiw-modal-box {
+        background: rgba(6, 13, 31, 0.85);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        width: 90%; max-width: 650px;
+        padding: 40px; position: relative;
+        transform: scale(0.95) translateY(20px);
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 30px 80px rgba(0,0,0,0.6), inset 0 0 20px rgba(59,130,246,0.05);
+    }
+    .hiw-modal-overlay.show .hiw-modal-box {
+        transform: scale(1) translateY(0);
+    }
+    .hiw-close-btn {
+        position: absolute; top: 20px; right: 24px;
+        background: transparent; border: none;
+        color: var(--muted); font-size: 1.5rem;
+        cursor: pointer; transition: color 0.2s;
+    }
+    .hiw-close-btn:hover { color: var(--glow); }
+    
+    .hiw-title {
+        font-family: var(--sans); font-size: 1.8rem; font-weight: 800;
+        color: #fff; margin-bottom: 8px; letter-spacing: -1px;
+    }
+    .hiw-title span { color: var(--glow); }
+    .hiw-subtitle {
+        font-family: var(--mono); font-size: .75rem; color: var(--cyan);
+        letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 24px;
+    }
+    .hiw-content p {
+        font-size: .9rem; color: var(--text); line-height: 1.6; margin-bottom: 16px;
+    }
+    .hiw-content strong { color: #fff; }
+    
+    .hiw-steps {
+        display: flex; flex-direction: column; gap: 12px; margin-top: 24px;
+    }
+    .hiw-step {
+        display: flex; gap: 16px; align-items: flex-start;
+        background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+        padding: 16px; border-radius: 12px;
+    }
+    .hiw-step-num {
+        width: 32px; height: 32px; border-radius: 50%; background: var(--dim);
+        border: 1px solid var(--line); color: var(--glow);
+        display: flex; align-items: center; justify-content: center;
+        font-family: var(--mono); font-weight: 700; flex-shrink: 0;
+    }
+    .hiw-step-text h4 { font-size: .95rem; color: #fff; margin-bottom: 4px; }
+    .hiw-step-text p { font-size: .8rem; color: var(--muted); margin: 0; }
     </style>
 </head>
 <body>
 
-<!-- Background canvas -->
 <canvas id="canvas-bg"></canvas>
 
-<!-- Ambient glow -->
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
 <div class="scanline"></div>
 
 <div class="shell">
 
-    <!-- ══ LEFT: HERO ══════════════════════════════════ -->
     <div class="hero">
         <div class="badge">
             <div class="dot"></div>
@@ -327,7 +389,7 @@
             <a href="/diagnostico-inicio" class="btn-primary">
                 INICIAR DIAGNÓSTICO <span class="btn-arrow">→</span>
             </a>
-            <a href="#" class="btn-ghost" onclick="return false;">¿Cómo funciona?</a>
+            <a href="#" class="btn-ghost" onclick="abrirModal(event)">¿Cómo funciona?</a>
         </div>
 
         <div class="stats">
@@ -346,7 +408,6 @@
         </div>
     </div>
 
-    <!-- ══ RIGHT: CARDS ════════════════════════════════ -->
     <div class="right-panel">
 
         <div class="meta-row">
@@ -400,6 +461,41 @@
             </div>
         </div>
 
+    </div>
+</div>
+
+<div class="hiw-modal-overlay" id="how-it-works-modal" onclick="cerrarModalFuera(event)">
+    <div class="hiw-modal-box">
+        <button class="hiw-close-btn" onclick="cerrarModal()">×</button>
+        <div class="hiw-subtitle">Documentación del Sistema</div>
+        <h2 class="hiw-title">¿Qué es <span>Tailor-PC</span>?</h2>
+        <div class="hiw-content">
+            <p>Tailor-PC no es un simple buscador de piezas. Es un <strong>Sistema Basado en Conocimiento</strong> (Sistema Experto) diseñado para emular el razonamiento de un ingeniero en hardware, utilizando lógica matemática y reglas de inferencia.</p>
+            
+            <div class="hiw-steps">
+                <div class="hiw-step">
+                    <div class="hiw-step-num">1</div>
+                    <div class="hiw-step-text">
+                        <h4>Recolección de Datos</h4>
+                        <p>A través de un diagnóstico, el sistema extrae tus necesidades reales: presupuesto exacto, perfil térmico de tu habitación y exigencia de software (gaming, render, ofimática).</p>
+                    </div>
+                </div>
+                <div class="hiw-step">
+                    <div class="hiw-step-num">2</div>
+                    <div class="hiw-step-text">
+                        <h4>Evaluación Algoritmo RETE (CLIPS)</h4>
+                        <p>El cerebro de Tailor-PC. Cruza miles de combinaciones en milisegundos. Descarta instantáneamente cuellos de botella, problemas de dimensiones físicas (GPU vs Gabinete) y voltajes insuficientes.</p>
+                    </div>
+                </div>
+                <div class="hiw-step">
+                    <div class="hiw-step-num">3</div>
+                    <div class="hiw-step-text">
+                        <h4>Síntesis y Optimización</h4>
+                        <p>Ordena las configuraciones sobrevivientes por "Sinergia" y balance financiero. Así, asegura que cada peso invertido se traduzca en rendimiento puro sin incompatibilidades ocultas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -488,6 +584,32 @@
     }
     setTimeout(tick, 900);
 })();
+
+/* ── LÓGICA DEL MODAL "CÓMO FUNCIONA" ────────────────── */
+const modal = document.getElementById('how-it-works-modal');
+
+function abrirModal(e) {
+    e.preventDefault();
+    modal.classList.add('show');
+}
+
+function cerrarModal() {
+    modal.classList.remove('show');
+}
+
+function cerrarModalFuera(e) {
+    // Si el usuario da clic en el overlay (fuera de la caja principal), se cierra.
+    if (e.target === modal) {
+        cerrarModal();
+    }
+}
+
+// Cerrar con la tecla Escape
+document.addEventListener('keydown', function(event) {
+    if (event.key === "Escape" && modal.classList.contains('show')) {
+        cerrarModal();
+    }
+});
 </script>
 </body>
 </html>

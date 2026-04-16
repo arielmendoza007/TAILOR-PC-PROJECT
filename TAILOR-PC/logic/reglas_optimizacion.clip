@@ -31,16 +31,15 @@
 (defrule validar-fuente-poder-integral
    (declare (salience -15))
    (usuario     (presupuesto ?p-max))
-   (cpu         (modelo ?mc)   (tdp ?tc)    (precio ?pc)  (socket ?sc))
+   ;; Usamos la variable ?socket-match para que RETE descarte placas incompatibles INMEDIATAMENTE
+   (cpu         (modelo ?mc)   (tdp ?tc)    (precio ?pc)  (socket ?socket-match))
+   (placa       (modelo ?mp)                (precio ?pp)  (socket ?socket-match))
    (gpu         (modelo ?mg)   (consumo ?tg)(precio ?pg))
    (fuente      (modelo ?mf)   (watts ?wf)  (precio ?pf))
-   (placa       (modelo ?mp)                (precio ?pp)  (socket ?sp))
    (gabinete    (modelo ?mgb)               (precio ?pgb))
    (ram         (modelo ?mram)              (precio ?pram))
-   (soporte-gpu (modelo ?ms)               (precio ?psoporte))
-   (disco       (modelo ?md)               (precio ?pd))
-   ;; Solo combinaciones con socket compatible entre CPU y placa
-   (test (eq ?sc ?sp))
+   (soporte-gpu (modelo ?ms)                (precio ?psoporte))
+   (disco       (modelo ?md)                (precio ?pd))
 =>
    (bind ?consumo-total (+ ?tc ?tg 100))
    (bind ?total   (+ ?pc ?pg ?pp ?pgb ?pf ?pd ?pram ?psoporte))

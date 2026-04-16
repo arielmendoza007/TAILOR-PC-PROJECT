@@ -940,23 +940,59 @@ function showTyping() {
 }
 function hideTyping() { var el = document.getElementById('typing'); if (el) el.remove(); }
 
+/* ── Historial de conversación (máx. 10 turnos) ───── */
+var chatHistorial = [];
+
+function registrarTurno(rol, texto) {
+    /* rol: 'user' | 'bot' */
+    chatHistorial.push({ rol: rol, texto: texto });
+    if (chatHistorial.length > 20) chatHistorial = chatHistorial.slice(-20);
+}
+
+/* ── Contexto: configs visibles en pantalla ─────── */
+function obtenerContextoConfigs() {
+    var cards = document.querySelectorAll('.pc-card:not([style*="none"])');
+    if (!cards.length) return '';
+    var lineas = ['Configuraciones actualmente visibles en pantalla:'];
+    cards.forEach(function(card, i) {
+        var nombre  = card.querySelector('.opt-name')  ? card.querySelector('.opt-name').textContent.trim()  : '';
+        var precio  = card.querySelector('.opt-price') ? card.querySelector('.opt-price').textContent.trim() : '';
+        var syn     = card.getAttribute('data-sinergia') || '';
+        var balance = card.getAttribute('data-balance')  || '';
+        lineas.push(
+            (i + 1) + '. ' + nombre + ' — ' + precio +
+            ' — Sinergia: ' + syn + '% — Balance: $' + parseFloat(balance).toFixed(0) + ' MXN'
+        );
+    });
+    return lineas.join('\n');
+}
+
 async function sendChat() {
     var inp  = document.getElementById('ch-input');
     if (!inp) return;
     var text = inp.value.trim();
     if (!text) return;
     inp.value = '';
+
     addUserMsg(text);
+    registrarTurno('user', text);
     showTyping();
+
     try {
+        var payload = {
+            mensaje:   text,
+            historial: chatHistorial.slice(-12),   /* últimos 6 turnos */
+            contexto:  obtenerContextoConfigs()
+        };
         var res  = await fetch('/chat-interactivo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mensaje: text })
+            body: JSON.stringify(payload)
         });
         var data = await res.json();
         hideTyping();
         addBotMsg(data.res);
+        registrarTurno('bot', data.res.replace(/<[^>]+>/g, '')); /* texto plano para historial */
         handleAction(data);
     } catch (err) {
         hideTyping();
@@ -1008,9 +1044,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // FIX 2: Mensaje de bienvenida
     setTimeout(function() {
         addBotMsg(
-            '¡Hola! Tengo <b>{{ sugerencias|length }}</b> configuración(es) listas. ' +
-            'Haz clic en cualquier tarjeta para verla al detalle, o usa los atajos de arriba. ' +
-            'Escribe <b>ayuda</b> para ver mis comandos ⚡'
+            '¡Hola! Soy <b>Tailor AI</b> ⚡ Tengo <b>{{ sugerencias|length }}</b> configuración(es) listas.<br>' +
+            'Puedo responder cualquier pregunta de hardware, explicar el sistema, o ejecutar comandos.<br>' +
+            'Escribe <b>ayuda</b> para ver los comandos de acción, o pregúntame lo que quieras.'
         );
     }, 700);
 
