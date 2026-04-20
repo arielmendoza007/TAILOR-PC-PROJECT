@@ -968,35 +968,34 @@ function obtenerContextoConfigs() {
 }
 
 async function sendChat() {
-    var inp  = document.getElementById('ch-input');
+    var inp = document.getElementById('ch-input');
     if (!inp) return;
     var text = inp.value.trim();
     if (!text) return;
     inp.value = '';
 
-    addUserMsg(text);
-    registrarTurno('user', text);
-    showTyping();
+    addUserMsg(text); // Muestra el mensaje del usuario en la burbuja
+    showTyping();    // Muestra los puntitos de "escribiendo"
 
     try {
         var payload = {
-            mensaje:   text,
-            historial: chatHistorial.slice(-12),   /* últimos 6 turnos */
-            contexto:  obtenerContextoConfigs()
+            mensaje: text,
+            contexto: obtenerContextoConfigs() // Lee las cards de hardware que hay en pantalla
         };
-        var res  = await fetch('/chat-interactivo', {
+
+        var res = await fetch('/chat-interactivo', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+
         var data = await res.json();
         hideTyping();
-        addBotMsg(data.res);
-        registrarTurno('bot', data.res.replace(/<[^>]+>/g, '')); /* texto plano para historial */
-        handleAction(data);
+        addBotMsg(data.res); // Muestra la respuesta de Mariana
+        
     } catch (err) {
         hideTyping();
-        addBotMsg('⚠️ Error de conexión. Verifica que Flask esté activo.');
+        addBotMsg('⚠️ Error de enlace. ¿Está encendido el servidor Flask?');
     }
 }
 

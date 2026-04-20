@@ -1,42 +1,15 @@
 # app.py — Tailor-PC Expert System
-# Integración Gemini: comandos de acción hardcodeados (confiables e instantáneos),
-# todo lo demás va a Gemini con contexto completo del sistema.
-
 import os
 import re
 import clips
-import google.generativeai as genai
+import requests  # <-- ¡Nuestra nueva solución!
 from flask import Flask, request, render_template, jsonify
 
 app = Flask(__name__)
 
-# ═══════════════════════════════════════════════════════════
-#  CONFIGURACIÓN GEMINI
-#  Pon tu API Key aquí directamente, o usa variable de entorno:
-#  Windows PowerShell: $env:GEMINI_API_KEY = "tu_key"
-#  Linux/Mac:          export GEMINI_API_KEY="tu_key"
-# ═══════════════════════════════════════════════════════════
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "AQUI_VA_TU_API_KEY")
+# Tu llave institucional va aquí directo
+GEMINI_API_KEY = "AQ.Ab8RN6LpZGifqb23zUKFwjwu88M5PjRGK77rYTez0BX7dwlWBw"
 
-_gemini_model = None
-
-def get_gemini_model():
-    """Inicializa el modelo Gemini una sola vez (singleton)."""
-    global _gemini_model
-    if _gemini_model is None and GEMINI_API_KEY != "AQUI_VA_TU_API_KEY":
-        genai.configure(api_key=GEMINI_API_KEY)
-        _gemini_model = genai.GenerativeModel(
-            model_name="gemini-2.0-flash",
-            generation_config={
-                "temperature":     0.7,
-                "top_p":           0.9,
-                "max_output_tokens": 300,
-            }
-        )
-    return _gemini_model
-
-
-# ─── System prompt que Gemini recibe en cada mensaje ──────
 SYSTEM_PROMPT = """Eres Tailor AI, el asistente experto integrado en Tailor-PC Expert System.
 Tailor-PC es un sistema experto académico desarrollado por Brandon Torres De Paz y Ángel Ariel Mendoza López, estudiantes de Licenciatura en Ciencias Computacionales de la UAEH ICBI, para la materia Sistemas Basados en Conocimiento.
 
@@ -57,44 +30,68 @@ Tailor-PC es un sistema experto académico desarrollado por Brandon Torres De Pa
 - reglas_compatibilidad.clip: compatibilidad socket, factor forma, VRAM, PSU, cuello de botella
 - reglas_control.clip: inicio y fin del ciclo de inferencia
 
-=== CATÁLOGO DE COMPONENTES ===
-CPUs: Intel Core i9-13900K ($12,500), Intel Core i7-13700K ($8,900), Intel Core i5-12400F ($3,200), Intel Core i3-12100F ($1,900), AMD Ryzen 7 7800X3D ($8,500), AMD Ryzen 5 7600 ($4,100), AMD Ryzen 5 5600G ($2,400), AMD Ryzen 3 4100 ($1,500)
-GPUs: RTX 4090 ($38,000), RTX 4080 ($24,000), RTX 4070 Ti ($15,500), RTX 4070 ($11,000), RTX 4060 ($6,500), RX 6700 XT ($7,500), RX 6600 ($4,500), GTX 1660 Super ($3,800), GTX 1650 ($3,200), Gráficos Integrados ($0)
-Placas: ASUS ROG Strix Z790-E LGA1700 ATX ($9,500), ASUS ROG STRIX Z790 LGA1700 ATX ($7,500), Gigabyte B760M DS3H LGA1700 mATX ($2,400), Gigabyte H610M-K LGA1700 mATX ($1,600), ASUS TUF Gaming B650-Plus AM5 ATX ($4,800), ASRock B450M-HDV AM4 mATX ($1,400), MSI B450 TOMAHAWK MAX AM4 ATX ($2,800)
-Gabinetes: Corsair 5000D Airflow ATX flujo-alto ($3,200), Corsair 4000D ATX flujo-alto ($1,800), NZXT H5 Flow ATX flujo-alto ($2,100), Cooler Master Q300L mATX flujo-medio ($1,150), Acteck Kiruna mATX flujo-bajo ($600)
-RAM: Kingston Fury 8GB DDR4-3200 ($500), Corsair Vengeance 16GB DDR4-3200 ($1,200), Kingston Fury Beast 32GB DDR4-3600 ($2,200), Kingston Fury 32GB DDR5-5200 ($2,800)
-Fuentes: XPG Pylon 450W ($900), EVGA 500W ($1,100), Corsair RM750e Gold ($2,400), ASUS ROG Thor 1000W Platinum ($5,800)
-Discos: Kingston NV2 500GB NVMe ($700), Kingston NV2 1TB NVMe ($1,250), Samsung 980 Pro 2TB NVMe ($3,100)
-Soportes GPU: Sin soporte necesario ($0), Cooler Master GPU Bracket ($450)
-
-=== REGLAS DE NEGOCIO IMPORTANTES ===
-- Socket CPU debe coincidir con socket de placa madre (LGA1700/AM5/AM4)
-- GPU mide X mm y el gabinete tiene max-gpu-len mm máximos
-- Fuente necesita cubrir TDP_CPU + consumo_GPU + 100W de overhead
-- AM5 requiere DDR5 (velocidad ≥ 4800 MHz)
-- GPUs > 300mm necesitan soporte anti-sag
-- Clima cálido requiere gabinete con flujo-aire "alto"
-
 === TU FUNCIÓN ===
 Eres un asistente conversacional de hardware y del sistema. Responde en español, de forma clara, amigable y técnicamente precisa. Puedes:
 - Explicar cómo funciona Tailor-PC y CLIPS/RETE
 - Ayudar a entender los resultados del diagnóstico
-- Responder preguntas de hardware, compatibilidad, presupuesto
-- Comparar componentes del catálogo
-- Explicar conceptos de Sistemas Basados en Conocimiento (CommonKADS, encadenamiento hacia adelante, etc.)
 - Dar recomendaciones personalizadas basadas en las configuraciones actuales
 
-IMPORTANTE: Responde SIEMPRE en español. Sé conciso (máximo 4-5 líneas). Usa HTML básico (<b>, <br>) para formatear si es necesario. NO menciones que eres Gemini o Google, eres Tailor AI."""
-
+IMPORTANTE: Responde SIEMPRE en español. Sé conciso (máximo 4-5 líneas). Usa HTML básico (<b>, <br>) para formatear si es necesario."""
 
 def preguntar_a_gemini(mensaje: str, historial: list, contexto_configs: str) -> str:
-    """Envía el mensaje a Gemini con contexto completo. Retorna el texto de respuesta."""
-    model = get_gemini_model()
-    if model is None:
-        return ("Tailor AI está en modo offline. "
-                "Configura la variable <b>GEMINI_API_KEY</b> en app.py para activar el asistente inteligente. "
-                "Mientras tanto, escribe <b>ayuda</b> para ver los comandos disponibles.")
+    # 1. Armamos el prompt con la info de la pantalla
+    partes = [SYSTEM_PROMPT]
+    
+    if contexto_configs:
+        partes.append(f"\n=== CONFIGURACIONES ACTUALES EN PANTALLA ===\n{contexto_configs}")
 
+    if historial:
+        partes.append("\n=== HISTORIAL RECIENTE ===")
+        for turno in historial[-6:]:
+            rol = "Usuario" if turno.get("rol") == "user" else "Tailor AI"
+            partes.append(f"{rol}: {turno.get('texto', '')}")
+
+    partes.append(f"\nUsuario: {mensaje}\nTailor AI:")
+    prompt_final = "\n".join(partes)
+
+    # 2. Petición directa a la API (replicando tu cURL )
+# 2. Petición directa a la API (replicando tu cURL)
+    url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent"
+    
+    headers = {
+        "Content-Type": "application/json",
+        "X-goog-api-key": GEMINI_API_KEY
+    }
+    
+    payload = {
+        "contents": [{"parts": [{"text": prompt_final}]}],
+        "generationConfig": {"temperature": 0.7, "maxOutputTokens": 600}
+    }
+    payload = {
+        "contents": [{"parts": [{"text": prompt_final}]}],
+        "generationConfig": {"temperature": 0.7, "maxOutputTokens": 600}
+    }
+
+    try:
+        response = requests.post(url, headers=headers, json=payload)
+        response.raise_for_status() # Lanza error si Google nos bloquea
+        datos = response.json()
+
+        # Extraemos el texto de la respuesta
+        texto = datos['candidates'][0]['content']['parts'][0]['text'].strip()
+
+        # Limpiamos los asteriscos de Markdown a HTML para tu frontend
+        texto = texto.replace("**", "<b>").replace("**", "</b>")
+        texto = re.sub(r'\*([^*]+)\*', r'<i>\1</i>', texto)
+        return texto
+
+    except Exception as e:
+        print(f"[Gemini HTTP Error] {e}")
+        if hasattr(e, 'response') and e.response is not None:
+            print("Respuesta de Google:", e.response.text)
+        return "Tuve un problema de conexión al contactar al motor. Intenta de nuevo."
+
+# A PARTIR DE AQUÍ DEJA EL CÓDIGO INTACTO (inicializar_experto, calcular_radar, rutas, etc.)
     # Construir el prompt completo
     partes = [SYSTEM_PROMPT]
 
@@ -109,7 +106,6 @@ def preguntar_a_gemini(mensaje: str, historial: list, contexto_configs: str) -> 
             partes.append(f"{rol}: {turno.get('texto', '')}")
 
     partes.append(f"\nUsuario: {mensaje}\nTailor AI:")
-
     prompt_final = "\n".join(partes)
 
     try:
